@@ -8,6 +8,7 @@ docs/COMPLIANCE_NOTES.txt    PHI statement, controls, assumptions, open question
 docs/RESEARCH_REPORT.txt     Federal/state/local perinatal programs, verified 2026-09-03
 
 Runnable functions and where they live:
+  verifyProject .................. Setup.gs  (run FIRST — checks all files present)
   runSetup, setAdminEmails ....... Setup.gs
   seedAll ........................ Seed.gs (resources in SeedResources.gs)
   purgeCache, smokeTest .......... Api.gs

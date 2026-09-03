@@ -12,6 +12,9 @@
  *     collect verified emails and write into the content spreadsheet.
  *  4. Stores all IDs in Script Properties. Nothing is hardcoded.
  *
+ * BEFORE running: run verifyProject() to confirm every file is present.
+ * A missing file surfaces as "<name> is not defined", not as a file error.
+ *
  * After running: move the audit spreadsheet's folder somewhere no task-force
  * member can reach, share the content spreadsheet with NO end users, and
  * add admin emails with setAdminEmails('a@x.org,b@y.org').
@@ -63,6 +66,57 @@ var RESOURCE_FORM_QUESTIONS = [
   { title: 'Website', type: 'text', required: false }
 ];
 var RESOURCE_ADMIN_COLUMNS = ['Review status', 'Reviewed by', 'Published'];
+
+/**
+ * DIAGNOSTIC — run this FIRST, before runSetup.
+ *
+ * Apps Script puts every .gs file in one shared global scope, so a missing
+ * or misnamed file shows up as "X is not defined" at the first call rather
+ * than as a missing-file error. This checks that every expected file is
+ * present by looking for one symbol from each, and prints a checklist.
+ *
+ * Safe to run with files missing: typeof on an undeclared name does not
+ * throw. Does not require admin (the admin check itself needs Config.gs).
+ */
+function verifyProject() {
+  var expected = [
+    { file: 'Config.gs',        symbol: 'CONFIG',                 kind: 'object'   },
+    { file: 'Config.gs',        symbol: 'getAdminEmails_',        kind: 'function' },
+    { file: 'DataAccess.gs',    symbol: 'readTable_',             kind: 'function' },
+    { file: 'Audit.gs',         symbol: 'writeAudit_',            kind: 'function' },
+    { file: 'Auth.gs',          symbol: 'requireAdmin_',          kind: 'function' },
+    { file: 'Api.gs',           symbol: 'getSiteContent',         kind: 'function' },
+    { file: 'Setup.gs',         symbol: 'runSetup',               kind: 'function' },
+    { file: 'Seed.gs',          symbol: 'seedAll',                kind: 'function' },
+    { file: 'SeedResources.gs', symbol: 'seedResources',          kind: 'function' }
+  ];
+  var missing = [];
+  var lines = expected.map(function (e) {
+    var present;
+    try { present = (eval('typeof ' + e.symbol) === e.kind); } catch (err) { present = false; }
+    if (!present) missing.push(e.file + ' (expected ' + e.kind + ' ' + e.symbol + ')');
+    return (present ? 'OK      ' : 'MISSING ') + e.file + ' -> ' + e.symbol;
+  });
+
+  // HTML files are not in the global scope; check them by trying to load each.
+  ['Index', 'Styles', 'Client'].forEach(function (name) {
+    var ok = true;
+    try { HtmlService.createHtmlOutputFromFile(name); } catch (err) { ok = false; missing.push(name + '.html'); }
+    lines.push((ok ? 'OK      ' : 'MISSING ') + name + '.html');
+  });
+
+  console.log(lines.join('\n'));
+  if (missing.length) {
+    console.log('\n' + missing.length + ' file(s) missing or incomplete:');
+    missing.forEach(function (m) { console.log('  - ' + m); });
+    console.log('\nCreate each missing file (File > New > Script for .gs, ' +
+                'File > New > HTML for .html), name it EXACTLY as shown ' +
+                '(no .gs/.html suffix typed in the name box), and paste the ' +
+                'matching .txt contents. Then run verifyProject() again.');
+  } else {
+    console.log('\nAll files present. Next: run runSetup() in Setup.gs.');
+  }
+}
 
 /**
  * MAIN SETUP. Run this once from the editor.

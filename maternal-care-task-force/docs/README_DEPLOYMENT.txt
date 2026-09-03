@@ -39,9 +39,19 @@ STEP 1 — Create the Apps Script project
   2. Project Settings > check "Show appsscript.json manifest file in editor".
   3. Create each file listed above (File > New > Script or HTML) and paste
      the contents. File names must match exactly (Index, Styles, Client are
-     HTML files).
+     HTML files). When Apps Script asks for the name, type it WITHOUT the
+     extension: "Config", not "Config.gs".
+  4. Run verifyProject in Setup.gs. It prints an OK/MISSING checklist for
+     all 12 files. Do not continue until every line says OK.
+
+     Why this matters: all .gs files share one global scope, so a missing
+     file does not report itself. It surfaces later as a ReferenceError such
+     as "getAdminEmails_ is not defined" (that symbol lives in Config.gs)
+     or "CONFIG is not defined". If you see one, the named symbol's file is
+     missing, empty, or misnamed.
 
 STEP 2 — Provision the spreadsheets and forms
+  0. Run verifyProject in Setup.gs first (see Step 1.4).
   1. In the editor, open Setup.gs, select runSetup, click Run. Approve the
      OAuth scopes (Sheets, Forms, Drive, email).
      - Creates "MCTF — Site Content (ADMIN ONLY)" with every tab and header.
@@ -128,6 +138,7 @@ HANDOFF TO A COUNTY ACCOUNT (when the Task Force is ready)
   6. Record the handoff date in COMPLIANCE_NOTES.txt.
 
 WHERE EACH RUNNABLE FUNCTION LIVES
+  verifyProject ....... Setup.gs   (run this first)
   runSetup ............ Setup.gs
   setAdminEmails ...... Setup.gs
   seedAll ............. Seed.gs      (calls seedResources in SeedResources.gs)
