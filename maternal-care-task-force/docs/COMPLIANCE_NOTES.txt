@@ -1,5 +1,5 @@
 MCTF MEMBER SITE — COMPLIANCE NOTES
-Prepared for the Task Force co-chairs and PHG Privacy & Security Officer
+Prepared for the Task Force co-chairs and county health department privacy officers
 2026-09-03
 
 1. PHI TOUCHED AND WHERE IT FLOWS
@@ -38,7 +38,7 @@ Prepared for the Task Force co-chairs and PHG Privacy & Security Officer
    //   Records Act does not attach to de-identified aggregate data.
    // RISK IF WRONG: An admin publishes an identifiable story or a small-cell
    //   statistic; any Google account holder with the URL could read it.
-   // NEEDS CONFIRMATION FROM: Task Force co-chairs; PHG Privacy Officer.
+   // NEEDS CONFIRMATION FROM: Task Force co-chairs; county privacy officers.
    // DATE: 2026-09-03
 
    // COMPLIANCE ASSUMPTION: Members do not share a Workspace domain, so
@@ -74,8 +74,12 @@ Prepared for the Task Force co-chairs and PHG Privacy & Security Officer
      no ePHI is expected.
    - Maryland PIPA: member emails/phones are personal information; opt-in
      and minimal storage applied.
-   - RSA advertising rules: PHG's member listing states "license pending";
-     do not describe PHG services as available until the RSA license issues.
+   - Neutrality: the site is a Task Force tool, not a marketing channel for
+     any member organization. Member listings state professional role only;
+     no member organization's services are described, ranked, or promoted;
+     resource rows are added only through the same review as every other
+     row. Task Force participation is separate from any member's business
+     interests, and the site must not be used to advance them.
 
 5. RESIDUAL RISK
    - Admin error publishing identifying text. Mitigation: review columns on

@@ -20,8 +20,9 @@ KEY FINDINGS
    >> Most important item to verify: which HealthChoice MCOs Christiana
       Hospital contracts with and what happens after ~December 2026.
 
-2. Federal money is flowing but no Cecil/Harford maternity line item is
-   confirmed. Maryland received $168.2M for RHTP Budget Period 1; MDH
+2. Cecil County announced more than $4.65M in RHTP funding on 2026-08-19
+   ($3.16M Rooted & Resilient; $1.267M Mobile Health Services Program).
+   The maternity-specific line item is not yet published. Maryland received $168.2M for RHTP Budget Period 1; MDH
    announced $80M in first-round subawards to 41 recipients effective
    2026-08-10. The recipient list could not be retrieved. Cecil and
    Harford are RHTP-eligible rural jurisdictions but not among the nine
@@ -76,6 +77,14 @@ Rural Health Transformation Program (CMS) — Both counties eligible
   Maryland competitive solicitation: "Rooted and Resilient Rural Maryland:
   Transformation through Sustainable Access, Innovative Care, and Tech
   Innovation" (PHPA 3936). Cecil applied with Union Hospital and DES.
+  2026-08-19: Cecil County announced more than $4.65M in RHTP funding:
+  about $3.16M Rooted & Resilient, $1.267M Mobile Health Services
+  Program, about $229K chronic disease prevention/management, and about
+  $1.16M associated with West Cecil Health Center. Initiatives named:
+  Connect to Care, community health worker development, mobile health,
+  maternal/perinatal planning, transportation, community-based services.
+  Source: Cecil County Government announcement (Facebook post, 2026-08-19);
+  Cecil Whig coverage. Maternity-specific share not published.
   https://www.highergov.com/sl/contract-opportunity/md-phpa-3936-rooted-and-resilient-rural-m-66259458/
   $50B/5-year program (2025 reconciliation law). Maryland BP1 award
   $168,180,838 (plan approved 2025-12-29). $80M first-round subawards
@@ -243,7 +252,8 @@ RECOMMENDED VERIFICATION ACTIONS FOR THE TASK FORCE
 ======================================================================
 1. Confirm with ChristianaCare which Maryland HealthChoice MCOs Christiana
    Hospital accepts and the end date of free transport (Insurance team).
-2. Obtain MDH's RHTP first-round recipient list; confirm Cecil's status.
+2. Obtain the Cecil RHTP award scope documents; confirm the maternal and
+   perinatal planning line item and the Task Force consultant budget.
 3. Confirm Harford and Cecil Mobile Health award amounts and scope.
 4. Confirm West Cecil Health Center prenatal scope (on-site vs referral).
 5. Confirm Johns Hopkins MFM Union-campus clinic schedule and payer rules.

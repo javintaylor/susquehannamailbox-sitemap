@@ -28,7 +28,7 @@
  *   contact data to a Published row, it becomes reachable by any Google
  *   account holder with the URL.
  * NEEDS CONFIRMATION FROM: Task Force co-chairs (Cecil/Harford Health
- *   Officers) and PHG Privacy & Security Officer.
+ *   Officers) and the county health departments' privacy officers.
  * DATE: 2026-09-03
  */
 

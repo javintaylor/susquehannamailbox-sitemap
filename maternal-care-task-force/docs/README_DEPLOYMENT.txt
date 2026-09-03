@@ -47,7 +47,7 @@ STEP 2 — Provision the spreadsheets and forms
   4. Do NOT share the content spreadsheet with task-force members. Admins
      who maintain content get Editor access; nobody else.
   5. Open Setup.gs, run setAdminEmails with a comma-separated list, e.g.
-        setAdminEmails('healthofficer@ccgov.org,admin@performancehealthgroup.org')
+        setAdminEmails('healthofficer@cecilcountyhealth.org,staff@harfordcountyhealth.com')
      (Run it from the editor by temporarily adding a wrapper:
         function setAdminsNow(){ setAdminEmails('a@x.org,b@y.org'); }
       then delete the wrapper.)

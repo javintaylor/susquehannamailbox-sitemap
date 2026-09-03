@@ -120,7 +120,7 @@ function runSetup() {
 }
 
 /**
- * Run from editor: setAdminEmails('officer@cecilcountyhealth.org,admin@performancehealthgroup.org')
+ * Run from editor: setAdminEmails('healthofficer@cecilcountyhealth.org,staff@harfordcountyhealth.com')
  * @param {string} csv
  */
 function setAdminEmails(csv) {

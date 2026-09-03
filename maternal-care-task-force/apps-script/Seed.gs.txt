@@ -14,6 +14,11 @@
  * task-force meeting; contact columns are left blank and ShareContact is
  * FALSE until each member opts in.
  *
+ * NEUTRALITY: Member listings describe a person's professional role only.
+ * The site does not describe, rank, or promote any member organization's
+ * services, and no resource row is added because a member requested it
+ * without the same verification applied to every other row.
+ *
  * Resource rows are in SeedResources.gs (separate file for readability).
  */
 
@@ -133,7 +138,7 @@ function seedMembers() {
     { Order: 4, Name: 'Christine White', Credentials: '', Organization: 'UM Upper Chesapeake Medical Center — Family Birthplace', RoleTitle: 'Family Birthplace', County: 'Harford', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
     { Order: 5, Name: 'Erin Grauer', Credentials: '', Organization: 'Cecil County Health Department — Healthy Families', RoleTitle: 'Family Support Specialist (home visiting)', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
     { Order: 6, Name: 'Georgianna Braywood', Credentials: 'RN (retired)', Organization: 'Community / faith representative', RoleTitle: 'Retired labor and delivery nurse, Union Hospital', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
-    { Order: 7, Name: 'Javin Taylor', Credentials: 'RN', Organization: 'Performance Health Group LLC', RoleTitle: 'Owner; Level 3 RSA (license pending)', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 7, Name: 'Javin Taylor', Credentials: 'RN', Organization: 'Performance Health Group LLC', RoleTitle: 'Registered Nurse', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
     { Order: 8, Name: 'Jennifer Tuerke', Credentials: '', Organization: 'Voices of Hope', RoleTitle: 'Executive Director', County: 'Both', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
     { Order: 9, Name: 'Kim Cruser', Credentials: 'RN, IBCLC', Organization: 'ChristianaCare Union Hospital OB/GYN', RoleTitle: 'OB Nurse Navigator; Lactation Consultant', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
     { Order: 10, Name: 'Lisa Beeman', Credentials: '', Organization: 'Cecil County Department of Social Services', RoleTitle: 'Director', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: true, ShareContact: false, Status: 'Active', Published: true },
@@ -150,13 +155,13 @@ function seedMembers() {
 function seedFunding() {
   seedIfEmpty_(CONFIG.TABS.FUNDING, [
     { Order: 1, Name: 'Rural Health Transformation Program — "Rooted and Resilient Rural Maryland" (PHPA 3936), Cecil County maternal care component', Source: 'CMS, via Maryland Department of Health competitive RFA', Level: 'Federal → State → Local',
-      Amount: 'TBD (competitive subaward; Cecil County application with Union Hospital and Dept. of Emergency Services)', Status: 'Applied',
-      Description: 'The Rural Health Transformation Program is a $50 billion, five-year CMS program created by the 2025 reconciliation law. CMS awarded Maryland $168.2 million for the first budget period (state plan approved 2025-12-29). MDH announced $80 million in first-round subawards to 41 recipients effective 2026-08-10 across workforce, sustainable access and innovative care (including regional mobile health and community care teams), and nutrition. Cecil County applied under MDH\'s competitive solicitation "Rooted and Resilient Rural Maryland: Transformation through Sustainable Access, Innovative Care, and Tech Innovation" (PHPA 3936) jointly with Union Hospital and the Department of Emergency Services; one component focuses on maternal care. Whether Cecil\'s application is among the first-round awards, and any maternity-specific line item, is not yet confirmed.',
-      IntendedUse: 'Consultant to staff the Task Force and lead the Data for Action work; maternal care system design; EMS coordination.', Counties: 'Cecil',
+      Amount: '$3.16 million (Rooted & Resilient) within more than $4.65 million of RHTP funding announced for Cecil County 2026-08-19', Status: 'Awarded',
+      Description: 'The Rural Health Transformation Program is a $50 billion, five-year CMS program created by the 2025 reconciliation law. CMS awarded Maryland $168.2 million for the first budget period (state plan approved 2025-12-29). MDH announced $80 million in first-round subawards to 41 recipients effective 2026-08-10 across workforce, sustainable access and innovative care (including regional mobile health and community care teams), and nutrition. Cecil County applied under MDH\'s competitive solicitation "Rooted and Resilient Rural Maryland: Transformation through Sustainable Access, Innovative Care, and Tech Innovation" (PHPA 3936) jointly with Union Hospital and the Department of Emergency Services; one component focuses on maternal care. On 2026-08-19 Cecil County announced more than $4.65 million in RHTP funding, including about $3.16 million under Rooted & Resilient, $1.267 million for a Mobile Health Services Program, about $229,000 for chronic disease prevention and management, and about $1.16 million associated with West Cecil Health Center. Announced initiatives include Connect to Care, community health worker development, mobile health, maternal and perinatal planning, transportation, and community-based services. The maternity-specific share of the award is not yet published.',
+      IntendedUse: 'Consultant to staff the Task Force and lead the Data for Action work; maternal and perinatal planning; EMS coordination; transportation; community health workers.', Counties: 'Cecil',
       URL: 'https://www.cms.gov/priorities/rural-health-transformation-rht-program', Published: true },
     { Order: 2, Name: 'Mobile Health funding (Maryland Department of Health)', Source: 'Maryland Department of Health', Level: 'State → Local',
-      Amount: 'TBD — both counties receiving awards', Status: 'Awarded',
-      Description: 'State mobile health funding to Cecil and Harford County Health Departments, aligned with the RHTP focus on regional mobile health and mobile integrated health models. The state asked the two counties to take a regional approach; each is also pursuing jurisdiction-specific maternal and child health activities (Harford to share its proposal summary).',
+      Amount: 'Cecil: $1.267 million (Mobile Health Services Program, announced 2026-08-19). Harford: amount TBD', Status: 'Awarded',
+      Description: 'RHTP-funded mobile health awards to Cecil and Harford County Health Departments, aligned with the state focus on regional mobile health and mobile integrated health models. The state asked the two counties to take a regional approach; each is also pursuing jurisdiction-specific maternal and child health activities (Harford to share its proposal summary).',
       IntendedUse: 'Mobile maternal and child health outreach; transportation program design; regional coordination.', Counties: 'Both', URL: 'https://health.maryland.gov/pophealth/Pages/Rural-Health-Transformation-Program.aspx', Published: true },
     { Order: 3, Name: 'Title V MCH Block Grant core funds (local health departments)', Source: 'HRSA via Maryland Department of Health', Level: 'Federal → State → Local',
       Amount: 'Existing allocation', Status: 'Active',
