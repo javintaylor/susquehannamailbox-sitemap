@@ -4,12 +4,13 @@
  * Authorization model (read COMPLIANCE_NOTES.txt before changing):
  *
  *  The task force spans many organizations (two county health departments,
- *  hospitals, DSS, nonprofits, private practices). Members do NOT share a
- *  Google Workspace domain, so Session.getActiveUser() is usually blank for
- *  them under an "execute as me" deployment. The site therefore treats every
+ *  hospitals, DSS, nonprofits, private practices) using mixed identities.
+ *  The web app is deployed with access = "Anyone" (no sign-in), so
+ *  Session.getActiveUser() is blank for every reader. The site treats every
  *  request as PUBLIC-TIER and serves ONLY rows an admin has marked
- *  Published = TRUE. Nothing on the site is sensitive by design; access to
- *  the Google Site itself is limited by Sites sharing to invited members.
+ *  Published = TRUE. Nothing on the site is sensitive by design. Google
+ *  Sites sharing controls who FINDS the page; it does not control who can
+ *  load the web app URL directly, so treat every Published row as public.
  *
  *  Writes never come through the web app. All submissions go through
  *  Google Forms configured to collect a verified email address, which gives
@@ -21,12 +22,12 @@
  *  caller against the admin allowlist.
  *
  * COMPLIANCE ASSUMPTION: The member site contains no PHI and no sensitive
- *   personal data, so an authenticated-but-unidentified reader is acceptable.
+ *   personal data, so an anonymous reader is acceptable.
  * BASIS: Minimum-necessary principle; the site is a governance/reference
  *   tool, not a clinical or case system. HIPAA 45 CFR 164.502(b).
  * RISK IF WRONG: If a future admin publishes identifiable client stories or
- *   contact data to a Published row, it becomes reachable by any Google
- *   account holder with the URL.
+ *   contact data to a Published row, it is reachable by anyone with the
+ *   URL, and indexable if that URL is ever linked publicly.
  * NEEDS CONFIRMATION FROM: Task Force co-chairs (Cecil/Harford Health
  *   Officers) and the county health departments' privacy officers.
  * DATE: 2026-09-03
@@ -43,7 +44,7 @@ function identifyCaller_() {
   if (email) {
     role = getAdminEmails_().indexOf(email) >= 0 ? 'admin' : 'member';
   }
-  return { email: email || 'anonymous-google-account', role: role };
+  return { email: email || 'anonymous', role: role };
 }
 
 /**

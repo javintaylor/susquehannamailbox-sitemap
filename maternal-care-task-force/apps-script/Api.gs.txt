@@ -2,9 +2,10 @@
  * FILE: Api.gs
  *
  * Web app entry points. Deploy as: Execute as ME (script owner), Who has
- * access: "Anyone with Google account" (preferred) or "Anyone" if the Google
- * Site must be viewable without sign-in. Embed the deployment URL in Google
- * Sites via Insert > Embed > By URL.
+ * access: "Anyone" (decision 2026-09-03: members use mixed Google and
+ * non-Google identities, so the embed must load without sign-in). The
+ * deployment URL is therefore public; the Published gate is the only
+ * content control. Embed the URL in Google Sites via Insert > Embed > By URL.
  *
  * Every entry point: (1) authorization/identification, (2) audit write,
  * (3) work. In that order.

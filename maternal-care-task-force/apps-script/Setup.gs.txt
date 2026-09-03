@@ -107,7 +107,15 @@ function runSetup() {
     upsertConfig_(ss, 'RESOURCE_FORM_URL', rf.getPublishedUrl(), 'Set by runSetup');
   }
 
-  // 4. Default config keys
+  // 4. Admin list: default to the account running setup if none is set.
+  //    (Decision 2026-09-03: admin@performancehealthgroup.org hosts during
+  //    development and deployment; add county admins with setAdminEmails.)
+  if (!props.getProperty(CONFIG.PROP_ADMIN_EMAILS)) {
+    var owner = Session.getEffectiveUser().getEmail();
+    if (owner) props.setProperty(CONFIG.PROP_ADMIN_EMAILS, owner);
+  }
+
+  // 5. Default config keys
   upsertConfig_(ss, 'SITE_TITLE', CONFIG.APP_NAME, 'Shown in the site header');
   upsertConfig_(ss, 'TAGLINE', 'Finding solutions so that all women and their families have access to quality perinatal services when needed.', 'Shown under the title');
   upsertConfig_(ss, 'CONTACT_EMAIL', '', 'General inbox for the task force (public, non-PHI)');
@@ -116,11 +124,12 @@ function runSetup() {
 
   console.log('Setup complete. Content SS: ' + ss.getUrl());
   console.log('Audit SS (move to a restricted folder): ' + audit.getUrl());
-  console.log('Next: run seedAll() in Seed.gs, then setAdminEmails(), then deploy the web app.');
+  console.log('Admin list: ' + (PropertiesService.getScriptProperties().getProperty(CONFIG.PROP_ADMIN_EMAILS) || '(none)'));
+  console.log('Next: run seedAll() in Seed.gs, then deploy the web app (Execute as: Me, Who has access: Anyone).');
 }
 
 /**
- * Run from editor: setAdminEmails('healthofficer@cecilcountyhealth.org,staff@harfordcountyhealth.com')
+ * Run from editor: setAdminEmails('admin@performancehealthgroup.org,healthofficer@cecilcountyhealth.org')
  * @param {string} csv
  */
 function setAdminEmails(csv) {

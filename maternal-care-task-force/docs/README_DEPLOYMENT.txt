@@ -24,9 +24,17 @@ FILES (all delivered as .txt; strip the .txt when creating each file)
   apps-script/Styles.html.txt       -> Styles.html
   apps-script/Client.html.txt       -> Client.html
 
+HOSTING AND ACCESS DECISIONS (2026-09-03)
+  - Hosted in the Performance Health Group Google Workspace during
+    development and deployment. Owner: admin@performancehealthgroup.org.
+  - Web app access: "Anyone" (no sign-in required). The deployment URL is
+    therefore PUBLIC. Every row marked Published must be safe for public
+    view; the Published gate is the only content control.
+  - Admin list defaults to the account that runs runSetup.
+  - See HANDOFF at the end for moving the project to a county account.
+
 STEP 1 — Create the Apps Script project
-  1. Signed in as the ADMIN account that will own the data (a health
-     department or task-force admin account, not a personal account), go to
+  1. Signed in as admin@performancehealthgroup.org, go to
      script.google.com > New project. Name it "MCTF Member Site".
   2. Project Settings > check "Show appsscript.json manifest file in editor".
   3. Create each file listed above (File > New > Script or HTML) and paste
@@ -46,8 +54,10 @@ STEP 2 — Provision the spreadsheets and forms
      admin/Privacy Officer can open. Do not share it with anyone else.
   4. Do NOT share the content spreadsheet with task-force members. Admins
      who maintain content get Editor access; nobody else.
-  5. Open Setup.gs, run setAdminEmails with a comma-separated list, e.g.
-        setAdminEmails('healthofficer@cecilcountyhealth.org,staff@harfordcountyhealth.com')
+  5. runSetup sets the admin list to the account that ran it
+     (admin@performancehealthgroup.org). To add county admins later, run
+     setAdminEmails in Setup.gs with the FULL list, e.g.
+        setAdminEmails('admin@performancehealthgroup.org,healthofficer@cecilcountyhealth.org')
      (Run it from the editor by temporarily adding a wrapper:
         function setAdminsNow(){ setAdminEmails('a@x.org,b@y.org'); }
       then delete the wrapper.)
@@ -65,8 +75,10 @@ STEP 3 — Seed starting content
 STEP 4 — Deploy the web app
   1. Deploy > New deployment > type: Web app.
      Execute as: Me.
-     Who has access: "Anyone with Google account" (recommended) or "Anyone"
-     only if the Google Site must be viewable without sign-in.
+     Who has access: Anyone.
+     (The manifest already declares ANYONE_ANONYMOUS. This makes the web
+     app URL public — no sign-in — so the embed loads for every member
+     regardless of which identity they use.)
   2. Copy the Web app URL. Open it once in a browser to confirm it renders.
   3. Run smokeTest in Api.gs; the log prints published row counts per tab.
 
@@ -77,7 +89,8 @@ STEP 5 — Google Site
      not auto-grow). Alternatively give each section its own Sites page and
      embed the same URL with #problems, #structure, #resources, etc.
   3. Sites sharing: Publish to "Specific people" and add task-force members
-     by email, or to the county domains. This is the membership gate.
+     by email. This controls who FINDS the page. It does not restrict the
+     web app URL, so never publish a row that must not be public.
   4. Publish.
 
 UPDATING CONTENT
@@ -93,12 +106,26 @@ UPDATING CONTENT
     a new Resources row and set Published = TRUE.
 
 EMBED TROUBLESHOOTING
-  - Blank iframe in Sites: confirm the deployment access matches how
-    viewers are signed in. "Anyone with Google account" requires viewers
-    to be signed in to a Google account in the same browser.
+  - Blank iframe in Sites: confirm the active deployment is set to
+    "Anyone" and that a NEW version was created after the last code edit.
   - "Content refreshed" footer shows an old time: run purgeCache.
   - After editing code, create a NEW deployment version (Deploy > Manage
     deployments > Edit > Version: New) or the site keeps the old code.
+
+HANDOFF TO A COUNTY ACCOUNT (when the Task Force is ready)
+  1. Drive: transfer ownership of the content spreadsheet, the audit
+     spreadsheet, both Forms, and the Apps Script project to the county
+     admin account (Share > transfer ownership). Script Properties travel
+     with the project.
+  2. Apps Script: the new owner must create a NEW deployment, because
+     "execute as me" binds to whoever deploys. Update the Sites embed with
+     the new URL and archive the old deployment.
+  3. Forms: confirm each form's response destination still points at the
+     content spreadsheet after transfer.
+  4. Run setAdminEmails with the county list; remove the PHG address once
+     the county confirms access.
+  5. Google Site: transfer ownership or rebuild under the county account.
+  6. Record the handoff date in COMPLIANCE_NOTES.txt.
 
 WHERE EACH RUNNABLE FUNCTION LIVES
   runSetup ............ Setup.gs
