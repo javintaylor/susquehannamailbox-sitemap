@@ -1,0 +1,138 @@
+/**
+ * FILE: DataAccess.gs
+ *
+ * The ONLY module that touches SpreadsheetApp for content. Every read or
+ * write in the project goes through these functions so a future move to
+ * Cloud SQL replaces this file and nothing else.
+ *
+ * Rules enforced here:
+ *  - Never getActiveSpreadsheet(). Always openById() under the deploying
+ *    (service) identity.
+ *  - Header row is row 1. Rows are returned as objects keyed by header.
+ *  - Rows are never deleted or overwritten by site code. Corrections are
+ *    made by admins in the sheet; the site only appends (form responses).
+ */
+
+/**
+ * Opens the content spreadsheet by ID.
+ * @return {GoogleAppsScript.Spreadsheet.Spreadsheet}
+ */
+function openContentSpreadsheet_() {
+  return SpreadsheetApp.openById(getContentSpreadsheetId_());
+}
+
+/**
+ * Reads a whole tab as an array of objects keyed by header text.
+ * Blank rows (no values at all) are skipped. Header names are trimmed.
+ * @param {string} tabName
+ * @return {Object[]}
+ */
+function readTable_(tabName) {
+  var ss = openContentSpreadsheet_();
+  var sheet = ss.getSheetByName(tabName);
+  if (!sheet) throw new Error('Tab not found: ' + tabName);
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (lastRow < 2 || lastCol < 1) return [];
+  var values = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+  var headers = values[0].map(function (h) { return String(h).trim(); });
+  var rows = [];
+  for (var r = 1; r < values.length; r++) {
+    var row = values[r];
+    var isBlank = row.every(function (c) { return c === '' || c === null; });
+    if (isBlank) continue;
+    var obj = { _row: r + 1 };
+    for (var c = 0; c < headers.length; c++) {
+      if (!headers[c]) continue;
+      obj[headers[c]] = normalizeCell_(row[c]);
+    }
+    rows.push(obj);
+  }
+  return rows;
+}
+
+/**
+ * Reads only rows flagged Published = TRUE (or "yes"/"y"/"true"/1).
+ * Tabs without a Published column return all rows.
+ * @param {string} tabName
+ * @return {Object[]}
+ */
+function readPublished_(tabName) {
+  var rows = readTable_(tabName);
+  if (!rows.length) return rows;
+  var hasFlag = Object.prototype.hasOwnProperty.call(rows[0], CONFIG.PUBLISHED_COLUMN);
+  if (!hasFlag) return rows;
+  return rows.filter(function (r) { return isTruthyFlag_(r[CONFIG.PUBLISHED_COLUMN]); });
+}
+
+/**
+ * Appends one row to a tab using the tab's header order. Missing keys are
+ * written as blank. Never overwrites.
+ * @param {string} tabName
+ * @param {Object} obj
+ */
+function appendRow_(tabName, obj) {
+  var ss = openContentSpreadsheet_();
+  var sheet = ss.getSheetByName(tabName);
+  if (!sheet) throw new Error('Tab not found: ' + tabName);
+  var lastCol = sheet.getLastColumn();
+  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h).trim(); });
+  var row = headers.map(function (h) {
+    return Object.prototype.hasOwnProperty.call(obj, h) ? obj[h] : '';
+  });
+  sheet.appendRow(row);
+}
+
+/**
+ * Reads the Config tab into a key/value map.
+ * @return {Object<string,string>}
+ */
+function readConfigMap_() {
+  var rows = readTable_(CONFIG.TABS.CONFIG);
+  var map = {};
+  rows.forEach(function (r) {
+    if (r.Key) map[String(r.Key).trim()] = r.Value === undefined ? '' : r.Value;
+  });
+  return map;
+}
+
+/**
+ * Converts Date cells to ISO date strings and leaves everything else as-is.
+ * Dates are serialized so they survive the google.script.run boundary.
+ * @param {*} v
+ * @return {*}
+ */
+function normalizeCell_(v) {
+  if (v instanceof Date) {
+    if (isNaN(v.getTime())) return '';
+    return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
+  return v;
+}
+
+/**
+ * @param {*} v
+ * @return {boolean}
+ */
+function isTruthyFlag_(v) {
+  if (v === true) return true;
+  var s = String(v === undefined || v === null ? '' : v).trim().toLowerCase();
+  return s === 'true' || s === 'yes' || s === 'y' || s === '1' || s === 'published';
+}
+
+/**
+ * Sorts an array of row objects by a numeric "Order" column when present,
+ * otherwise by sheet row order.
+ * @param {Object[]} rows
+ * @return {Object[]}
+ */
+function sortByOrder_(rows) {
+  return rows.slice().sort(function (a, b) {
+    var ao = Number(a.Order), bo = Number(b.Order);
+    var aHas = !isNaN(ao) && a.Order !== '', bHas = !isNaN(bo) && b.Order !== '';
+    if (aHas && bHas) return ao - bo;
+    if (aHas) return -1;
+    if (bHas) return 1;
+    return a._row - b._row;
+  });
+}

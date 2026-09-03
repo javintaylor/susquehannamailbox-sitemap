@@ -1,0 +1,68 @@
+/**
+ * FILE: Audit.gs
+ *
+ * Audit writes go to a SEPARATE spreadsheet in a Drive location no site
+ * user can reach. The site holds no PHI, but the same discipline applies:
+ * every entry-point call is logged with actor, action, resource, outcome.
+ * Entries never contain content — only that something was read and what.
+ *
+ * Retention: keep the audit spreadsheet a minimum of six years
+ * (45 CFR 164.316(b)(2)(i)) even though no PHI is expected; the log is the
+ * evidence that none was handled.
+ */
+
+/**
+ * Writes one audit row. Never throws to the caller — an audit failure is
+ * logged to Stackdriver (without content) and the request is still refused
+ * upstream if the audit could not be written before a write action.
+ *
+ * @param {Object} entry
+ * @param {string} entry.actor        email or 'anonymous-google-account' / 'anonymous'
+ * @param {string} entry.actorRole    'admin' | 'member' | 'public'
+ * @param {string} entry.action       e.g. 'READ', 'SUBMIT', 'SETUP', 'DENY'
+ * @param {string} entry.resourceType e.g. 'SiteContent', 'BarrierLog'
+ * @param {string} [entry.resourceId]
+ * @param {string} entry.outcome      'SUCCESS' | 'DENIED' | 'ERROR'
+ * @param {string} [entry.session]
+ * @param {string} [entry.justification]
+ * @return {boolean} true if written
+ */
+function writeAudit_(entry) {
+  try {
+    var ss = SpreadsheetApp.openById(getAuditSpreadsheetId_());
+    var sheet = ss.getSheetByName(CONFIG.AUDIT_TAB) || ss.insertSheet(CONFIG.AUDIT_TAB);
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['TimestampUTC', 'LocalTZ', 'Actor', 'ActorRole', 'Action',
+        'ResourceType', 'ResourceId', 'Outcome', 'Session', 'Justification', 'AppVersion']);
+      sheet.setFrozenRows(1);
+    }
+    var now = new Date();
+    sheet.appendRow([
+      Utilities.formatDate(now, 'UTC', "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+      Session.getScriptTimeZone(),
+      entry.actor || 'unknown',
+      entry.actorRole || 'unknown',
+      entry.action || 'UNKNOWN',
+      entry.resourceType || '',
+      entry.resourceId || '',
+      entry.outcome || 'UNKNOWN',
+      entry.session || '',
+      entry.justification || '',
+      CONFIG.VERSION
+    ]);
+    return true;
+  } catch (e) {
+    // No content, no identifiers beyond the action name, in the console log.
+    console.error('AUDIT_WRITE_FAILED action=' + (entry && entry.action));
+    return false;
+  }
+}
+
+/**
+ * Returns an opaque per-execution session token for correlating audit rows.
+ * Not derived from any user attribute.
+ * @return {string}
+ */
+function newSessionToken_() {
+  return Utilities.getUuid().slice(0, 8);
+}

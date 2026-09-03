@@ -1,0 +1,211 @@
+/**
+ * FILE: Setup.gs
+ *
+ * One-time provisioning. Run runSetup() from the Apps Script editor while
+ * signed in as the admin account that will own the spreadsheets.
+ *
+ * What it does:
+ *  1. Creates the content spreadsheet with every tab + header row
+ *     (or reuses one if MCTF_CONTENT_SPREADSHEET_ID is already set).
+ *  2. Creates the audit spreadsheet (separate file, separate folder).
+ *  3. Creates two Google Forms (Barrier Log, Resource Submission) that
+ *     collect verified emails and write into the content spreadsheet.
+ *  4. Stores all IDs in Script Properties. Nothing is hardcoded.
+ *
+ * After running: move the audit spreadsheet's folder somewhere no task-force
+ * member can reach, share the content spreadsheet with NO end users, and
+ * add admin emails with setAdminEmails('a@x.org,b@y.org').
+ */
+
+var TAB_HEADERS = {
+  Config: ['Key', 'Value', 'Notes'],
+  Purpose: ['Order', 'Section', 'Heading', 'Body', 'Published'],
+  Problems: ['Order', 'Title', 'Description', 'Counties', 'RelatedActionTeam', 'SourceOrEvidence', 'Published'],
+  Structure: ['Order', 'Level', 'Name', 'Purpose', 'CoChairs', 'StaffSupport', 'MeetingCadence', 'Status', 'Published'],
+  Members: ['Order', 'Name', 'Credentials', 'Organization', 'RoleTitle', 'County', 'ActionTeams', 'SteeringCommittee', 'Email', 'Phone', 'ShareContact', 'Status', 'InternalNotes', 'Published'],
+  Funding: ['Order', 'Name', 'Source', 'Level', 'Amount', 'Status', 'Description', 'IntendedUse', 'Counties', 'URL', 'Published'],
+  Resources: ['Order', 'Name', 'Type', 'Category', 'Counties', 'Description', 'Eligibility', 'Contact', 'URL', 'SourceURL', 'DateVerified', 'Confidence', 'Published'],
+  Data: ['Order', 'Indicator', 'Definition', 'Cecil', 'Harford', 'Maryland', 'Unit', 'Year', 'Source', 'SourceURL', 'Published'],
+  Meetings: ['Date', 'ActionTeam', 'Title', 'Summary', 'Decisions', 'NextSteps', 'NotesURL', 'Published'],
+  ActionItems: ['ID', 'ActionTeam', 'Item', 'Owner', 'DueDate', 'Status', 'Created', 'Updated', 'Published'],
+  Announcements: ['Date', 'Title', 'Body', 'LinkURL', 'ExpiresOn', 'Published']
+};
+
+// Form-driven tabs: header order = Timestamp, Email Address, then question
+// titles in order, then admin-only review columns appended by setup.
+var BARRIER_FORM_QUESTIONS = [
+  { title: 'Month of occurrence', type: 'text', help: 'Format YYYY-MM. Month only — do not enter a full date.', required: true },
+  { title: 'County', type: 'list', choices: ['Cecil', 'Harford', 'Both / Regional', 'Other'], required: true },
+  { title: 'Barrier category', type: 'list', choices: [
+      'Transportation cost or availability', 'Emergency / EMS transport', 'Insurance not accepted (incl. Maryland Medicaid out of state)',
+      'No in-county provider for service', 'Appointment availability / scheduling', 'Maternal-fetal medicine access',
+      'Behavioral health / perinatal mental health', 'Substance use treatment access', 'Material needs (car seat, crib, supplies)',
+      'Language / communication', 'Housing instability', 'Childcare to attend appointments', 'Other'
+    ], required: true },
+  { title: 'Service type', type: 'list', choices: [
+      'Prenatal care', 'Labor and delivery', 'Induction / scheduled procedure', 'Postpartum care', 'Newborn / pediatric',
+      'Lactation', 'Behavioral health', 'WIC / nutrition', 'Home visiting', 'Other'
+    ], required: true },
+  { title: 'Reporting organization', type: 'text', help: 'Your organization, not the family\'s name.', required: true },
+  { title: 'Brief description', type: 'paragraph', help: 'NO names, initials, dates of birth, addresses, exact dates, or any detail that could identify a person. Describe the barrier, not the patient. Max 500 characters.', required: true },
+  { title: 'May a co-chair contact you for more detail?', type: 'list', choices: ['Yes', 'No'], required: true }
+];
+var BARRIER_ADMIN_COLUMNS = ['Review status', 'Reviewed by', 'Published'];
+
+var RESOURCE_FORM_QUESTIONS = [
+  { title: 'Resource name', type: 'text', required: true },
+  { title: 'Organization', type: 'text', required: true },
+  { title: 'Category', type: 'list', choices: ['Clinical', 'Home Visiting', 'Behavioral Health', 'Transportation', 'Insurance', 'Community', 'Funding', 'Data', 'Other'], required: true },
+  { title: 'Counties served', type: 'list', choices: ['Cecil', 'Harford', 'Both', 'Statewide', 'Other'], required: true },
+  { title: 'Description', type: 'paragraph', required: true },
+  { title: 'Eligibility', type: 'paragraph', required: false },
+  { title: 'Public contact (phone or email that is already public)', type: 'text', required: false },
+  { title: 'Website', type: 'text', required: false }
+];
+var RESOURCE_ADMIN_COLUMNS = ['Review status', 'Reviewed by', 'Published'];
+
+/**
+ * MAIN SETUP. Run this once from the editor.
+ */
+function runSetup() {
+  requireAdmin_('SETUP');
+  var props = PropertiesService.getScriptProperties();
+
+  // 1. Content spreadsheet
+  var contentId = props.getProperty(CONFIG.PROP_CONTENT_SS_ID);
+  var ss = contentId ? SpreadsheetApp.openById(contentId) : SpreadsheetApp.create(CONFIG.APP_SHORT_NAME + ' — Site Content (ADMIN ONLY)');
+  props.setProperty(CONFIG.PROP_CONTENT_SS_ID, ss.getId());
+  Object.keys(TAB_HEADERS).forEach(function (tab) { ensureTab_(ss, tab, TAB_HEADERS[tab]); });
+  var defaultSheet = ss.getSheetByName('Sheet1');
+  if (defaultSheet && ss.getSheets().length > 1) ss.deleteSheet(defaultSheet);
+
+  // 2. Audit spreadsheet (separate file)
+  var auditId = props.getProperty(CONFIG.PROP_AUDIT_SS_ID);
+  var audit = auditId ? SpreadsheetApp.openById(auditId) : SpreadsheetApp.create(CONFIG.APP_SHORT_NAME + ' — Audit Log (RESTRICTED)');
+  props.setProperty(CONFIG.PROP_AUDIT_SS_ID, audit.getId());
+  ensureTab_(audit, CONFIG.AUDIT_TAB, ['TimestampUTC', 'LocalTZ', 'Actor', 'ActorRole', 'Action', 'ResourceType', 'ResourceId', 'Outcome', 'Session', 'Justification', 'AppVersion']);
+  var a1 = audit.getSheetByName('Sheet1');
+  if (a1 && audit.getSheets().length > 1) audit.deleteSheet(a1);
+
+  // 3. Forms
+  if (!props.getProperty(CONFIG.PROP_BARRIER_FORM_ID)) {
+    var bf = createForm_(ss, CONFIG.TABS.BARRIER_LOG,
+      'MCTF Access Barrier Report (de-identified)',
+      'Use this form to record a maternal care access barrier a family experienced, so the Task Force can track patterns. ' +
+      'This is NOT a clinical record and NOT a referral. Do not enter any information that could identify a patient or family. ' +
+      'Your email is collected so a co-chair can follow up with YOU, not with the family.',
+      BARRIER_FORM_QUESTIONS, BARRIER_ADMIN_COLUMNS);
+    props.setProperty(CONFIG.PROP_BARRIER_FORM_ID, bf.getId());
+    upsertConfig_(ss, 'BARRIER_FORM_URL', bf.getPublishedUrl(), 'Set by runSetup');
+  }
+  if (!props.getProperty(CONFIG.PROP_RESOURCE_FORM_ID)) {
+    var rf = createForm_(ss, CONFIG.TABS.RESOURCE_SUBMISSIONS,
+      'MCTF Resource Submission',
+      'Suggest a program, service, or funding source for the Task Force resource directory. Only public contact information, please.',
+      RESOURCE_FORM_QUESTIONS, RESOURCE_ADMIN_COLUMNS);
+    props.setProperty(CONFIG.PROP_RESOURCE_FORM_ID, rf.getId());
+    upsertConfig_(ss, 'RESOURCE_FORM_URL', rf.getPublishedUrl(), 'Set by runSetup');
+  }
+
+  // 4. Default config keys
+  upsertConfig_(ss, 'SITE_TITLE', CONFIG.APP_NAME, 'Shown in the site header');
+  upsertConfig_(ss, 'TAGLINE', 'Finding solutions so that all women and their families have access to quality perinatal services when needed.', 'Shown under the title');
+  upsertConfig_(ss, 'CONTACT_EMAIL', '', 'General inbox for the task force (public, non-PHI)');
+  upsertConfig_(ss, 'NEXT_MEETING', '', 'Free text, e.g. "Regional System of Care AT — monthly, virtual, date TBD"');
+  upsertConfig_(ss, 'FIND_HELP_URL', 'https://www.findhelp.org', 'Free / reduced-cost resource finder used by Cecil County HD');
+
+  console.log('Setup complete. Content SS: ' + ss.getUrl());
+  console.log('Audit SS (move to a restricted folder): ' + audit.getUrl());
+  console.log('Next: run seedAll() in Seed.gs, then setAdminEmails(), then deploy the web app.');
+}
+
+/**
+ * Run from editor: setAdminEmails('officer@cecilcountyhealth.org,admin@performancehealthgroup.org')
+ * @param {string} csv
+ */
+function setAdminEmails(csv) {
+  requireAdmin_('SET_ADMINS');
+  if (!csv) throw new Error('Pass a comma-separated list of admin emails.');
+  PropertiesService.getScriptProperties().setProperty(CONFIG.PROP_ADMIN_EMAILS, csv);
+}
+
+/**
+ * Creates a tab with a frozen, bold header row if missing. Adds any header
+ * columns that are missing from an existing tab (never removes or reorders).
+ */
+function ensureTab_(ss, name, headers) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+    return sheet;
+  }
+  var lastCol = Math.max(sheet.getLastColumn(), 1);
+  var existing = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h).trim(); });
+  headers.forEach(function (h) {
+    if (existing.indexOf(h) < 0) {
+      existing.push(h);
+      sheet.getRange(1, existing.length).setValue(h).setFontWeight('bold');
+    }
+  });
+  sheet.setFrozenRows(1);
+  return sheet;
+}
+
+/**
+ * Creates a Google Form whose responses land in `ss`, renames the response
+ * tab to `tabName`, and appends admin review columns to its header.
+ */
+function createForm_(ss, tabName, title, description, questions, adminColumns) {
+  var form = FormApp.create(title);
+  form.setDescription(description);
+  form.setCollectEmail(true);          // verified identity per row
+  form.setLimitOneResponsePerUser(false);
+  form.setAllowResponseEdits(false);
+  form.setProgressBar(false);
+  questions.forEach(function (q) {
+    var item;
+    if (q.type === 'text') item = form.addTextItem();
+    else if (q.type === 'paragraph') item = form.addParagraphTextItem();
+    else if (q.type === 'list') { item = form.addListItem(); item.setChoiceValues(q.choices); }
+    item.setTitle(q.title);
+    if (q.help) item.setHelpText(q.help);
+    item.setRequired(!!q.required);
+  });
+  var before = ss.getSheets().map(function (s) { return s.getName(); });
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
+  SpreadsheetApp.flush();
+  var after = SpreadsheetApp.openById(ss.getId()).getSheets();
+  for (var i = 0; i < after.length; i++) {
+    if (before.indexOf(after[i].getName()) < 0) {
+      after[i].setName(tabName);
+      var lastCol = after[i].getLastColumn();
+      adminColumns.forEach(function (c, idx) {
+        after[i].getRange(1, lastCol + idx + 1).setValue(c).setFontWeight('bold');
+      });
+      after[i].setFrozenRows(1);
+      break;
+    }
+  }
+  return form;
+}
+
+/**
+ * Inserts or updates a Config key. Existing non-empty values are kept.
+ */
+function upsertConfig_(ss, key, value, notes) {
+  var sheet = ss.getSheetByName(CONFIG.TABS.CONFIG);
+  var last = sheet.getLastRow();
+  if (last >= 2) {
+    var keys = sheet.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < keys.length; i++) {
+      if (String(keys[i][0]).trim() === key) {
+        var cur = sheet.getRange(i + 2, 2).getValue();
+        if (cur === '' && value !== '') sheet.getRange(i + 2, 2).setValue(value);
+        return;
+      }
+    }
+  }
+  sheet.appendRow([key, value, notes || '']);
+}

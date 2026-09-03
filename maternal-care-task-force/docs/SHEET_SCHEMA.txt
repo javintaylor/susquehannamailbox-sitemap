@@ -1,0 +1,72 @@
+MCTF CONTENT SPREADSHEET — TAB AND COLUMN REFERENCE
+Row 1 of every tab is the header. Column order does not matter (rows are
+read by header name) but header text must match exactly. A column named
+"Published" gates what the site shows; TRUE/yes/y/1 publish the row.
+
+Config           Key | Value | Notes
+  Keys used by the site: SITE_TITLE, TAGLINE, CONTACT_EMAIL, NEXT_MEETING,
+  FIND_HELP_URL, BARRIER_FORM_URL, RESOURCE_FORM_URL.
+
+Purpose          Order | Section | Heading | Body | Published
+  Section groups paragraphs into bands (Purpose, Who we serve, How we work).
+
+Problems         Order | Title | Description | Counties | RelatedActionTeam |
+                 SourceOrEvidence | Published
+  Counties: Cecil, Harford, Both.
+
+Structure        Order | Level | Name | Purpose | CoChairs | StaffSupport |
+                 MeetingCadence | Status | Published
+  Level: "Steering Committee" or "Action Team".
+
+Members          Order | Name | Credentials | Organization | RoleTitle |
+                 County | ActionTeams | SteeringCommittee | Email | Phone |
+                 ShareContact | Status | InternalNotes | Published
+  ActionTeams: comma-separated team names (matched on first word).
+  Email/Phone are served ONLY when ShareContact = TRUE. InternalNotes never
+  leaves the sheet.
+
+Funding          Order | Name | Source | Level | Amount | Status |
+                 Description | IntendedUse | Counties | URL | Published
+
+Resources        Order | Name | Type | Category | Counties | Description |
+                 Eligibility | Contact | URL | SourceURL | DateVerified |
+                 Confidence | Published
+  Type: Federal, State, Local, Data. Category: Funding, Clinical,
+  Home Visiting, Behavioral Health, Transportation, Insurance, Data,
+  Community, Nutrition, Substance Use, Hotline. Counties: Cecil, Harford,
+  Both, Statewide, National. Contact must be a PUBLIC phone/email only.
+
+Data             Order | Indicator | Definition | Cecil | Harford | Maryland |
+                 Unit | Year | Source | SourceURL | Published
+  Aggregate public statistics only. Never a cell count small enough to
+  identify a person (follow the source's suppression rules).
+
+Meetings         Date | ActionTeam | Title | Summary | Decisions | NextSteps |
+                 NotesURL | Published
+  Summaries must not contain patient stories with identifying details.
+
+ActionItems      ID | ActionTeam | Item | Owner | DueDate | Status |
+                 Created | Updated | Published
+  Status: Open, In progress, Done. Do not delete; mark Done.
+
+Announcements    Date | Title | Body | LinkURL | ExpiresOn | Published
+  Rows past ExpiresOn are hidden automatically.
+
+BarrierLog       (Google Form destination — do not edit header)
+                 Timestamp | Email Address | Month of occurrence | County |
+                 Barrier category | Service type | Reporting organization |
+                 Brief description | May a co-chair contact you for more
+                 detail? | Review status | Reviewed by | Published
+  Email Address is the REPORTER, never a family. It is never served to the
+  site. Free text is served only when Published = TRUE after review.
+
+ResourceSubmissions (Google Form destination)
+                 Timestamp | Email Address | Resource name | Organization |
+                 Category | Counties served | Description | Eligibility |
+                 Public contact | Website | Review status | Reviewed by |
+                 Published
+
+AUDIT SPREADSHEET (separate file)
+AuditLog         TimestampUTC | LocalTZ | Actor | ActorRole | Action |
+                 ResourceType | ResourceId | Outcome | Session |
+                 Justification | AppVersion

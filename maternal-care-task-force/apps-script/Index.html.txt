@@ -1,0 +1,59 @@
+<!--
+  FILE: Index.html
+  Single-page member site served by doGet() in Api.gs. Embedded in Google
+  Sites via Insert > Embed > By URL (web app deployment URL).
+  Contains no PHI. All content is loaded from getSiteContent() (Api.gs).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base target="_top">
+  <title><?= appName ?></title>
+  <?!= include('Styles') ?>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Cecil County &amp; Harford County, Maryland</p>
+      <h1 id="siteTitle">Maternal Care Task Force</h1>
+      <p class="tagline" id="siteTagline">Loading…</p>
+      <div id="announcementBar" class="announce" hidden></div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Site sections">
+    <div class="wrap tabs-inner">
+      <button class="tab" data-view="home" aria-current="page">Purpose</button>
+      <button class="tab" data-view="problems">The Problem</button>
+      <button class="tab" data-view="structure">Structure</button>
+      <button class="tab" data-view="funding">Funding</button>
+      <button class="tab" data-view="resources">Resources</button>
+      <button class="tab" data-view="data">Data</button>
+      <button class="tab" data-view="meetings">Meetings &amp; Actions</button>
+      <button class="tab" data-view="barriers">Barrier Log</button>
+    </div>
+  </nav>
+
+  <main id="main" class="wrap">
+    <div id="status" class="status" role="status">Loading task force content…</div>
+
+    <section id="view-home" class="view" hidden></section>
+    <section id="view-problems" class="view" hidden></section>
+    <section id="view-structure" class="view" hidden></section>
+    <section id="view-funding" class="view" hidden></section>
+    <section id="view-resources" class="view" hidden></section>
+    <section id="view-data" class="view" hidden></section>
+    <section id="view-meetings" class="view" hidden></section>
+    <section id="view-barriers" class="view" hidden></section>
+  </main>
+
+  <footer class="foot wrap">
+    <p><strong>Reference site for Task Force members.</strong> This site holds no patient information. Do not enter names, dates of birth, or any detail that could identify a patient or family anywhere on this site or its forms.</p>
+    <p class="muted">Content is maintained by the Task Force co-chairs. Version <?= version ?> · <span id="generatedAt"></span></p>
+  </footer>
+
+  <?!= include('Client') ?>
+</body>
+</html>

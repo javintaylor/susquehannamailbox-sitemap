@@ -1,0 +1,169 @@
+/**
+ * FILE: Api.gs
+ *
+ * Web app entry points. Deploy as: Execute as ME (script owner), Who has
+ * access: "Anyone with Google account" (preferred) or "Anyone" if the Google
+ * Site must be viewable without sign-in. Embed the deployment URL in Google
+ * Sites via Insert > Embed > By URL.
+ *
+ * Every entry point: (1) authorization/identification, (2) audit write,
+ * (3) work. In that order.
+ *
+ * All content returned is READ-ONLY and filtered to Published = TRUE rows.
+ * No write endpoint exists in the web app by design (see Auth.gs).
+ */
+
+/**
+ * Serves the single-page member site.
+ * @param {GoogleAppsScript.Events.DoGet} e
+ * @return {GoogleAppsScript.HTML.HtmlOutput}
+ */
+function doGet(e) {
+  authorizeRead_('SitePage', (e && e.parameter && e.parameter.page) || 'home');
+  var tpl = HtmlService.createTemplateFromFile('Index');
+  tpl.appName = CONFIG.APP_NAME;
+  tpl.version = CONFIG.VERSION;
+  return tpl.evaluate()
+    .setTitle(CONFIG.APP_NAME)
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL) // required for Google Sites embed
+    .setSandboxMode(HtmlService.SandboxMode.IFRAME);
+}
+
+/**
+ * Template helper: inlines another HTML file (Styles.html, Client.html).
+ * @param {string} filename
+ * @return {string}
+ */
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+/**
+ * Returns every published content block the site needs, in one call.
+ * Cached for CONFIG.CACHE_TTL_SECONDS to keep Sheets reads low.
+ * @return {Object}
+ */
+function getSiteContent() {
+  var who = authorizeRead_('SiteContent', 'all');
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('siteContent:v' + CONFIG.VERSION);
+  if (cached) {
+    var parsed = JSON.parse(cached);
+    parsed.viewerRole = who.role;
+    return parsed;
+  }
+  var bundle = buildSiteContent_();
+  bundle.viewerRole = who.role;
+  try {
+    var json = JSON.stringify(bundle);
+    if (json.length < 100000) cache.put('siteContent:v' + CONFIG.VERSION, json, CONFIG.CACHE_TTL_SECONDS);
+  } catch (err) {
+    console.warn('CACHE_PUT_SKIPPED');
+  }
+  return bundle;
+}
+
+/**
+ * Assembles the published content bundle from the sheet. Internal.
+ * @return {Object}
+ */
+function buildSiteContent_() {
+  var T = CONFIG.TABS;
+  var config = readConfigMap_();
+  var members = readPublished_(T.MEMBERS).map(redactMemberContact_);
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var announcements = readPublished_(T.ANNOUNCEMENTS).filter(function (a) {
+    return !a.ExpiresOn || String(a.ExpiresOn) >= today;
+  });
+  return {
+    generatedAt: new Date().toISOString(),
+    appName: CONFIG.APP_NAME,
+    version: CONFIG.VERSION,
+    config: config,
+    purpose: sortByOrder_(readPublished_(T.PURPOSE)),
+    problems: sortByOrder_(readPublished_(T.PROBLEMS)),
+    structure: sortByOrder_(readPublished_(T.STRUCTURE)),
+    members: sortByOrder_(members),
+    funding: sortByOrder_(readPublished_(T.FUNDING)),
+    resources: sortByOrder_(readPublished_(T.RESOURCES)),
+    data: sortByOrder_(readPublished_(T.DATA)),
+    meetings: readPublished_(T.MEETINGS).sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
+    actionItems: readPublished_(T.ACTION_ITEMS),
+    announcements: announcements.sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
+    barriers: buildBarrierSummary_(),
+    forms: {
+      barrierFormUrl: config.BARRIER_FORM_URL || '',
+      resourceFormUrl: config.RESOURCE_FORM_URL || ''
+    }
+  };
+}
+
+/**
+ * Strips Email/Phone unless the member has consented (ShareContact = TRUE).
+ * Internal notes never leave the sheet.
+ * @param {Object} m
+ * @return {Object}
+ */
+function redactMemberContact_(m) {
+  var out = {};
+  Object.keys(m).forEach(function (k) {
+    if (k === 'InternalNotes') return;
+    out[k] = m[k];
+  });
+  if (!isTruthyFlag_(m[CONFIG.MEMBER_CONTACT_CONSENT_COLUMN])) {
+    out.Email = '';
+    out.Phone = '';
+  }
+  return out;
+}
+
+/**
+ * Aggregates the de-identified BarrierLog into counts. Free-text descriptions
+ * are exposed ONLY for rows an admin has marked Published = TRUE after review.
+ * Reporter email addresses are never returned.
+ * @return {Object}
+ */
+function buildBarrierSummary_() {
+  var rows;
+  try { rows = readTable_(CONFIG.TABS.BARRIER_LOG); } catch (e) { return { total: 0, byCategory: {}, byCounty: {}, byMonth: {}, published: [] }; }
+  var byCategory = {}, byCounty = {}, byMonth = {}, published = [];
+  rows.forEach(function (r) {
+    var cat = String(r['Barrier category'] || 'Unspecified');
+    var county = String(r['County'] || 'Unspecified');
+    var month = String(r['Month of occurrence'] || '').slice(0, 7) || 'Unspecified';
+    byCategory[cat] = (byCategory[cat] || 0) + 1;
+    byCounty[county] = (byCounty[county] || 0) + 1;
+    byMonth[month] = (byMonth[month] || 0) + 1;
+    if (isTruthyFlag_(r[CONFIG.PUBLISHED_COLUMN])) {
+      published.push({
+        month: month, county: county, category: cat,
+        service: String(r['Service type'] || ''),
+        org: String(r['Reporting organization'] || ''),
+        description: String(r['Brief description'] || '').slice(0, CONFIG.BARRIER_TEXT_MAX)
+      });
+    }
+  });
+  return { total: rows.length, byCategory: byCategory, byCounty: byCounty, byMonth: byMonth, published: published };
+}
+
+/**
+ * ADMIN (run from editor): clears the content cache so sheet edits show
+ * immediately instead of after CONFIG.CACHE_TTL_SECONDS.
+ */
+function purgeCache() {
+  requireAdmin_('PURGE_CACHE');
+  CacheService.getScriptCache().remove('siteContent:v' + CONFIG.VERSION);
+}
+
+/**
+ * ADMIN (run from editor): smoke test that prints row counts per tab.
+ * Prints counts only, never row contents.
+ */
+function smokeTest() {
+  requireAdmin_('SMOKE_TEST');
+  var b = buildSiteContent_();
+  var summary = ['purpose', 'problems', 'structure', 'members', 'funding', 'resources', 'data', 'meetings', 'actionItems', 'announcements']
+    .map(function (k) { return k + '=' + b[k].length; }).join(', ');
+  console.log('Published row counts: ' + summary + ', barriers=' + b.barriers.total);
+}

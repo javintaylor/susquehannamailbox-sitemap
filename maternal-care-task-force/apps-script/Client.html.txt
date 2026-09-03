@@ -1,0 +1,272 @@
+<!-- FILE: Client.html — inlined by include('Client') in Index.html -->
+<script>
+(function () {
+  'use strict';
+
+  var STATE = { content: null, view: 'home' };
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  /* ---------- safe HTML helpers (all sheet text is escaped) ---------- */
+  function esc(s) {
+    return String(s === undefined || s === null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function para(s) { // newlines -> paragraphs, plain text only
+    return String(s || '').split(/\n{2,}|\r\n\r\n/).map(function (p) {
+      return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+  }
+  function link(url, label) {
+    if (!url) return '';
+    var safe = /^https?:\/\//i.test(String(url)) ? String(url) : '';
+    if (!safe) return esc(label || url);
+    return '<a href="' + esc(safe) + '" target="_blank" rel="noopener">' + esc(label || 'Website') + '</a>';
+  }
+  function countyPill(c) {
+    var s = String(c || '').toLowerCase();
+    var cls = s.indexOf('both') >= 0 || s.indexOf('regional') >= 0 ? 'both' : s.indexOf('cecil') >= 0 && s.indexOf('harford') >= 0 ? 'both' : s.indexOf('cecil') >= 0 ? 'cecil' : s.indexOf('harford') >= 0 ? 'harford' : '';
+    return c ? '<span class="pill ' + cls + '">' + esc(c) + '</span>' : '';
+  }
+  function statusPill(s) {
+    if (!s) return '';
+    return '<span class="pill status-' + esc(String(s).toLowerCase().replace(/[^a-z]/g, '')) + '">' + esc(s) + '</span>';
+  }
+
+  /* ---------- navigation ---------- */
+  function show(view) {
+    STATE.view = view;
+    $$('.view').forEach(function (v) { v.hidden = v.id !== 'view-' + view; });
+    $$('.tab').forEach(function (t) {
+      if (t.dataset.view === view) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    try { history.replaceState(null, '', '#' + view); } catch (e) { /* embedded */ }
+    window.scrollTo({ top: 0 });
+  }
+  $$('.tab').forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
+
+  /* ---------- renderers ---------- */
+  function renderHome(c) {
+    var cfg = c.config || {};
+    $('#siteTitle').textContent = cfg.SITE_TITLE || 'Maternal Care Task Force';
+    $('#siteTagline').textContent = cfg.TAGLINE || '';
+    var ann = c.announcements || [];
+    var bar = $('#announcementBar');
+    if (ann.length) {
+      bar.hidden = false;
+      bar.innerHTML = '<strong>' + esc(ann[0].Title) + '</strong> ' + esc(ann[0].Body) + (ann[0].LinkURL ? ' ' + link(ann[0].LinkURL, 'More') : '');
+    }
+    var sections = {};
+    (c.purpose || []).forEach(function (p) { (sections[p.Section || 'Purpose'] = sections[p.Section || 'Purpose'] || []).push(p); });
+    var html = '<h2>Purpose</h2><p class="lead">Why the Task Force exists and what it is working toward.</p>';
+    Object.keys(sections).forEach(function (sec) {
+      html += '<div class="section"><div class="band"><h3>' + esc(sec) + '</h3>';
+      sections[sec].forEach(function (p) {
+        html += (p.Heading ? '<h4>' + esc(p.Heading) + '</h4>' : '') + para(p.Body);
+      });
+      html += '</div></div>';
+    });
+    if (cfg.NEXT_MEETING) html += '<div class="card accent"><h3>Next meeting</h3><p>' + esc(cfg.NEXT_MEETING) + '</p></div>';
+    if (ann.length > 1) {
+      html += '<div class="section"><h3>Announcements</h3>' + ann.map(function (a) {
+        return '<div class="card"><p class="meta">' + esc(a.Date) + '</p><h4>' + esc(a.Title) + '</h4>' + para(a.Body) + (a.LinkURL ? '<p>' + link(a.LinkURL, 'Link') + '</p>' : '') + '</div>';
+      }).join('') + '</div>';
+    }
+    $('#view-home').innerHTML = html;
+  }
+
+  function renderProblems(c) {
+    var html = '<h2>The Problem</h2><p class="lead">Access concerns the Task Force is working to solve. Each is tied to an Action Team.</p><div class="grid">';
+    (c.problems || []).forEach(function (p) {
+      html += '<div class="card accent"><h3>' + esc(p.Title) + '</h3>' + countyPill(p.Counties) +
+        (p.RelatedActionTeam ? '<span class="pill">' + esc(p.RelatedActionTeam) + '</span>' : '') +
+        para(p.Description) + (p.SourceOrEvidence ? '<p class="meta">Evidence: ' + esc(p.SourceOrEvidence) + '</p>' : '') + '</div>';
+    });
+    html += '</div>';
+    $('#view-problems').innerHTML = html;
+  }
+
+  function renderStructure(c) {
+    var structure = c.structure || [];
+    var members = c.members || [];
+    var html = '<h2>Structure</h2><p class="lead">A Steering Committee sets direction. Four Action Teams do the work.</p>';
+    var steering = structure.filter(function (s) { return /steering/i.test(s.Level); });
+    var teams = structure.filter(function (s) { return /action/i.test(s.Level); });
+
+    function memberCards(list) {
+      if (!list.length) return '<p class="muted small">No members listed yet.</p>';
+      return '<div class="grid">' + list.map(function (m) {
+        var contact = '';
+        if (m.Email) contact += '<div class="small"><a href="mailto:' + esc(m.Email) + '">' + esc(m.Email) + '</a></div>';
+        if (m.Phone) contact += '<div class="small">' + esc(m.Phone) + '</div>';
+        return '<div class="card member"><span class="name">' + esc(m.Name) + (m.Credentials ? ', ' + esc(m.Credentials) : '') + '</span>' +
+          '<span class="org">' + esc(m.RoleTitle) + (m.Organization ? ' · ' + esc(m.Organization) : '') + '</span>' +
+          '<div>' + countyPill(m.County) + statusPill(m.Status) + '</div>' + contact + '</div>';
+      }).join('') + '</div>';
+    }
+
+    steering.forEach(function (s) {
+      html += '<div class="team-block band"><h3>' + esc(s.Name) + '</h3>' + para(s.Purpose) +
+        (s.CoChairs ? '<p><strong>Co-chairs:</strong> ' + esc(s.CoChairs) + '</p>' : '') +
+        (s.MeetingCadence ? '<p><strong>Cadence:</strong> ' + esc(s.MeetingCadence) + '</p>' : '') + statusPill(s.Status) + '</div>';
+      html += memberCards(members.filter(function (m) { return truthy(m.SteeringCommittee); }));
+    });
+
+    html += '<div class="section"><h3>Action Teams</h3></div>';
+    teams.forEach(function (t) {
+      var teamMembers = members.filter(function (m) { return String(m.ActionTeams || '').toLowerCase().indexOf(String(t.Name).toLowerCase().split(' ')[0]) >= 0; });
+      html += '<div class="team-block"><div class="card accent"><h3>' + esc(t.Name) + '</h3>' + para(t.Purpose) +
+        (t.CoChairs ? '<p><strong>Co-chairs:</strong> ' + esc(t.CoChairs) + '</p>' : '') +
+        (t.StaffSupport ? '<p><strong>Staff support:</strong> ' + esc(t.StaffSupport) + '</p>' : '') +
+        (t.MeetingCadence ? '<p><strong>Cadence:</strong> ' + esc(t.MeetingCadence) + '</p>' : '') + statusPill(t.Status) + '</div>' +
+        '<details><summary>Members (' + teamMembers.length + ')</summary>' + memberCards(teamMembers) + '</details></div>';
+    });
+    html += '<p class="notice">Contact details appear only for members who opted in. To update your listing, contact the co-chairs.</p>';
+    $('#view-structure').innerHTML = html;
+  }
+
+  function renderFunding(c) {
+    var html = '<h2>Funding</h2><p class="lead">Grants and programs resourcing the Task Force and the regional system of care.</p><div class="grid">';
+    (c.funding || []).forEach(function (f) {
+      html += '<div class="card"><h3>' + esc(f.Name) + '</h3><p class="meta">' + esc(f.Source) + (f.Level ? ' · ' + esc(f.Level) : '') + '</p>' +
+        countyPill(f.Counties) + statusPill(f.Status) + (f.Amount ? '<p><strong>Amount:</strong> ' + esc(f.Amount) + '</p>' : '') +
+        para(f.Description) + (f.IntendedUse ? '<p><strong>Use:</strong> ' + esc(f.IntendedUse) + '</p>' : '') + (f.URL ? '<p>' + link(f.URL, 'Program page') + '</p>' : '') + '</div>';
+    });
+    html += '</div>';
+    $('#view-funding').innerHTML = html;
+  }
+
+  function renderResources(c) {
+    var all = c.resources || [];
+    var cats = uniq(all.map(function (r) { return r.Category; }));
+    var types = uniq(all.map(function (r) { return r.Type; }));
+    var html = '<h2>Resources &amp; Programs</h2><p class="lead">Current federal, state, and local programs for perinatal care in Cecil and Harford Counties. Verified dates are shown on each card; confirm details before referring.</p>' +
+      '<div class="filters"><label>County <select id="fCounty"><option value="">All</option><option>Cecil</option><option>Harford</option><option>Both</option><option>Statewide</option></select></label>' +
+      '<label>Category <select id="fCat"><option value="">All</option>' + cats.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
+      '<label>Level <select id="fType"><option value="">All</option>' + types.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
+      '<label>Search <input id="fText" type="search" placeholder="name or keyword"></label><span class="count" id="fCount"></span></div>' +
+      '<div id="resourceList" class="grid"></div>' +
+      (c.forms && c.forms.resourceFormUrl ? '<p style="margin-top:18px"><a class="btn secondary" target="_blank" rel="noopener" href="' + esc(c.forms.resourceFormUrl) + '">Suggest a resource</a></p>' : '');
+    $('#view-resources').innerHTML = html;
+    function apply() {
+      var county = $('#fCounty').value.toLowerCase(), cat = $('#fCat').value, type = $('#fType').value, q = $('#fText').value.toLowerCase();
+      var list = all.filter(function (r) {
+        var rc = String(r.Counties || '').toLowerCase();
+        if (county && !countyMatches(rc, county)) return false;
+        if (cat && r.Category !== cat) return false;
+        if (type && r.Type !== type) return false;
+        if (q && (String(r.Name) + ' ' + String(r.Description) + ' ' + String(r.Eligibility)).toLowerCase().indexOf(q) < 0) return false;
+        return true;
+      });
+      $('#fCount').textContent = list.length + ' of ' + all.length;
+      $('#resourceList').innerHTML = list.map(function (r) {
+        return '<div class="card"><h3>' + esc(r.Name) + '</h3><p class="meta">' + esc(r.Type) + ' · ' + esc(r.Category) + '</p>' + countyPill(r.Counties) +
+          para(r.Description) + (r.Eligibility ? '<p><strong>Eligibility:</strong> ' + esc(r.Eligibility) + '</p>' : '') +
+          (r.Contact ? '<p><strong>Contact:</strong> ' + esc(r.Contact) + '</p>' : '') +
+          '<p>' + link(r.URL, 'Website') + (r.SourceURL && r.SourceURL !== r.URL ? ' · ' + link(r.SourceURL, 'Source') : '') + '</p>' +
+          '<p class="meta">Verified ' + esc(r.DateVerified || 'n/a') + (r.Confidence ? ' · Confidence: ' + esc(r.Confidence) : '') + '</p></div>';
+      }).join('') || '<p class="muted">No resources match.</p>';
+    }
+    ['fCounty', 'fCat', 'fType'].forEach(function (id) { $('#' + id).addEventListener('change', apply); });
+    $('#fText').addEventListener('input', apply);
+    apply();
+  }
+
+  function renderData(c) {
+    var rows = c.data || [];
+    var html = '<h2>Maternal &amp; Infant Health Data</h2><p class="lead">County-level indicators compared with Maryland. Red marks where a county is doing worse than the state; green marks where it is doing better. These are aggregate public statistics, not patient data.</p>' +
+      '<div class="table-scroll"><table><thead><tr><th>Indicator</th><th>Cecil</th><th>Harford</th><th>Maryland</th><th>Year</th><th>Source</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      html += '<tr><td><strong>' + esc(r.Indicator) + '</strong>' + (r.Definition ? '<div class="small muted">' + esc(r.Definition) + '</div>' : '') + '</td>' +
+        cell(r.Cecil, r.Maryland, r.Unit, r.Indicator) + cell(r.Harford, r.Maryland, r.Unit, r.Indicator) +
+        '<td class="num">' + esc(fmt(r.Maryland, r.Unit)) + '</td><td>' + esc(r.Year) + '</td><td class="small">' + (r.SourceURL ? link(r.SourceURL, r.Source) : esc(r.Source)) + '</td></tr>';
+    });
+    html += '</tbody></table></div><p class="legend">For most indicators lower is better. For "Early prenatal care" higher is better. Comparison direction is inferred from the indicator name.</p>';
+    $('#view-data').innerHTML = html;
+    function fmt(v, unit) { if (v === '' || v === undefined) return '—'; return unit === '%' ? v + '%' : String(v); }
+    function cell(v, md, unit, name) {
+      var n = parseFloat(v), m = parseFloat(md);
+      var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(name));
+      var cls = '';
+      if (!isNaN(n) && !isNaN(m) && n !== m) cls = (higherBetter ? n > m : n < m) ? 'better' : 'worse';
+      return '<td class="num ' + cls + '">' + esc(fmt(v, unit)) + '</td>';
+    }
+  }
+
+  function renderMeetings(c) {
+    var html = '<h2>Meetings &amp; Action Items</h2>';
+    var open = (c.actionItems || []).filter(function (a) { return !/done|closed|complete/i.test(a.Status); });
+    var done = (c.actionItems || []).filter(function (a) { return /done|closed|complete/i.test(a.Status); });
+    html += '<div class="section"><h3>Open action items (' + open.length + ')</h3>' + actionTable(open) + '</div>';
+    html += '<div class="section"><h3>Meeting summaries</h3>' + ((c.meetings || []).map(function (m) {
+      return '<details' + (m === c.meetings[0] ? ' open' : '') + '><summary>' + esc(m.Date) + ' · ' + esc(m.ActionTeam) + ' — ' + esc(m.Title) + '</summary>' + para(m.Summary) +
+        (m.Decisions ? '<p><strong>Decisions:</strong></p>' + para(m.Decisions) : '') + (m.NextSteps ? '<p><strong>Next steps:</strong></p>' + para(m.NextSteps) : '') +
+        (m.NotesURL ? '<p>' + link(m.NotesURL, 'Full notes') + '</p>' : '') + '</details>';
+    }).join('') || '<p class="muted">No meeting summaries yet.</p>') + '</div>';
+    if (done.length) html += '<details><summary>Completed action items (' + done.length + ')</summary>' + actionTable(done) + '</details>';
+    $('#view-meetings').innerHTML = html;
+    function actionTable(list) {
+      if (!list.length) return '<p class="muted small">None.</p>';
+      return '<div class="table-scroll"><table><thead><tr><th>Item</th><th>Team</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>' + list.map(function (a) {
+        return '<tr><td>' + esc(a.Item) + '</td><td>' + esc(a.ActionTeam) + '</td><td>' + esc(a.Owner) + '</td><td>' + esc(a.DueDate) + '</td><td>' + statusPill(a.Status) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    }
+  }
+
+  function renderBarriers(c) {
+    var b = c.barriers || { total: 0, byCategory: {}, byCounty: {}, byMonth: {}, published: [] };
+    var html = '<h2>Access Barrier Log</h2><p class="lead">A de-identified tally of real barriers families hit while trying to reach perinatal care. It exists so the Task Force can see patterns and measure progress. It is not a clinical record and not a referral pathway.</p>' +
+      '<div class="notice"><strong>Never enter identifying details.</strong> No names, initials, dates of birth, addresses, exact dates, or anything that could identify a patient or family. Describe the barrier, not the person. If a family needs help now, use the navigator and clinical contacts under Resources.</div>' +
+      (c.forms && c.forms.barrierFormUrl ? '<p style="margin:16px 0"><a class="btn" target="_blank" rel="noopener" href="' + esc(c.forms.barrierFormUrl) + '">Report a barrier (de-identified form)</a></p>' : '') +
+      '<div class="grid"><div class="card"><h3>Total reports</h3><p style="font-size:40px;font-weight:800;color:var(--purple);margin:0">' + esc(b.total) + '</p></div>' +
+      '<div class="card"><h3>By county</h3>' + bars(b.byCounty) + '</div>' +
+      '<div class="card"><h3>By month</h3>' + bars(b.byMonth, true) + '</div></div>' +
+      '<div class="section" style="margin-top:20px"><div class="card"><h3>By barrier category</h3>' + bars(b.byCategory) + '</div></div>';
+    if (b.published.length) {
+      html += '<div class="section"><h3>Reviewed examples</h3><p class="muted small">Shown only after a co-chair has reviewed the entry for identifying details.</p>' + b.published.map(function (p) {
+        return '<div class="card"><p class="meta">' + esc(p.month) + ' · ' + esc(p.county) + ' · ' + esc(p.service) + ' · reported by ' + esc(p.org) + '</p><span class="pill">' + esc(p.category) + '</span>' + para(p.description) + '</div>';
+      }).join('') + '</div>';
+    }
+    $('#view-barriers').innerHTML = html;
+    function bars(map, sortKey) {
+      var keys = Object.keys(map);
+      if (!keys.length) return '<p class="muted small">No reports yet.</p>';
+      keys.sort(sortKey ? function (a, b2) { return a.localeCompare(b2); } : function (a, b2) { return map[b2] - map[a]; });
+      var max = Math.max.apply(null, keys.map(function (k) { return map[k]; }));
+      return keys.map(function (k) {
+        return '<div class="bar"><span class="lbl">' + esc(k) + '</span><span class="track"><span class="fill" style="width:' + Math.round(map[k] / max * 100) + '%"></span></span><span class="n">' + map[k] + '</span></div>';
+      }).join('');
+    }
+  }
+
+  /* ---------- utils ---------- */
+  // Filter value -> which Counties cell text should match.
+  function countyMatches(cellText, filter) {
+    var wide = cellText.indexOf('both') >= 0 || cellText.indexOf('regional') >= 0;
+    var statewide = cellText.indexOf('statewide') >= 0 || cellText.indexOf('national') >= 0;
+    if (filter === 'cecil' || filter === 'harford') return cellText.indexOf(filter) >= 0 || wide || statewide;
+    if (filter === 'both') return wide;
+    if (filter === 'statewide') return statewide;
+    return true;
+  }
+  function uniq(arr) { var seen = {}; return arr.filter(function (x) { x = String(x || ''); if (!x || seen[x]) return false; seen[x] = 1; return true; }).sort(); }
+  function truthy(v) { var s = String(v === undefined || v === null ? '' : v).toLowerCase(); return v === true || s === 'true' || s === 'yes' || s === 'y' || s === '1'; }
+
+  /* ---------- boot ---------- */
+  function onContent(c) {
+    STATE.content = c;
+    $('#status').hidden = true;
+    $('#generatedAt').textContent = 'Content refreshed ' + new Date(c.generatedAt).toLocaleString();
+    renderHome(c); renderProblems(c); renderStructure(c); renderFunding(c); renderResources(c); renderData(c); renderMeetings(c); renderBarriers(c);
+    var initial = (location.hash || '#home').replace('#', '');
+    show($$('.tab').some(function (t) { return t.dataset.view === initial; }) ? initial : 'home');
+  }
+  function onError(err) {
+    var s = $('#status');
+    s.className = 'status error';
+    s.textContent = 'Could not load content. Please refresh, or contact the co-chairs if this continues.';
+    console.error(err && err.message ? err.message : err);
+  }
+  google.script.run.withSuccessHandler(onContent).withFailureHandler(onError).getSiteContent();
+})();
+</script>

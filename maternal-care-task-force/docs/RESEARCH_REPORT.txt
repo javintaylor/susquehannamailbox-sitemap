@@ -1,0 +1,249 @@
+PERINATAL CARE PROGRAMS AND RESOURCES — CECIL AND HARFORD COUNTIES, MARYLAND
+Research report for the Maternal Care Task Force member site
+Compiled 2026-09-03. All web facts come from search-indexed program pages
+and news coverage; direct page fetches were blocked in the research
+environment, so confidence ratings are given per item. Items marked
+"member report" come from the 2026-09-03 Regional System of Care Action
+Team kickoff and were not independently verified online.
+
+======================================================================
+KEY FINDINGS
+======================================================================
+1. Cecil County has had no in-county labor and delivery since 2026-06-30,
+   when ChristianaCare closed Union Hospital's 11-bed Family Birth Center
+   (fewer than 0.5 deliveries/day; 31 positions cut). Union's ED still
+   evaluates and treats active labor and may deliver before transfer.
+   ChristianaCare offered free transport to Christiana Hospital (Newark,
+   DE, about 13 miles) for six months and Christiana reportedly accepts
+   Maryland Medicaid "for the time being." The Maryland Health Care
+   Commission held a public hearing 2026-06-11.
+   >> Most important item to verify: which HealthChoice MCOs Christiana
+      Hospital contracts with and what happens after ~December 2026.
+
+2. Federal money is flowing but no Cecil/Harford maternity line item is
+   confirmed. Maryland received $168.2M for RHTP Budget Period 1; MDH
+   announced $80M in first-round subawards to 41 recipients effective
+   2026-08-10. The recipient list could not be retrieved. Cecil and
+   Harford are RHTP-eligible rural jurisdictions but not among the nine
+   federally designated priority counties.
+
+3. Not currently serving the region: HRSA Healthy Start (Baltimore City
+   only), RMOMS (Lower Shore only), Babies Born Healthy (no Cecil or
+   Harford site verified), MIECHV-funded home visiting (Baltimore City and
+   Cambridge; MDH is assessing expansion). Maryland is NOT in the CMS
+   Transforming Maternal Health model.
+
+4. 2026 Maryland laws relevant to the Task Force:
+   - SB 169 (Ch. 788): hospital duty to examine/stabilize emergency
+     pregnancy-related conditions or transfer; effective 2026-10-01.
+   - HB 1118 / SB 891: insurers and Medicaid must cover standardized
+     perinatal behavioral health screening through 12 months postpartum.
+   - HB 158: Maternal Health Monitoring Pilot (remote monitoring for
+     hypertension/diabetes, up to 150 Medicaid enrollees/yr); enactment
+     status not confirmed.
+   - No 2026 bill found on birth-center licensure, doula rates, or
+     advance notice of L&D closures (Maine passed a 120-day notice law).
+
+5. Medicaid: full coverage through 12 months postpartum since 2022-04-01;
+   pregnancy eligibility to about 264% FPL; Healthy Babies Equity Act
+   covers pregnancy regardless of immigration status; doula benefit with
+   self-referral extended through 2026-12-31.
+
+6. Data: latest published Vital Statistics reports are 2023 (the Task
+   Force slides cite 2024 VSA figures). CDC PRAMS collection was
+   interrupted in January 2025. March of Dimes released its 2026
+   Maternity Care Deserts report 2026-08-11; Cecil's designation should
+   be re-checked now that the closure is in effect.
+
+======================================================================
+ITEMS STATED AT THE KICKOFF THAT COULD NOT BE VERIFIED ONLINE
+======================================================================
+(Retained in the site as "member report"; confirm with the member named.)
+- Union Hospital OB nurse navigator role (Kim Cruser) — no web listing.
+- Johns Hopkins MFM outreach at the Union campus three Fridays a month —
+  no web listing; news reports high-risk patients driving to Baltimore.
+- Cecil County Health Department "Hello Baby" event, late September.
+- "Mothers and Munchkins" parents group (contact via Taylor O'Bryan).
+- Voices of Hope recovery house for pregnant women/women with children
+  in Elkton — a January 2025 grant request was found; current status not.
+- Harford County "Babies Born Healthy" program.
+- CCHD findhelp.org "trusted network" status.
+
+======================================================================
+FEDERAL PROGRAMS
+======================================================================
+Rural Health Transformation Program (CMS) — Both counties eligible
+  $50B/5-year program (2025 reconciliation law). Maryland BP1 award
+  $168,180,838 (plan approved 2025-12-29). $80M first-round subawards
+  (41 recipients, effective 2026-08-10) in three focus areas: rural
+  workforce; sustainable access and innovative care (regional mobile
+  health / MIH, community care teams); Eat for Health.
+  https://health.maryland.gov/pophealth/Pages/Rural-Health-Transformation-Program.aspx
+  https://marylandmatters.org/2026/08/11/medical-systems-local-health-agencies-get-80-million-in-federal-funds-to-boost-rural-health/
+  Confidence: High (totals/dates). Recipient list not retrieved.
+
+Title V MCH Block Grant — Statewide
+  FY24 federal award $12,377,354 plus state match. Cecil and Harford among
+  13 LHDs using core funds for perinatal care coordination/home visiting.
+  https://health.maryland.gov/phpa/mch/  |  https://mchb.tvisdata.hrsa.gov/
+  Confidence: High.
+
+Healthy Start (HRSA) — Not in region
+  Maryland grantee: Baltimore Healthy Start, Inc. https://baltimorehealthystart.org/
+  Confidence: Medium.
+
+MIECHV Home Visiting — Statewide
+  MDH-administered (FY23 $10.4M); funds NFP and Healthy Families in
+  Baltimore City and an HFA expansion in Cambridge; readiness-assessment
+  RFA to expand. https://health.maryland.gov/phpa/mch/pages/home_visiting.aspx
+  Confidence: Medium. FY26 award and Cecil/Harford funding source unconfirmed.
+
+WIC — Cecil: 401 Bow St, Elkton; (410) 996-5550; Mon–Fri 8–5.
+      Harford: Edgewood 1321 Woodbridge Station Way, 410-942-7999;
+      Bel Air 120 S. Hays St, 410-638-3060; Havre de Grace site.
+  Confidence: High.
+
+Medicaid 12-month postpartum extension — Statewide since 2022-04-01
+  Pregnancy eligibility about 264% FPL; presumptive eligibility.
+  Maryland Medicaid 1-877-463-3464.
+  https://www.marylandhealthconnection.gov/good-news-for-pregnant-women/
+  Confidence: High.
+
+RMOMS (HRSA) — Not in region
+  Maryland awardee: Chesapeake Health Care (Somerset/Wicomico/Worcester),
+  cohort through 2026-08. https://www.hrsa.gov/rural-health/grants/rural-community/rmoms
+  Confidence: Medium.
+
+CMS Transforming Maternal Health model — Maryland NOT participating
+  15 states selected 2025-01-06. https://www.cms.gov/priorities/innovation/innovation-models/tmah
+  Confidence: High.
+
+National Maternal Mental Health Hotline — 1-833-TLC-MAMA (1-833-852-6262)
+  24/7 call/text, English/Spanish, 60+ languages via interpreter.
+  https://mchb.hrsa.gov/programs-impact/national-maternal-mental-health-hotline
+  Confidence: High.
+
+Postpartum Support International / PSI Maryland
+  HelpLine, 50+ free online groups (including dads/partners), provider
+  directory. No Cecil/Harford in-person group found.
+  https://postpartum.net/get-help/  |  https://psichapters.com/md/
+  Confidence: High.
+
+AIM bundles / Maryland Perinatal-Neonatal Quality Collaborative
+  All birthing hospitals; severe hypertension bundle since 2021;
+  obstetric hemorrhage current. https://www.mdpqc.org/
+  Confidence: High.
+
+======================================================================
+MARYLAND STATE PROGRAMS
+======================================================================
+MDH Maternal and Child Health Bureau — https://health.maryland.gov/phpa/mch/
+MDMOM (Maryland Maternal Health Innovation Program, 2019–2028)
+  Hospital Equity Initiative; telehealth severe-hypertension program with
+  free BP cuffs; 2025 Maternal Health Improvement Strategic Plan; briefed
+  House HGO 2026-02-03. https://mdmom.org/  Confidence: High.
+Maryland Prenatal Risk Assessment (MDH 4850)
+  Required at first prenatal visit for Medicaid; to LHD within 10 days;
+  digital via CRISP in FY26. https://health.maryland.gov/mmcp/medicaid-mch-initiatives/Pages/MPRA.aspx
+  Confidence: High.
+Babies Born Healthy — 8 jurisdictions FY24; no Cecil/Harford site verified.
+  https://health.maryland.gov/phpa/mch/pages/bbh.aspx  Confidence: Medium.
+Maryland Perinatal System Standards / MIEMSS perinatal referral centers
+  https://www.miemss.org/home/hospitals/perinatal-programs  Confidence: High.
+Maryland Maternal Mortality Review — latest report covers 2020 deaths;
+  MD 21.3/100k (2018–2022). https://health.maryland.gov/phpa/mch/pages/mmr.aspx
+Maryland Medicaid Doula Program — self-referral through 2026-12-31;
+  hospital or freestanding birth center delivery required.
+  https://health.maryland.gov/mmcp/medicaid-mch-initiatives/Pages/DoulaProgram.aspx
+Maryland Medicaid at Delaware hospitals — see Key Finding 1.
+  https://www.thebanner.com/economy/science-medicine/cecil-county-maryland-maternity-babies-delivery-birth-center-pregnancy-S6D5RTN6OJHGDGTGKXRDVVD2DQ/
+  Confidence: Medium.
+Mobile health / MIH funding to LHDs — RHTP-aligned; St. Mary's RFP due
+  2026-09-17 and Talbot MIH program found; no Cecil/Harford award found
+  online (members report both counties are receiving awards).
+Maryland Healthy Kids / EPSDT; Cecil ACCU (410) 996-5145.
+Maryland Family Planning Program (Title X) — new Cecil sites FY25.
+Maryland Rural Health Association — conference 2026-10-18 to 20.
+2026 legislation — see Key Finding 4.
+  SB 169: https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/sb0169/?ys=2026rs
+  HB 1118: https://mgaleg.maryland.gov/2026RS/fnotes/bil_0008/hb1118.pdf
+  HB 158: https://mgaleg.maryland.gov/2026RS/fnotes/bil_0008/hb0158.pdf
+
+======================================================================
+LOCAL — CECIL COUNTY
+======================================================================
+ChristianaCare Union Hospital — birth center closed 2026-06-30.
+  https://news.christianacare.org/2026/05/christianacare-union-hospital-announces-closure-of-family-birth-center/
+ChristianaCare OB/GYN Elkton — Singerly Medical Bldg, 137 W. High St,
+  Suite 3B; 443-245-7377. Prenatal/postpartum continues; deliveries at
+  Christiana Hospital. OB nurse navigator per member report.
+West Cecil Health Center (FQHC) — Conowingo (410) 378-9696; Havre de
+  Grace Beacon Health Center. Full prenatal care not explicitly listed.
+Healthy Families Cecil County — (410) 996-5168; supplies for enrolled
+  families; Healthy Start nurse.
+CCHD Administrative Care Coordination — (410) 996-5145.
+CCHD Medical Assistance Transportation (NEMT) — (410) 996-5171.
+Cecil Transit — 410-996-5295 opt 2; SaturdayGO! Elkton–Newark pilot.
+Cecil County Dept. of Emergency Services — no published OB protocol found.
+findhelp.org — CCHD expanding trusted network (member report).
+Brantwood Family Services — 1190 Augustine Herman Hwy, Elkton; 410-398-0651.
+Voices of Hope — 227 Howard St, Elkton; 443-993-7055.
+Upper Bay Counseling & Support Services — 200 Booth St, Elkton;
+  410-996-3450. Perinatal screening/group in development (member report).
+Judy Centers (Cecil) — Holly Hall ES, 410-996-5050, plus five other sites.
+Cecil Pregnancy & Family Resource Center — https://ccpregnancycenter.org/
+Susquehanna OB/GYN & Nurse Midwifery (Advantia) — Bel Air and Havre de
+  Grace offices; no Elkton office. https://www.advantiahealth.com/sogmd/
+Independent CNM practice opening early 2027 (member report).
+
+Out-of-state / regional destinations
+  Christiana Hospital, Newark DE — ~7,100 births/yr, Level III NICU.
+  UM Upper Chesapeake, Bel Air — 14 LDRP, Level II NICU, 443-643-1200.
+  Johns Hopkins MFM — 410-502-3200 opt 4; Union outreach per member report.
+  Josie's Grace, Newark DE — free perinatal mental health; MD eligibility TBC.
+  The Birth Center, Newark DE — (302) 658-2229; MD Medicaid acceptance TBC.
+  ChristianaCare Wilmington — no L&D identified (confirm).
+  TidalHealth — 90+ miles; not practical.
+
+======================================================================
+LOCAL — HARFORD COUNTY
+======================================================================
+UM Upper Chesapeake Dresher Family Birthplace — 443-643-1200.
+Healthy Families Harford County — 410-612-1779; hchd.healthyfamilies@maryland.gov
+HCHD Babies Born Healthy — not verified.
+HCHD Women's Wellness / Family Planning (Edgewood) — HCHD main 410-838-1500.
+HCHD Medical Assistance Transportation — (410) 877-2300; scheduling 410-638-1671.
+Harford Transit LINK — dispatch 410-612-1620 / 410-838-2562.
+FQHC access — West Cecil Health Center's Beacon Health Center, Havre de Grace.
+Doula/midwifery — no county program; Doula Alliance of MD; Mobtown Doulas,
+  Loving Hands Doula, M.A.M.A.S. Inc. (details unverified).
+Harford County DSS — representative being recruited.
+
+======================================================================
+DATA SOURCES
+======================================================================
+Maryland VSA reports — https://health.maryland.gov/vsa/pages/reports.aspx
+  Latest published 2023; slide data cites 2024.
+March of Dimes 2026 Maternity Care Deserts (2026-08-11) —
+  https://www.marchofdimes.org/sites/default/files/2026-08/MCDR_2026_Report_English.pdf
+  MD 2025 report card: preterm 10.5%, adequate prenatal care 76.3%.
+CDC PRAMS — data system shut down January 2025; no county estimates.
+County Health Rankings 2026 (released 2026-03-25).
+Maryland SHIP dashboard (2024–2029; March 2026 update).
+HRSA TVIS / Maryland fact sheet — https://data.hrsa.gov/api/factsheet/3/24/2025
+Maryland Maternal Health Report Card (hospital-level).
+Maryland EPHT birth outcomes portal.
+
+======================================================================
+RECOMMENDED VERIFICATION ACTIONS FOR THE TASK FORCE
+======================================================================
+1. Confirm with ChristianaCare which Maryland HealthChoice MCOs Christiana
+   Hospital accepts and the end date of free transport (Insurance team).
+2. Obtain MDH's RHTP first-round recipient list; confirm Cecil's status.
+3. Confirm Harford and Cecil Mobile Health award amounts and scope.
+4. Confirm West Cecil Health Center prenatal scope (on-site vs referral).
+5. Confirm Johns Hopkins MFM Union-campus clinic schedule and payer rules.
+6. Check Cecil's 2026 March of Dimes designation and request re-scoring.
+7. Confirm Josie's Grace and The Birth Center policies for MD residents.
+8. Track HB 158 enactment; monitor 2027 session for closure-notice and
+   birth-center bills.

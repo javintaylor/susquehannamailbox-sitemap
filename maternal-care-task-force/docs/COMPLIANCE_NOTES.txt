@@ -1,0 +1,97 @@
+MCTF MEMBER SITE — COMPLIANCE NOTES
+Prepared for the Task Force co-chairs and PHG Privacy & Security Officer
+2026-09-03
+
+1. PHI TOUCHED AND WHERE IT FLOWS
+   Intended: NONE. The system stores governance content, public program
+   listings, aggregate county statistics, professional member identities,
+   and de-identified barrier categories.
+   Personal data (not PHI) that is stored: member names, organizations,
+   roles; member email/phone only with opt-in; reporter email on form rows
+   (verified by Google, never served to the site).
+   Flow: Google Forms -> content Sheet (admin-owned) -> Apps Script web app
+   (execute as admin) -> browser -> Google Sites iframe. No third party
+   receives any data. No analytics, tag manager, or pixel is included.
+
+2. CONTROLS APPLIED
+   - Authorization: web app is read-only. Every entry point runs
+     authorizeRead_ then an audit write, then work (Api.gs). Admin functions
+     run requireAdmin_ (Auth.gs) against a Script Properties allowlist.
+   - Publication gate: only rows with Published = TRUE leave the sheet.
+     Form free-text is served only after a co-chair marks it Published.
+   - Contact consent gate: member Email/Phone served only if ShareContact.
+   - Data access: all Sheets I/O in DataAccess.gs via openById under the
+     service identity; never getActiveSpreadsheet.
+   - Audit: separate spreadsheet, separate folder, six-year retention;
+     entries hold actor, role, action, resource, outcome, session; no content.
+   - Output encoding: all sheet text is HTML-escaped client-side; links are
+     rendered only for http(s) URLs.
+   - No secrets in code; IDs in Script Properties.
+   - Barrier form: month-only date, closed-choice categories, 500-char text,
+     explicit prohibition of identifiers on the form and on the site.
+
+3. ASSUMPTIONS
+   // COMPLIANCE ASSUMPTION: The site is a governance/reference tool and
+   //   will never hold identifiable patient or family information.
+   // BASIS: HIPAA minimum necessary (45 CFR 164.502(b)); the Task Force is
+   //   not a covered-entity workflow; Maryland Confidentiality of Medical
+   //   Records Act does not attach to de-identified aggregate data.
+   // RISK IF WRONG: An admin publishes an identifiable story or a small-cell
+   //   statistic; any Google account holder with the URL could read it.
+   // NEEDS CONFIRMATION FROM: Task Force co-chairs; PHG Privacy Officer.
+   // DATE: 2026-09-03
+
+   // COMPLIANCE ASSUMPTION: Members do not share a Workspace domain, so
+   //   per-user identity on reads is not reliable; access is governed by
+   //   Google Sites sharing plus the Published gate.
+   // BASIS: Apps Script Session.getActiveUser() behavior for cross-domain
+   //   "execute as me" deployments.
+   // RISK IF WRONG: None for public-safe content; if sensitive content is
+   //   ever needed, a domain-restricted deployment or per-member allowlist
+   //   with a different auth model is required.
+   // NEEDS CONFIRMATION FROM: Co-chairs (which Google identities members use).
+   // DATE: 2026-09-03
+
+   // COMPLIANCE ASSUMPTION: The "historian / share drive for anecdotal
+   //   examples with a release" idea raised at kickoff is NOT implemented
+   //   as described. Identifiable case narratives would be PHI held by a
+   //   multi-organization group with no BAA structure, no single covered
+   //   entity, and no consent workflow.
+   // BASIS: 45 CFR 164.502, 164.508 (authorization for disclosure);
+   //   Md. Health-Gen. 4-302; minimum necessary.
+   // RISK IF WRONG: Nothing breaks; the Task Force loses some narrative
+   //   detail. The compliant alternative (de-identified barrier log with
+   //   reporter follow-up) is implemented instead.
+   // NEEDS CONFIRMATION FROM: Co-chairs; county health department privacy
+   //   officers.
+   // DATE: 2026-09-03
+
+4. REGULATORY REQUIREMENTS IMPLICATED
+   - HIPAA Privacy Rule minimum necessary; de-identification standard
+     (164.514) as the bar for anything narrative on the site.
+   - HIPAA Security Rule audit controls and six-year documentation
+     retention (164.312(b), 164.316(b)(2)(i)) applied by policy even though
+     no ePHI is expected.
+   - Maryland PIPA: member emails/phones are personal information; opt-in
+     and minimal storage applied.
+   - RSA advertising rules: PHG's member listing states "license pending";
+     do not describe PHG services as available until the RSA license issues.
+
+5. RESIDUAL RISK
+   - Admin error publishing identifying text. Mitigation: review columns on
+     form tabs; periodic spot-check by Privacy Officer; footer reminder.
+   - URL leakage of the web app outside Sites sharing. Mitigation: content
+     is public-safe by design; rotate deployment if needed.
+   - Sheets has no row-level security; anyone with sheet Editor access sees
+     reporter emails. Mitigation: Editor access limited to named admins.
+
+6. OPEN QUESTIONS FOR THE TASK FORCE
+   a. Which Google identities will members use (county Workspace, hospital,
+      personal Gmail)? This decides "Anyone with Google account" vs "Anyone".
+   b. Who are the named admins with Editor access to the content sheet?
+   c. Who reviews BarrierLog submissions and on what cadence?
+   d. Should member contact details be shown at all, or should the site
+      point to the co-chairs as the single contact?
+   e. Does the Task Force want the site to be public-facing for families
+      later? That is a different product (public resource page) and should
+      not share this sheet.

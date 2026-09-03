@@ -1,0 +1,85 @@
+/**
+ * FILE: Auth.gs
+ *
+ * Authorization model (read COMPLIANCE_NOTES.txt before changing):
+ *
+ *  The task force spans many organizations (two county health departments,
+ *  hospitals, DSS, nonprofits, private practices). Members do NOT share a
+ *  Google Workspace domain, so Session.getActiveUser() is usually blank for
+ *  them under an "execute as me" deployment. The site therefore treats every
+ *  request as PUBLIC-TIER and serves ONLY rows an admin has marked
+ *  Published = TRUE. Nothing on the site is sensitive by design; access to
+ *  the Google Site itself is limited by Sites sharing to invited members.
+ *
+ *  Writes never come through the web app. All submissions go through
+ *  Google Forms configured to collect a verified email address, which gives
+ *  a per-person identity for every appended row without relying on the
+ *  web app's (unreliable) identity.
+ *
+ *  Admin-only functions (setup, seeding, cache purge) are run from the
+ *  Apps Script editor by the script owner and additionally check the
+ *  caller against the admin allowlist.
+ *
+ * COMPLIANCE ASSUMPTION: The member site contains no PHI and no sensitive
+ *   personal data, so an authenticated-but-unidentified reader is acceptable.
+ * BASIS: Minimum-necessary principle; the site is a governance/reference
+ *   tool, not a clinical or case system. HIPAA 45 CFR 164.502(b).
+ * RISK IF WRONG: If a future admin publishes identifiable client stories or
+ *   contact data to a Published row, it becomes reachable by any Google
+ *   account holder with the URL.
+ * NEEDS CONFIRMATION FROM: Task Force co-chairs (Cecil/Harford Health
+ *   Officers) and PHG Privacy & Security Officer.
+ * DATE: 2026-09-03
+ */
+
+/**
+ * Identifies the caller as best the platform allows.
+ * @return {{email:string, role:string}}
+ */
+function identifyCaller_() {
+  var email = '';
+  try { email = (Session.getActiveUser().getEmail() || '').toLowerCase(); } catch (e) { email = ''; }
+  var role = 'public';
+  if (email) {
+    role = getAdminEmails_().indexOf(email) >= 0 ? 'admin' : 'member';
+  }
+  return { email: email || 'anonymous-google-account', role: role };
+}
+
+/**
+ * Guards admin-only maintenance functions. Throws if the effective user
+ * (the person running the function in the editor) is not on the admin list
+ * or is not the script owner.
+ * @param {string} action Audit action label.
+ * @return {{email:string, role:string}}
+ */
+function requireAdmin_(action) {
+  var email = '';
+  try { email = (Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { email = ''; }
+  var admins = getAdminEmails_();
+  var ok = email && (admins.length === 0 || admins.indexOf(email) >= 0);
+  // If no admin list has been set yet (first setup), the script owner is
+  // the only person who can run editor functions, so allow it and record it.
+  writeAudit_({
+    actor: email || 'unknown', actorRole: ok ? 'admin' : 'denied', action: action,
+    resourceType: 'Maintenance', outcome: ok ? 'SUCCESS' : 'DENIED'
+  });
+  if (!ok) throw new Error('Not authorized: ' + email + ' is not on the admin list.');
+  return { email: email, role: 'admin' };
+}
+
+/**
+ * Public-tier read gate. Always allowed, always audited.
+ * @param {string} resourceType
+ * @param {string} [resourceId]
+ * @return {{email:string, role:string, session:string}}
+ */
+function authorizeRead_(resourceType, resourceId) {
+  var who = identifyCaller_();
+  var session = newSessionToken_();
+  writeAudit_({
+    actor: who.email, actorRole: who.role, action: 'READ',
+    resourceType: resourceType, resourceId: resourceId || '', outcome: 'SUCCESS', session: session
+  });
+  return { email: who.email, role: who.role, session: session };
+}

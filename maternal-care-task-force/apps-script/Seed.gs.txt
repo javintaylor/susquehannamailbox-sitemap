@@ -1,0 +1,217 @@
+/**
+ * FILE: Seed.gs
+ *
+ * Seeds the content spreadsheet with the Task Force's starting content,
+ * drawn from the 2026-09 Regional System of Care Action Team kickoff
+ * (slides + meeting notes) and from the resource research compiled on
+ * 2026-09-03 (see docs/RESEARCH_REPORT.txt).
+ *
+ * Idempotent per tab: a tab is seeded only if it has no data rows. To
+ * re-seed a tab, clear its rows (keep the header) and run again.
+ *
+ * Contains NO patient information. Member rows contain professional
+ * identity only (name, org, role) as stated on the record at a public
+ * task-force meeting; contact columns are left blank and ShareContact is
+ * FALSE until each member opts in.
+ *
+ * Resource rows are in SeedResources.gs (separate file for readability).
+ */
+
+function seedAll() {
+  requireAdmin_('SEED_ALL');
+  seedPurpose();
+  seedProblems();
+  seedStructure();
+  seedMembers();
+  seedFunding();
+  seedData();
+  seedMeetings();
+  seedActionItems();
+  seedAnnouncements();
+  seedResources(); // SeedResources.gs
+  purgeCacheInternal_();
+  console.log('Seeding complete.');
+}
+
+function purgeCacheInternal_() {
+  CacheService.getScriptCache().remove('siteContent:v' + CONFIG.VERSION);
+}
+
+/** Appends rows only when the tab has no data rows. */
+function seedIfEmpty_(tabName, rows) {
+  var existing = readTable_(tabName);
+  if (existing.length) { console.log(tabName + ': already has ' + existing.length + ' rows, skipped.'); return; }
+  rows.forEach(function (r) { appendRow_(tabName, r); });
+  console.log(tabName + ': seeded ' + rows.length + ' rows.');
+}
+
+function seedPurpose() {
+  seedIfEmpty_(CONFIG.TABS.PURPOSE, [
+    { Order: 1, Section: 'Purpose', Heading: 'Maternal Care Task Force',
+      Body: 'The Maternal Care Task Force was established to find solutions that ensure all women and their families in Cecil and Harford Counties have access to quality perinatal services when needed.\n\nThe Task Force takes a regional approach across both counties, co-led by the Cecil County and Harford County Health Officers, with the Cecil County Executive co-chairing the Steering Committee.',
+      Published: true },
+    { Order: 2, Section: 'Purpose', Heading: 'Starting point and horizon',
+      Body: 'The immediate focus is perinatal care: prenatal, labor and delivery, and postpartum services. The work was catalyzed by the closure of labor and delivery at ChristianaCare Union Hospital in Elkton, but it responds to longstanding gaps in maternal and infant outcomes in the region.\n\nOver time the Task Force expects to look across the full continuum: preconception, prenatal, peripartum, postpartum, interconception, and women\'s health broadly.',
+      Published: true },
+    { Order: 3, Section: 'Who we serve', Heading: 'Populations of focus',
+      Body: 'Significant disparities exist in access to care and birth outcomes for minority populations, geographically isolated families, and people experiencing housing insecurity, mental health concerns, or substance use disorder. The Task Force intentionally includes members who represent and can reach these communities, and welcomes members of the public with lived experience.',
+      Published: true },
+    { Order: 4, Section: 'How we work', Heading: 'Steering Committee and Action Teams',
+      Body: 'The Steering Committee provides leadership-level direction and receives reports from the Action Teams. The Action Teams are where the work happens: reviewing data, developing plans, piloting solutions, and monitoring progress.\n\nCo-chair roles on each Action Team are open to any member who wishes to step in; the Health Officers are serving as initial co-chairs to get the teams stood up.',
+      Published: true },
+    { Order: 5, Section: 'How we work', Heading: 'Meeting cadence',
+      Body: 'Action Teams meet monthly, virtually, at a standing time, with periodic in-person sessions. The Steering Committee first met in July 2026.',
+      Published: true }
+  ]);
+}
+
+function seedProblems() {
+  seedIfEmpty_(CONFIG.TABS.PROBLEMS, [
+    { Order: 1, Title: 'No in-county labor and delivery in Cecil County', Counties: 'Cecil', RelatedActionTeam: 'Regional System of Care',
+      Description: 'ChristianaCare Union Hospital in Elkton closed its Family Birth Center on 2026-06-30, citing fewer than 0.5 deliveries a day and physician and nursing shortages. Cecil County has no birthing hospital. Families now deliver at Christiana Hospital in Newark, DE (about 13 miles), UM Upper Chesapeake in Bel Air (about 40 miles), or further. Union\'s emergency department still treats patients arriving in active labor and transfers mother and baby separately.',
+      SourceOrEvidence: 'ChristianaCare announcement 2026-05; MHCC public hearing 2026-06-11; Task Force kickoff 2026-09. Union Hospital OB nurse navigator role created in response.', Published: true },
+    { Order: 2, Title: 'Worse infant and birth outcomes than Maryland', Counties: 'Cecil', RelatedActionTeam: 'Data for Action',
+      Description: 'Cecil County\'s infant mortality (7.6 per 1,000), preterm birth (12.1%), low birth weight (9.2%), and very low birth weight (1.9%) all exceed Maryland rates. Harford does better than the state on most indicators, but every indicator has room to improve.',
+      SourceOrEvidence: 'Maryland Vital Statistics Administration, 2024 data (see Data tab).', Published: true },
+    { Order: 3, Title: 'Maternal-fetal medicine access', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
+      Description: 'Higher-risk pregnancies need maternal-fetal medicine (MFM). Delaware MFM practices do not accept Maryland Medicaid. Johns Hopkins MFM sees patients at the Union campus three Fridays a month, but slots fill quickly and depend on insurance; the next closest options are Bel Air (University of Maryland) or Towson.',
+      SourceOrEvidence: 'Member report, Regional System of Care Action Team, 2026-09.', Published: true },
+    { Order: 4, Title: 'Insurance does not follow the patient across the state line', Counties: 'Both', RelatedActionTeam: 'Insurance Access, Policy & Workforce',
+      Description: 'About 70% of Union Hospital deliveries were covered by Maryland Medicaid, and many Cecil families now deliver in Delaware. Christiana Hospital reportedly agreed to accept Maryland Medicaid "for the time being" and ChristianaCare offered free transport to Newark for six months from July 2026; which managed care organizations are contracted, and what happens after the six months, is unconfirmed. The Task Force wants to ensure that wherever women need care, insurance is not a barrier.',
+      SourceOrEvidence: 'Task Force kickoff, 2026-09; Baltimore Banner and WMAR coverage of the closure, 2026.', Published: true },
+    { Order: 5, Title: 'Transportation cost and reliability', Counties: 'Both', RelatedActionTeam: 'EMS Transport & Transportation',
+      Description: 'A one-way cab ride from Elkton to a Newark, DE, maternity hospital was reported at $67 before tolls. Scheduled inductions can be cancelled on arrival when the receiving hospital is full, requiring a second trip, sometimes with a call to return on short notice at night.',
+      SourceOrEvidence: 'Member report (residential SUD treatment provider), 2026-09.', Published: true },
+    { Order: 6, Title: 'Emergency transport out of county', Counties: 'Cecil', RelatedActionTeam: 'EMS Transport & Transportation',
+      Description: 'With no in-county delivery unit, EMS must transport laboring or obstetric-emergency patients out of Cecil County. The EMS Transport & Transportation Action Team is examining protocols, capacity, and destination decisions with the Department of Emergency Services.',
+      SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true },
+    { Order: 7, Title: 'Perinatal mental health support is thin', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
+      Description: 'There is little postpartum behavioral health support in the region, for mothers or for partners. Local behavioral health providers are beginning measurement-based perinatal screening and a postpartum group; Josie\'s Grace in Newark, DE, offers free perinatal mental health services that Cecil families use.',
+      SourceOrEvidence: 'Member reports, 2026-09.', Published: true },
+    { Order: 8, Title: 'Material needs at delivery', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
+      Description: 'Hospital staff report that many families delivering at Upper Chesapeake need car seats, cribs, and basic supplies. Cecil County Health Department and Healthy Families offer supplies for enrolled families; a shared, current list across both counties is needed.',
+      SourceOrEvidence: 'UM Upper Chesapeake Family Birthplace, 2026-09.', Published: true },
+    { Order: 9, Title: 'Workforce shortages', Counties: 'Both', RelatedActionTeam: 'Insurance Access, Policy & Workforce',
+      Description: 'OB/GYN, advanced practice nursing, midwifery, and other maternal care provider capacity is limited, especially in rural parts of both counties. A new midwifery practice is expected to open in Cecil County in early 2027 (prenatal and well-woman care, no deliveries).',
+      SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true },
+    { Order: 10, Title: 'Data gaps', Counties: 'Both', RelatedActionTeam: 'Data for Action',
+      Description: 'The Task Force needs more granular, timely data on access, disparities, and outcomes to guide and monitor its work. A consultant funded through the Rural Health Transformation grant will support this.',
+      SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true }
+  ]);
+}
+
+function seedStructure() {
+  seedIfEmpty_(CONFIG.TABS.STRUCTURE, [
+    { Order: 1, Level: 'Steering Committee', Name: 'Maternal Care Task Force Steering Committee',
+      Purpose: 'Leadership-level body that sets direction, receives Action Team reports, and engages county, hospital, state, and community leadership. Membership includes county leaders (including the Cecil County Executive), county departments, hospital leadership, perinatal care professionals, community representatives for harder-to-reach populations, and a Maryland Department of Health seat.',
+      CoChairs: 'Cecil County Executive; Karyl Rattay, MD (Cecil County Health Officer)', StaffSupport: 'Cecil County Health Department', MeetingCadence: 'First met July 2026; cadence TBD', Status: 'Active', Published: true },
+    { Order: 2, Level: 'Action Team', Name: 'Regional System of Care / Pilot Development',
+      Purpose: 'To develop a regional system of care by working with professionals, experts, and the public to improve access to perinatal services for all women and families in Cecil and Harford Counties. Expected to move quickly into pilot work in both counties.',
+      CoChairs: 'Karyl Rattay, MD (Cecil County Health Officer); Lauren Levy (Harford County Health Officer)', StaffSupport: 'Lindsey Scott, Cecil County Health Department', MeetingCadence: 'Monthly, virtual, standing time', Status: 'Active', Published: true },
+    { Order: 3, Level: 'Action Team', Name: 'EMS Transport & Transportation',
+      Purpose: 'To identify maternal care access concerns and solutions related to EMS and transportation by working with other professionals, experts, and members of the public. Covers both emergency transport protocols after the Union Hospital closure and broader non-emergency transportation to out-of-county care.',
+      CoChairs: 'TBD', StaffSupport: 'Cecil County Department of Emergency Services; Cecil County Health Department', MeetingCadence: 'Monthly, virtual', Status: 'Active', Published: true },
+    { Order: 4, Level: 'Action Team', Name: 'Insurance Access, Policy & Workforce Development',
+      Purpose: 'To ensure insurance coverage is not a barrier wherever women need care (including Maryland Medicaid acceptance by Delaware providers), to identify policies affecting access, and to grow the maternal care workforce, including OB/GYN, advanced practice nursing, and midwifery.',
+      CoChairs: 'TBD', StaffSupport: 'TBD', MeetingCadence: 'Monthly, virtual', Status: 'Active', Published: true },
+    { Order: 5, Level: 'Action Team', Name: 'Data for Action',
+      Purpose: 'To assemble and analyze the data that will drive and monitor the Task Force\'s work: access, disparities, outcomes, and progress measures. To be supported by a consultant funded under the Rural Health Transformation Program.',
+      CoChairs: 'TBD', StaffSupport: 'Consultant (recruiting)', MeetingCadence: 'Forming', Status: 'Forming', Published: true }
+  ]);
+}
+
+function seedMembers() {
+  // Professional identity only, as stated at the 2026-09 kickoff. Contact fields intentionally blank.
+  var RSC = 'Regional System of Care';
+  seedIfEmpty_(CONFIG.TABS.MEMBERS, [
+    { Order: 1, Name: 'Karyl Rattay', Credentials: 'MD', Organization: 'Cecil County Health Department', RoleTitle: 'Health Officer; Co-chair', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: true, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 2, Name: 'Lauren Levy', Credentials: '', Organization: 'Harford County Health Department', RoleTitle: 'Health Officer; Co-chair', County: 'Harford', ActionTeams: RSC, SteeringCommittee: true, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 3, Name: 'Lindsey Scott', Credentials: '', Organization: 'Cecil County Health Department', RoleTitle: 'Director, Division of Health Promotion (WIC, Healthy Families, Child Fatality); Staff support', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 4, Name: 'Christine White', Credentials: '', Organization: 'UM Upper Chesapeake Medical Center — Family Birthplace', RoleTitle: 'Family Birthplace', County: 'Harford', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 5, Name: 'Erin Grauer', Credentials: '', Organization: 'Cecil County Health Department — Healthy Families', RoleTitle: 'Family Support Specialist (home visiting)', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 6, Name: 'Georgianna Braywood', Credentials: 'RN (retired)', Organization: 'Community / faith representative', RoleTitle: 'Retired labor and delivery nurse, Union Hospital', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 7, Name: 'Javin Taylor', Credentials: 'RN', Organization: 'Performance Health Group LLC', RoleTitle: 'Owner; Level 3 RSA (license pending)', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 8, Name: 'Jennifer Tuerke', Credentials: '', Organization: 'Voices of Hope', RoleTitle: 'Executive Director', County: 'Both', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 9, Name: 'Kim Cruser', Credentials: 'RN, IBCLC', Organization: 'ChristianaCare Union Hospital OB/GYN', RoleTitle: 'OB Nurse Navigator; Lactation Consultant', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 10, Name: 'Lisa Beeman', Credentials: '', Organization: 'Cecil County Department of Social Services', RoleTitle: 'Director', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: true, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 11, Name: 'Madison Reese', Credentials: 'CNM', Organization: 'Independent midwifery practice (opening 2027); nonprofit in formation', RoleTitle: 'Certified Nurse Midwife', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 12, Name: 'Mary Gamble', Credentials: '', Organization: 'Brantwood Family Services', RoleTitle: 'Owner and Director (residential SUD treatment for pregnant and parenting women)', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 13, Name: 'Sarah Shrewsbury', Credentials: '', Organization: 'Cecil County Department of Social Services', RoleTitle: 'Assistant Director, Child and Adult Welfare Services', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 14, Name: 'Taylor O\'Bryan', Credentials: '', Organization: 'Postpartum doula; SnapCare', RoleTitle: 'Postpartum Doula; Director of Market Intelligence and Enablement', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 15, Name: 'Suanne Blumberg', Credentials: '', Organization: 'Upper Bay Counseling and Support Services', RoleTitle: 'CEO', County: 'Both', ActionTeams: RSC, SteeringCommittee: true, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 16, Name: 'Mozella Williams', Credentials: 'MD', Organization: 'West Cecil Health Center', RoleTitle: 'Chief Medical Officer', County: 'Cecil', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', Published: true },
+    { Order: 17, Name: 'Lacy Wyatt', Credentials: '', Organization: '', RoleTitle: '', County: '', ActionTeams: RSC, SteeringCommittee: false, ShareContact: false, Status: 'Active', InternalNotes: 'Joined late; role to confirm', Published: false }
+  ]);
+}
+
+function seedFunding() {
+  seedIfEmpty_(CONFIG.TABS.FUNDING, [
+    { Order: 1, Name: 'Rural Health Transformation Program (RHTP) — Cecil County maternal care component', Source: 'CMS, via Maryland Department of Health', Level: 'Federal → State → Local',
+      Amount: 'TBD (competitive subaward; Cecil County application with Union Hospital and Dept. of Emergency Services)', Status: 'Applied',
+      Description: 'The Rural Health Transformation Program is a $50 billion, five-year CMS program created by the 2025 reconciliation law. CMS awarded Maryland $168.2 million for the first budget period (state plan approved 2025-12-29). MDH announced $80 million in first-round subawards to 41 recipients effective 2026-08-10 across workforce, sustainable access and innovative care (including regional mobile health and community care teams), and nutrition. Whether Cecil\'s application is among them, and any maternity-specific line item, is not yet confirmed.',
+      IntendedUse: 'Consultant to staff the Task Force and lead the Data for Action work; maternal care system design; EMS coordination.', Counties: 'Cecil',
+      URL: 'https://www.cms.gov/priorities/rural-health-transformation-rht-program', Published: true },
+    { Order: 2, Name: 'Mobile Health funding (Maryland Department of Health)', Source: 'Maryland Department of Health', Level: 'State → Local',
+      Amount: 'TBD — both counties receiving awards', Status: 'Awarded',
+      Description: 'State mobile health funding to Cecil and Harford County Health Departments, aligned with the RHTP focus on regional mobile health and mobile integrated health models. The state asked the two counties to take a regional approach; each is also pursuing jurisdiction-specific maternal and child health activities (Harford to share its proposal summary).',
+      IntendedUse: 'Mobile maternal and child health outreach; transportation program design; regional coordination.', Counties: 'Both', URL: 'https://health.maryland.gov/pophealth/Pages/Rural-Health-Transformation-Program.aspx', Published: true },
+    { Order: 3, Name: 'Title V MCH Block Grant core funds (local health departments)', Source: 'HRSA via Maryland Department of Health', Level: 'Federal → State → Local',
+      Amount: 'Existing allocation', Status: 'Active',
+      Description: 'Cecil and Harford County Health Departments already use Title V core funds for maternal health enabling services, including perinatal care coordination and home visiting (FY24).',
+      IntendedUse: 'Perinatal care coordination; Healthy Families home visiting.', Counties: 'Both', URL: 'https://health.maryland.gov/phpa/mch/', Published: true },
+    { Order: 4, Name: 'Potential future opportunities', Source: 'HRSA / CMS', Level: 'Federal',
+      Amount: 'n/a', Status: 'Not applied',
+      Description: 'Programs the region is not currently funded under but could pursue: HRSA Healthy Start (Maryland\'s only grantee is in Baltimore City), MIECHV home visiting expansion (MDH readiness assessments), and RMOMS rural obstetric networks (Maryland\'s only awardee is on the Lower Shore). Maryland is not a participant in the CMS Transforming Maternal Health model.',
+      IntendedUse: 'For Insurance Access, Policy & Workforce and Data for Action teams to evaluate.', Counties: 'Both', URL: 'https://mchb.hrsa.gov/programs-impact/healthy-start', Published: true }
+  ]);
+}
+
+function seedData() {
+  var src = 'Maryland Vital Statistics Administration (2024)';
+  var url = 'https://health.maryland.gov/vsa/Pages/reports.aspx';
+  seedIfEmpty_(CONFIG.TABS.DATA, [
+    { Order: 1, Indicator: 'Infant mortality', Definition: 'Deaths under age 1 per 1,000 live births', Cecil: 7.6, Harford: 4.4, Maryland: 5.5, Unit: 'per 1,000', Year: 2024, Source: src, SourceURL: url, Published: true },
+    { Order: 2, Indicator: 'Preterm birth', Definition: 'Live births before 37 weeks gestation', Cecil: 12.1, Harford: 10.1, Maryland: 10.5, Unit: '%', Year: 2024, Source: src, SourceURL: url, Published: true },
+    { Order: 3, Indicator: 'Low birth weight', Definition: 'Live births under 2,500 grams', Cecil: 9.2, Harford: 9.0, Maryland: 8.9, Unit: '%', Year: 2024, Source: src, SourceURL: url, Published: true },
+    { Order: 4, Indicator: 'Very low birth weight', Definition: 'Live births under 1,500 grams', Cecil: 1.9, Harford: 1.2, Maryland: 1.5, Unit: '%', Year: 2024, Source: src, SourceURL: url, Published: true },
+    { Order: 5, Indicator: 'Early prenatal care', Definition: 'Mothers reporting care beginning in the first trimester', Cecil: 72.6, Harford: 78.7, Maryland: 69.3, Unit: '%', Year: 2024, Source: src, SourceURL: url, Published: true },
+    { Order: 6, Indicator: 'No prenatal care', Definition: 'Mothers reporting no prenatal care', Cecil: 4.5, Harford: 3.2, Maryland: 7.1, Unit: '%', Year: 2024, Source: src, SourceURL: url, Published: true }
+  ]);
+}
+
+function seedMeetings() {
+  seedIfEmpty_(CONFIG.TABS.MEETINGS, [
+    { Date: '2026-09-03', ActionTeam: 'Regional System of Care', Title: 'Kickoff and orientation',
+      Summary: 'Co-chairs Karyl Rattay (Cecil) and Lauren Levy (Harford) oriented members to the Task Force purpose, the Steering Committee, the four Action Teams, and the Rural Health Transformation and Mobile Health funding opportunities. Members confirmed the Action Team purpose statement. Discussion covered maternal-fetal medicine access, Medicaid acceptance in Delaware, transportation cost, induction scheduling failures, perinatal mental health, material supplies for new families, and a single place to point families to resources.',
+      Decisions: 'Purpose statement adopted as written.\nMonthly virtual meetings at a standing time, with occasional in-person sessions.\nCo-chair roles open to members.',
+      NextSteps: 'Recruit maternal-fetal medicine (Dr. Karen Blakemore, Johns Hopkins), a lay community member (Mothers and Munchkins), Harford County DSS, Susquehanna OB/GYN, pregnancy centers, Judy Centers, and school guidance counselors.\nHarford to share summary of its Mobile Health proposals.\nDSS to share recent county data before the next meeting.\nBuild a de-identified barrier log and a shared resource list.',
+      NotesURL: '', Published: true }
+  ]);
+}
+
+function seedActionItems() {
+  var now = '2026-09-03';
+  var RSC = 'Regional System of Care';
+  seedIfEmpty_(CONFIG.TABS.ACTION_ITEMS, [
+    { ID: 'AI-001', ActionTeam: RSC, Item: 'Invite Dr. Karen Blakemore (Johns Hopkins MFM) to join the Action Team', Owner: 'Co-chairs / M. Reese', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-002', ActionTeam: RSC, Item: 'Invite a lay community member (Mothers and Munchkins, Cecil County) to represent recent parents', Owner: 'T. O\'Bryan / Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-003', ActionTeam: RSC, Item: 'Identify a Harford County DSS representative', Owner: 'S. Shrewsbury / L. Levy', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-004', ActionTeam: RSC, Item: 'Re-invite Susquehanna OB/GYN and Harbor of Grace; reach providers directly', Owner: 'K. Rattay / M. Reese', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-005', ActionTeam: RSC, Item: 'Share Hello Baby event flyer (late Sept, Cecil County HD) with the group and with Upper Chesapeake and Susquehanna OB/GYN', Owner: 'E. Grauer', DueDate: '2026-09-15', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-006', ActionTeam: RSC, Item: 'Compile a broader list of material-supply resources (car seats, cribs) across both counties for hospital staff', Owner: 'E. Grauer / L. Scott', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-007', ActionTeam: RSC, Item: 'Share recent DSS county data ahead of next meeting', Owner: 'L. Beeman / S. Shrewsbury', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-008', ActionTeam: RSC, Item: 'Send Harford County Mobile Health proposal summary with meeting notes', Owner: 'L. Levy', DueDate: '2026-09-17', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-009', ActionTeam: RSC, Item: 'Follow up on induction cancellation and transport case with OB nurse navigator (details shared privately, not on this site)', Owner: 'K. Cruser / M. Gamble', DueDate: '2026-09-10', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-010', ActionTeam: RSC, Item: 'Stand up a de-identified barrier log and decide historian / share-drive approach', Owner: 'Co-chairs / consultant', DueDate: '2026-10-15', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-011', ActionTeam: RSC, Item: 'Ensure partner free/reduced-cost resources are listed in the findhelp.org trusted network', Owner: 'L. Scott', DueDate: '2026-11-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-012', ActionTeam: RSC, Item: 'Raise teen pregnancy resources with high school guidance counselors; loop in Judy Centers', Owner: 'E. Grauer', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-013', ActionTeam: RSC, Item: 'Set standing monthly meeting time and send calendar invitations', Owner: 'L. Scott', DueDate: '2026-09-17', Status: 'Open', Created: now, Updated: now, Published: true }
+  ]);
+}
+
+function seedAnnouncements() {
+  seedIfEmpty_(CONFIG.TABS.ANNOUNCEMENTS, [
+    { Date: '2026-09-03', Title: 'Welcome to the member site', Body: 'This site is the shared reference for the Maternal Care Task Force. Use the Barrier Log to record access problems families encounter (no identifying details), and suggest programs for the resource directory.', LinkURL: '', ExpiresOn: '2026-12-31', Published: true },
+    { Date: '2026-09-03', Title: 'Hello Baby event — late September', Body: 'Cecil County Health Department will host a Hello Baby resource event for new and expecting families at the end of September. Flyer to follow.', LinkURL: '', ExpiresOn: '2026-10-01', Published: true }
+  ]);
+}

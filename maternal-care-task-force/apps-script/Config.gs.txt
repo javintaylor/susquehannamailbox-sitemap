@@ -1,0 +1,95 @@
+/**
+ * FILE: Config.gs
+ * PROJECT: Maternal Care Task Force (Cecil + Harford Counties, MD) — Member Site
+ *
+ * Central configuration. No secrets live in this file. IDs of the content
+ * spreadsheet and the audit spreadsheet are stored in Script Properties and
+ * are written once by Setup.gs (runSetup). Nothing here is read by end users.
+ *
+ * PHI STATEMENT: This system is designed to hold NO protected health
+ * information. It holds task-force governance content, public-program
+ * resource listings, aggregate (county-level) public health statistics, and
+ * de-identified access-barrier reports. See COMPLIANCE_NOTES.txt.
+ */
+
+var CONFIG = {
+  APP_NAME: 'Maternal Care Task Force — Cecil & Harford Counties',
+  APP_SHORT_NAME: 'MCTF',
+  VERSION: '1.0.0',
+
+  // Script Property keys (values written by Setup.gs, never hardcoded here)
+  PROP_CONTENT_SS_ID: 'MCTF_CONTENT_SPREADSHEET_ID',
+  PROP_AUDIT_SS_ID: 'MCTF_AUDIT_SPREADSHEET_ID',
+  PROP_BARRIER_FORM_ID: 'MCTF_BARRIER_FORM_ID',
+  PROP_RESOURCE_FORM_ID: 'MCTF_RESOURCE_FORM_ID',
+  PROP_ADMIN_EMAILS: 'MCTF_ADMIN_EMAILS',        // comma-separated
+  PROP_ALLOWED_DOMAINS: 'MCTF_ALLOWED_DOMAINS',  // comma-separated, optional
+
+  // Content spreadsheet tab names. Every tab has a header row (row 1).
+  TABS: {
+    CONFIG: 'Config',
+    PURPOSE: 'Purpose',
+    PROBLEMS: 'Problems',
+    STRUCTURE: 'Structure',
+    MEMBERS: 'Members',
+    FUNDING: 'Funding',
+    RESOURCES: 'Resources',
+    DATA: 'Data',
+    MEETINGS: 'Meetings',
+    ACTION_ITEMS: 'ActionItems',
+    ANNOUNCEMENTS: 'Announcements',
+    BARRIER_LOG: 'BarrierLog',          // Google Form destination (de-identified)
+    RESOURCE_SUBMISSIONS: 'ResourceSubmissions' // Google Form destination
+  },
+
+  // Audit spreadsheet tab
+  AUDIT_TAB: 'AuditLog',
+
+  // Cache TTL for published content served to the site (seconds). Max 21600.
+  CACHE_TTL_SECONDS: 300,
+
+  // Column name used on content tabs to gate what the site may show.
+  PUBLISHED_COLUMN: 'Published',
+
+  // Members tab: only show contact details when this column is TRUE.
+  MEMBER_CONTACT_CONSENT_COLUMN: 'ShareContact',
+
+  // Barrier log free-text field maximum length (kept short to discourage
+  // narrative that could re-identify a person).
+  BARRIER_TEXT_MAX: 500
+};
+
+/**
+ * Returns a Script Property or throws a clear error if it is missing.
+ * @param {string} key
+ * @return {string}
+ */
+function getRequiredProperty_(key) {
+  var v = PropertiesService.getScriptProperties().getProperty(key);
+  if (!v) {
+    throw new Error('Missing Script Property "' + key + '". Run runSetup() in Setup.gs first.');
+  }
+  return v;
+}
+
+/**
+ * @return {string} Content spreadsheet ID (service-identity access only).
+ */
+function getContentSpreadsheetId_() {
+  return getRequiredProperty_(CONFIG.PROP_CONTENT_SS_ID);
+}
+
+/**
+ * @return {string} Audit spreadsheet ID.
+ */
+function getAuditSpreadsheetId_() {
+  return getRequiredProperty_(CONFIG.PROP_AUDIT_SS_ID);
+}
+
+/**
+ * @return {string[]} Lower-cased admin emails.
+ */
+function getAdminEmails_() {
+  var raw = PropertiesService.getScriptProperties().getProperty(CONFIG.PROP_ADMIN_EMAILS) || '';
+  return raw.split(',').map(function (e) { return e.trim().toLowerCase(); }).filter(Boolean);
+}
