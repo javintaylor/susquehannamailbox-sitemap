@@ -33,6 +33,15 @@ Prepared for the Task Force co-chairs and county health department privacy offic
      service identity; never getActiveSpreadsheet.
    - Audit: separate spreadsheet, separate folder, six-year retention;
      entries hold actor, role, action, resource, outcome, session; no content.
+     Bootstrap ordering: the first runSetup performs its admin check before
+     it creates the audit spreadsheet, so that one SETUP entry has nowhere
+     to write. writeAudit_ buffers such an entry and flushPendingAudit_
+     replays it as soon as the spreadsheet exists, carrying its original
+     timestamp and a justification marking it a deferred write. Projects
+     provisioned before this fix log AUDIT_WRITE_FAILED instead and can
+     close the gap with backfillSetupAudit() in Setup.gs, which writes the
+     row explicitly labelled BACKFILLED. No audit row is ever edited or
+     deleted; corrections are additional rows.
    - Output encoding: all sheet text is HTML-escaped client-side; links are
      rendered only for http(s) URLs.
    - No secrets in code; IDs in Script Properties.
@@ -117,6 +126,10 @@ Prepared for the Task Force co-chairs and county health department privacy offic
      a documented handoff path to a county account.
    - Sheets has no row-level security; anyone with sheet Editor access sees
      reporter emails. Mitigation: Editor access limited to named admins.
+   - An admin with Editor access to the audit spreadsheet could alter it;
+     Sheets cannot enforce append-only. Mitigation: audit file kept in a
+     folder no portal user can reach, Editor access limited to named
+     admins, and Drive file-level revision history retained.
 
 6. OPEN QUESTIONS FOR THE TASK FORCE
    a. Do the co-chairs accept the public-URL model, and PHG hosting during

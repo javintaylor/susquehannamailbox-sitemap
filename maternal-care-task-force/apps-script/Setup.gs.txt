@@ -119,6 +119,39 @@ function verifyProject() {
 }
 
 /**
+ * ONE-TIME REMEDIATION — run only if your first runSetup logged
+ * "AUDIT_WRITE_FAILED action=SETUP" (versions before this fix dropped that
+ * entry instead of buffering it). Writes the missing bootstrap row, clearly
+ * marked as backfilled so the log does not misrepresent when it was made.
+ *
+ * Safe to skip if your setup log showed AUDIT_DEFERRED / "Replayed N
+ * deferred audit row(s)" instead. Running it twice simply adds a second
+ * backfill row; it never edits or removes an existing row.
+ *
+ * @param {string} occurredAtIso UTC time of the original runSetup, e.g.
+ *   '2026-09-03T22:22:12Z'. Read it from the original execution log.
+ */
+function backfillSetupAudit(occurredAtIso) {
+  requireAdmin_('BACKFILL_AUDIT');
+  if (!occurredAtIso) {
+    throw new Error('Pass the original runSetup UTC time, e.g. ' +
+                    "backfillSetupAudit('2026-09-03T22:22:12Z')");
+  }
+  writeAudit_({
+    actor: Session.getEffectiveUser().getEmail(),
+    actorRole: 'admin',
+    action: 'SETUP',
+    resourceType: 'Maintenance',
+    outcome: 'SUCCESS',
+    justification: 'BACKFILLED. Original action occurred at ' + occurredAtIso +
+      ' but could not be logged because the audit spreadsheet was created ' +
+      'later in the same execution. Recorded retrospectively by ' +
+      'backfillSetupAudit().'
+  });
+  console.log('Backfill row written. Verify it in the audit spreadsheet.');
+}
+
+/**
  * MAIN SETUP. Run this once from the editor.
  */
 function runSetup() {
@@ -138,6 +171,9 @@ function runSetup() {
   var audit = auditId ? SpreadsheetApp.openById(auditId) : SpreadsheetApp.create(CONFIG.APP_SHORT_NAME + ' — Audit Log (RESTRICTED)');
   props.setProperty(CONFIG.PROP_AUDIT_SS_ID, audit.getId());
   ensureTab_(audit, CONFIG.AUDIT_TAB, ['TimestampUTC', 'LocalTZ', 'Actor', 'ActorRole', 'Action', 'ResourceType', 'ResourceId', 'Outcome', 'Session', 'Justification', 'AppVersion']);
+  // The SETUP entry from requireAdmin_ above could not be written until now.
+  var replayed = flushPendingAudit_();
+  if (replayed) console.log('Replayed ' + replayed + ' deferred audit row(s) from bootstrap.');
   var a1 = audit.getSheetByName('Sheet1');
   if (a1 && audit.getSheets().length > 1) audit.deleteSheet(a1);
 

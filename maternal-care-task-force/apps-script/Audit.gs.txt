@@ -12,6 +12,16 @@
  */
 
 /**
+ * Entries that could not be written because the audit spreadsheet did not
+ * exist yet (only possible during the very first runSetup, before step 2
+ * creates it). Held in memory for the current execution and replayed by
+ * flushPendingAudit_ as soon as the audit spreadsheet exists, so the
+ * bootstrap action still lands in the log.
+ * @type {Object[]}
+ */
+var PENDING_AUDIT_ = [];
+
+/**
  * Writes one audit row. Never throws to the caller — an audit failure is
  * logged to Stackdriver (without content) and the request is still refused
  * upstream if the audit could not be written before a write action.
@@ -28,6 +38,15 @@
  * @return {boolean} true if written
  */
 function writeAudit_(entry) {
+  // Bootstrap case: the audit spreadsheet is created partway through the
+  // first runSetup, so the SETUP entry that precedes it has nowhere to go.
+  // Buffer it instead of dropping it; flushPendingAudit_ replays it.
+  if (!PropertiesService.getScriptProperties().getProperty(CONFIG.PROP_AUDIT_SS_ID)) {
+    PENDING_AUDIT_.push({ entry: entry, occurredAt: new Date() });
+    console.log('AUDIT_DEFERRED action=' + (entry && entry.action) +
+                ' (audit spreadsheet not provisioned yet; will be replayed)');
+    return false;
+  }
   try {
     var ss = SpreadsheetApp.openById(getAuditSpreadsheetId_());
     var sheet = ss.getSheetByName(CONFIG.AUDIT_TAB) || ss.insertSheet(CONFIG.AUDIT_TAB);
@@ -56,6 +75,35 @@ function writeAudit_(entry) {
     console.error('AUDIT_WRITE_FAILED action=' + (entry && entry.action));
     return false;
   }
+}
+
+/**
+ * Replays any entries buffered before the audit spreadsheet existed.
+ * Called by runSetup immediately after the audit spreadsheet is created.
+ * Each replayed row keeps its ORIGINAL timestamp and carries a
+ * justification saying it was written after the fact, so the log is
+ * complete without misrepresenting when the action happened.
+ * @return {number} how many rows were replayed
+ */
+function flushPendingAudit_() {
+  if (!PENDING_AUDIT_.length) return 0;
+  var buffered = PENDING_AUDIT_.slice();
+  PENDING_AUDIT_ = [];
+  var written = 0;
+  buffered.forEach(function (item) {
+    var e = item.entry || {};
+    var note = 'Deferred write: audit spreadsheet did not exist at time of ' +
+               'action (bootstrap). Original UTC timestamp ' +
+               Utilities.formatDate(item.occurredAt, 'UTC', "yyyy-MM-dd'T'HH:mm:ss'Z'") + '.';
+    var ok = writeAudit_({
+      actor: e.actor, actorRole: e.actorRole, action: e.action,
+      resourceType: e.resourceType, resourceId: e.resourceId,
+      outcome: e.outcome, session: e.session,
+      justification: e.justification ? e.justification + ' | ' + note : note
+    });
+    if (ok) written++;
+  });
+  return written;
 }
 
 /**

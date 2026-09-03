@@ -60,6 +60,12 @@ STEP 2 — Provision the spreadsheets and forms
        collect verified email and write into the content sheet.
      - Stores all IDs in Script Properties.
   2. Read the execution log for the two spreadsheet URLs.
+     Expected log lines: "AUDIT_DEFERRED action=SETUP" followed by
+     "Replayed 1 deferred audit row(s) from bootstrap." That pair is
+     normal on a first run — the admin check runs before the audit
+     spreadsheet exists, so the entry is buffered and replayed.
+     If instead you see "AUDIT_WRITE_FAILED action=SETUP" (older code),
+     run backfillSetupAudit('<UTC time from the log>') in Setup.gs once.
   3. Move the Audit Log spreadsheet into a Drive folder that only the
      admin/Privacy Officer can open. Do not share it with anyone else.
   4. Do NOT share the content spreadsheet with task-force members. Admins
@@ -140,6 +146,7 @@ HANDOFF TO A COUNTY ACCOUNT (when the Task Force is ready)
 WHERE EACH RUNNABLE FUNCTION LIVES
   verifyProject ....... Setup.gs   (run this first)
   runSetup ............ Setup.gs
+  backfillSetupAudit .. Setup.gs   (only if setup logged AUDIT_WRITE_FAILED)
   setAdminEmails ...... Setup.gs
   seedAll ............. Seed.gs      (calls seedResources in SeedResources.gs)
   purgeCache .......... Api.gs
