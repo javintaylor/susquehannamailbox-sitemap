@@ -59,7 +59,10 @@ function seedPurpose() {
     { Order: 4, Section: 'How we work', Heading: 'Steering Committee and Action Teams',
       Body: 'The Steering Committee provides leadership-level direction and receives reports from the Action Teams. The Action Teams are where the work happens: reviewing data, developing plans, piloting solutions, and monitoring progress.\n\nCo-chair roles on each Action Team are open to any member who wishes to step in; the Health Officers are serving as initial co-chairs to get the teams stood up.',
       Published: true },
-    { Order: 5, Section: 'How we work', Heading: 'Meeting cadence',
+    { Order: 5, Section: 'How we work', Heading: 'Staffing and support',
+      Body: 'The Cecil County Health Department currently staffs the Task Force. Funding from the Rural Health Transformation Program will add a consultant to support the Action Teams and lead the data work, which is expected to speed the work considerably.',
+      Published: true },
+    { Order: 6, Section: 'How we work', Heading: 'Meeting cadence',
       Body: 'Action Teams meet monthly, virtually, at a standing time, with periodic in-person sessions. The Steering Committee first met in July 2026.',
       Published: true }
   ]);
@@ -76,7 +79,7 @@ function seedProblems() {
     { Order: 3, Title: 'Maternal-fetal medicine access', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
       Description: 'Higher-risk pregnancies need maternal-fetal medicine (MFM). Delaware MFM practices do not accept Maryland Medicaid. Johns Hopkins MFM sees patients at the Union campus three Fridays a month, but slots fill quickly and depend on insurance; the next closest options are Bel Air (University of Maryland) or Towson.',
       SourceOrEvidence: 'Member report, Regional System of Care Action Team, 2026-09.', Published: true },
-    { Order: 4, Title: 'Insurance does not follow the patient across the state line', Counties: 'Both', RelatedActionTeam: 'Insurance Access, Policy & Workforce',
+    { Order: 4, Title: 'Insurance does not follow the patient across the state line', Counties: 'Both', RelatedActionTeam: 'Insurance Coverage, Policy & Workforce Development',
       Description: 'About 70% of Union Hospital deliveries were covered by Maryland Medicaid, and many Cecil families now deliver in Delaware. Christiana Hospital reportedly agreed to accept Maryland Medicaid "for the time being" and ChristianaCare offered free transport to Newark for six months from July 2026; which managed care organizations are contracted, and what happens after the six months, is unconfirmed. The Task Force wants to ensure that wherever women need care, insurance is not a barrier.',
       SourceOrEvidence: 'Task Force kickoff, 2026-09; Baltimore Banner and WMAR coverage of the closure, 2026.', Published: true },
     { Order: 5, Title: 'Transportation cost and reliability', Counties: 'Both', RelatedActionTeam: 'EMS Transport & Transportation',
@@ -91,7 +94,7 @@ function seedProblems() {
     { Order: 8, Title: 'Material needs at delivery', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
       Description: 'Hospital staff report that many families delivering at Upper Chesapeake need car seats, cribs, and basic supplies. Cecil County Health Department and Healthy Families offer supplies for enrolled families; a shared, current list across both counties is needed.',
       SourceOrEvidence: 'UM Upper Chesapeake Family Birthplace, 2026-09.', Published: true },
-    { Order: 9, Title: 'Workforce shortages', Counties: 'Both', RelatedActionTeam: 'Insurance Access, Policy & Workforce',
+    { Order: 9, Title: 'Workforce shortages', Counties: 'Both', RelatedActionTeam: 'Insurance Coverage, Policy & Workforce Development',
       Description: 'OB/GYN, advanced practice nursing, midwifery, and other maternal care provider capacity is limited, especially in rural parts of both counties. A new midwifery practice is expected to open in Cecil County in early 2027 (prenatal and well-woman care, no deliveries).',
       SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true },
     { Order: 10, Title: 'Data gaps', Counties: 'Both', RelatedActionTeam: 'Data for Action',
@@ -106,13 +109,13 @@ function seedStructure() {
       Purpose: 'Leadership-level body that sets direction, receives Action Team reports, and engages county, hospital, state, and community leadership. Membership includes county leaders (including the Cecil County Executive), county departments, hospital leadership, perinatal care professionals, community representatives for harder-to-reach populations, and a Maryland Department of Health seat.',
       CoChairs: 'Cecil County Executive; Karyl Rattay, MD (Cecil County Health Officer)', StaffSupport: 'Cecil County Health Department', MeetingCadence: 'First met July 2026; cadence TBD', Status: 'Active', Published: true },
     { Order: 2, Level: 'Action Team', Name: 'Regional System of Care / Pilot Development',
-      Purpose: 'To develop a regional system of care by working with professionals, experts, and the public to improve access to perinatal services for all women and families in Cecil and Harford Counties. Expected to move quickly into pilot work in both counties.',
+      Purpose: 'To develop a regional system of care by working with professionals, experts and the public to improve access to perinatal services for all women and families in Cecil and Harford Counties.\n\nExpected to move quickly into pilot work in both counties. The largest and most complex of the four teams.',
       CoChairs: 'Karyl Rattay, MD (Cecil County Health Officer); Lauren Levy (Harford County Health Officer)', StaffSupport: 'Lindsey Scott, Cecil County Health Department', MeetingCadence: 'Monthly, virtual, standing time', Status: 'Active', Published: true },
     { Order: 3, Level: 'Action Team', Name: 'EMS Transport & Transportation',
-      Purpose: 'To identify maternal care access concerns and solutions related to EMS and transportation by working with other professionals, experts, and members of the public. Covers both emergency transport protocols after the Union Hospital closure and broader non-emergency transportation to out-of-county care.',
+      Purpose: 'To identify maternal care access concerns and solutions related to EMS and transportation by working with other professionals, experts and members of the public.\n\nCovers both emergency transport after the Union Hospital closure and broader non-emergency transportation to out-of-county care.',
       CoChairs: 'TBD', StaffSupport: 'Cecil County Department of Emergency Services; Cecil County Health Department', MeetingCadence: 'Monthly, virtual', Status: 'Active', Published: true },
-    { Order: 4, Level: 'Action Team', Name: 'Insurance Access, Policy & Workforce Development',
-      Purpose: 'To ensure insurance coverage is not a barrier wherever women need care (including Maryland Medicaid acceptance by Delaware providers), to identify policies affecting access, and to grow the maternal care workforce, including OB/GYN, advanced practice nursing, and midwifery.',
+    { Order: 4, Level: 'Action Team', Name: 'Insurance Coverage, Policy & Workforce Development',
+      Purpose: 'To understand and address insurance barriers to maternal and infant care, especially when crossing state lines, assess how policies impact access, and identify opportunities for workforce development to recruit and retain maternal care professionals in this rural region.',
       CoChairs: 'TBD', StaffSupport: 'TBD', MeetingCadence: 'Monthly, virtual', Status: 'Active', Published: true },
     { Order: 5, Level: 'Action Team', Name: 'Data for Action',
       Purpose: 'To assemble and analyze the data that will drive and monitor the Task Force\'s work: access, disparities, outcomes, and progress measures. To be supported by a consultant funded under the Rural Health Transformation Program.',
@@ -162,7 +165,7 @@ function seedFunding() {
     { Order: 4, Name: 'Potential future opportunities', Source: 'HRSA / CMS', Level: 'Federal',
       Amount: 'n/a', Status: 'Not applied',
       Description: 'Programs the region is not currently funded under but could pursue: HRSA Healthy Start (Maryland\'s only grantee is in Baltimore City), MIECHV home visiting expansion (MDH readiness assessments), and RMOMS rural obstetric networks (Maryland\'s only awardee is on the Lower Shore). Maryland is not a participant in the CMS Transforming Maternal Health model.',
-      IntendedUse: 'For Insurance Access, Policy & Workforce and Data for Action teams to evaluate.', Counties: 'Both', URL: 'https://mchb.hrsa.gov/programs-impact/healthy-start', Published: true }
+      IntendedUse: 'For the Insurance Coverage, Policy & Workforce Development and Data for Action teams to evaluate.', Counties: 'Both', URL: 'https://mchb.hrsa.gov/programs-impact/healthy-start', Published: true }
   ]);
 }
 
