@@ -67,6 +67,8 @@
   .ind.worse .v { color: #ffd7d3; }
   .ind.better .v { color: #d3f5d9; }
   .pill.ind-tag { background: #eef6ee; color: #1f5f2a; border: 1px solid #cfe6d3; }
+  .indicator-source { margin: 4px 0 0; font-size: 12px; opacity: .9; }
+  .indicator-source a { color: #fff; text-decoration: underline; }
   .band { background: var(--purple-pale); border-radius: var(--radius); padding: 20px; margin: 0 0 24px; }
   .band h3 { color: var(--purple); }
 
@@ -103,6 +105,8 @@
   .driver .cols { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin: 8px 0; }
   .driver .cols div { background: var(--purple-pale); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
   .driver .cols strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--purple); }
+  .driver .cols .cite { display: block; margin-top: 6px; font-size: 12px; }
+  .driver .cols .cite.muted { color: var(--muted); font-style: italic; }
   .implication { border-left: 3px solid var(--ok); padding-left: 10px; margin-top: 8px; }
   .case .result { font-weight: 700; color: var(--ok); }
   details { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px; }

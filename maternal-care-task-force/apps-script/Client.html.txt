@@ -98,6 +98,14 @@
     if (!strip) return;
     if (!rows.length) { strip.hidden = true; return; }
     strip.hidden = false;
+    var src = rows[0] || {};
+    var note = $('#indicatorSource');
+    if (note) {
+      note.innerHTML = 'Cecil shown; ' + (src.Year ? esc(src.Year) + ' ' : '') +
+        (src.SourceURL ? link(src.SourceURL, src.Source || 'source') : esc(src.Source || '')) +
+        ' · <a href="#data" data-goto="data">All six indicators and sources</a>';
+      note.hidden = false;
+    }
     strip.innerHTML = rows.map(function (r) {
       var n = parseFloat(r.Cecil), m = parseFloat(r.Maryland);
       var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(r.Indicator));
@@ -106,6 +114,13 @@
       return '<button class="ind ' + cls + '" data-goto="data" title="Open Regional Data"><span class="n">' + esc(r.Indicator) + '</span>' +
         '<span class="v">' + esc(r.Cecil) + unit + '</span><span class="c">Cecil · Harford ' + esc(r.Harford) + unit + ' · MD ' + esc(r.Maryland) + unit + '</span></button>';
     }).join('');
+  }
+
+  // Problems cite their evidence, hyperlinked when a published source exists.
+  function evidenceLine(p) {
+    if (!p.SourceOrEvidence && !p.SourceURL) return '';
+    var txt = esc(p.SourceOrEvidence || 'Source');
+    return '<p class="meta">Evidence: ' + (p.SourceURL ? link(p.SourceURL, p.SourceOrEvidence || 'Source') : txt) + '</p>';
   }
 
   function renderProblems(c) {
@@ -121,7 +136,7 @@
         return '<div class="card accent"><h3>' + esc(p.Title) + '</h3>' + countyPill(p.Counties) +
           (p.RelatedActionTeam ? '<span class="pill">' + esc(p.RelatedActionTeam) + '</span>' : '') +
           '<div>' + indicatorPills(p.TargetIndicators) + '</div>' +
-          para(p.Description) + (p.SourceOrEvidence ? '<p class="meta">Evidence: ' + esc(p.SourceOrEvidence) + '</p>' : '') + '</div>';
+          para(p.Description) + evidenceLine(p) + '</div>';
       }).join('') || '<p class="muted">No problems match.</p>';
     }
     $('#fProbInd').addEventListener('change', apply); apply();
@@ -257,6 +272,7 @@
     } else {
       html += '<p class="muted">No driver evidence published yet.</p>';
     }
+    html += '<p class="notice small">Every figure on this page links to the page it came from. Figures were read from search-index extracts of those pages rather than full-text retrieval, so open the primary source before putting a number in front of an external audience. Anything that could not be verified is marked as a gap rather than smoothed over.</p>';
     html += '<div class="section" style="margin-top:32px"><h3>Case studies: communities that moved their numbers</h3><p class="muted small">Before/after results as reported by the source. Evidence quality is noted; a pre/post result without a comparison group is weaker than a trial.</p>';
     if (cases.length) {
       html += '<div class="filters"><label>Indicator <select id="fCaseInd"><option value="">All</option>' + uniq(cases.reduce(function (acc, cs) { return acc.concat(String(cs.Indicators || '').split(/[;,]/).map(function (x) { return x.trim(); })); }, [])).map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label><span class="count" id="cCount"></span></div><div id="caseList"></div>';
@@ -266,13 +282,27 @@
     html += '</div>';
     $('#view-evidence').innerHTML = html;
 
+    // Every figure shown must name where it came from. A column with no URL
+    // is labelled as unsourced rather than left looking cited.
+    function dataCol(label, value, url) {
+      if (!value) return '';
+      var cite;
+      if (url) {
+        cite = '<span class="cite">' + link(url, 'Source') + '</span>';
+      } else if (/not yet obtained|not been obtained|has not been retrieved|not retrieved|unconfirmed/i.test(value)) {
+        cite = '<span class="cite muted">Data gap — on the request list below</span>';
+      } else {
+        cite = '<span class="cite muted">Task Force record (slide deck or member report); no published URL</span>';
+      }
+      return '<div><strong>' + esc(label) + '</strong>' + esc(value) + cite + '</div>';
+    }
     function driverCard(d) {
       return '<div class="card driver"><h3>' + esc(d.Driver) + '</h3><p class="meta">' + esc(d.Indicator) + (d.RelatedActionTeam ? ' · ' + esc(d.RelatedActionTeam) : '') + (d.Confidence ? ' · Confidence: ' + esc(d.Confidence) : '') + '</p>' +
         para(d.WhatTheEvidenceShows) +
         '<div class="cols">' +
-        (d.NationalData ? '<div><strong>National</strong>' + esc(d.NationalData) + '</div>' : '') +
-        (d.MarylandData ? '<div><strong>Maryland</strong>' + esc(d.MarylandData) + '</div>' : '') +
-        (d.LocalData ? '<div><strong>Cecil / Harford</strong>' + esc(d.LocalData) + '</div>' : '') +
+        dataCol('National', d.NationalData, d.NationalSourceURL) +
+        dataCol('Maryland', d.MarylandData, d.MarylandSourceURL) +
+        dataCol('Cecil / Harford', d.LocalData, d.LocalSourceURL) +
         '</div>' +
         (d.ImplicationForAction ? '<p class="implication"><strong>Implication for action:</strong> ' + esc(d.ImplicationForAction) + '</p>' : '') +
         (d.DataSystem ? '<p class="small muted"><strong>Where to get county-level data:</strong> ' + esc(d.DataSystem) + '</p>' : '') +

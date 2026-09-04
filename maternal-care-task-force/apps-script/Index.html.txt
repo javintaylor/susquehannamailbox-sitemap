@@ -20,6 +20,7 @@
       <p class="subtitle" id="siteSubtitle">Cecil and Harford Counties, Maryland</p>
       <p class="tagline" id="siteTagline">Loading…</p>
       <div id="indicatorStrip" class="indicators" hidden></div>
+      <p class="indicator-source" id="indicatorSource" hidden></p>
       <div id="announcementBar" class="announce" hidden></div>
     </div>
   </header>

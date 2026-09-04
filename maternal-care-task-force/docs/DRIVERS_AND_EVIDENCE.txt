@@ -215,6 +215,27 @@ CAUTIONARY, INCLUDED DELIBERATELY
    equity metrics before launching anything.
 
 ======================================================================
+SOURCING RULES APPLIED ON THE SITE
+======================================================================
+Every figure shown on the site links to the page it came from.
+
+ - Drivers: each of the three data columns (national, Maryland, local)
+   carries its own source URL, because the figures in a single row come from
+   different documents. 43 of the 51 populated columns link to a source.
+ - The remaining 8 are labelled honestly rather than left looking cited:
+   "Data gap — on the request list" where the figure has not been obtained,
+   and "Task Force record; no published URL" where it comes from the slide
+   deck or a member report.
+ - Case studies: all 24 link to their source.
+ - Regional Data: all six indicator rows link to the source, and the header
+   tiles cite that source with a link through to the full table.
+ - Problems: the evidence line hyperlinks where a published page exists.
+   Member reports show the attribution text without a link.
+ - Resources: every row carries URL, SourceURL, DateVerified and Confidence.
+   Rows sourced only to a member report carry no DateVerified and render as
+   "Reported by a Task Force member — not independently verified".
+
+======================================================================
 SOURCES
 ======================================================================
 Every driver and case study row on the site carries its own source URL. The

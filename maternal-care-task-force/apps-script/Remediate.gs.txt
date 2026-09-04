@@ -189,6 +189,7 @@ function remediateV1_2() {
   setConfigValue('SUBTITLE', CONFIG.APP_SUBTITLE);
   reseedTabs('Purpose,Problems,Structure,Funding,Resources,ActionItems,Announcements,Drivers,CaseStudies',
              'v1.2.0: indicator tagging on every content row, Drivers and CaseStudies tabs, ' +
+             'per-column source URLs on Drivers, source URLs on Problems, ' +
              'welcome announcement removed.');
 }
 

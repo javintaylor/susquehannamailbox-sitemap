@@ -11,7 +11,9 @@ Purpose          Order | Section | Heading | Body | Published
   Section groups paragraphs into bands (Purpose, Who we serve, How we work).
 
 Problems         Order | Title | Description | Counties | RelatedActionTeam |
-                 TargetIndicators | SourceOrEvidence | Published
+                 TargetIndicators | SourceOrEvidence | SourceURL | Published
+  SourceURL hyperlinks the evidence line. Leave blank when the evidence is a
+  member report with no published page; the site then shows the text alone.
   Counties: Cecil, Harford, Both. TargetIndicators: semicolon-separated
   names from the Data tab (the six indicators) or "Cross-cutting".
 
@@ -41,14 +43,22 @@ Resources        Order | Name | Type | Category | Counties | Indicators |
 
 Data             Order | Indicator | Definition | Cecil | Harford | Maryland |
                  Unit | Year | Source | SourceURL | Published
+  SourceURL is required. The header indicator tiles cite the FIRST row's
+  Source and SourceURL, so keep row 1 accurate.
   Aggregate public statistics only. Never a cell count small enough to
   identify a person (follow the source's suppression rules).
 
 Drivers          Order | Indicator | Driver | WhatTheEvidenceShows |
-                 NationalData | MarylandData | LocalData | DataSystem |
-                 ImplicationForAction | RelatedActionTeam | Source |
-                 SourceURL | Confidence | Published
-  One row per cause/risk factor per indicator. Shown on Drivers & Evidence.
+                 NationalData | NationalSourceURL | MarylandData |
+                 MarylandSourceURL | LocalData | LocalSourceURL |
+                 DataSystem | ImplicationForAction | RelatedActionTeam |
+                 Source | SourceURL | Confidence | Published
+  One row per cause/risk factor per indicator. Each of the three data
+  columns carries its OWN source URL, because the national, Maryland and
+  local figures in one row come from different documents. A column with no
+  URL renders as "Data gap" when the text says the figure has not been
+  obtained, otherwise as "Task Force record; no published URL". Never leave
+  a figure looking cited when it is not.
 
 CaseStudies      Order | Name | Location | Years | ProblemFaced | WhatTheyDid |
                  Result | EvidenceQuality | Funding | Transferability |
