@@ -16,7 +16,7 @@ var CONFIG = {
   APP_NAME: 'Maternal Care Task Force',
   APP_SUBTITLE: 'Cecil and Harford Counties, Maryland',
   APP_SHORT_NAME: 'MCTF',
-  VERSION: '1.2.0',
+  VERSION: '1.3.0',
 
   // Script Property keys (values written by Setup.gs, never hardcoded here)
   PROP_CONTENT_SS_ID: 'MCTF_CONTENT_SPREADSHEET_ID',

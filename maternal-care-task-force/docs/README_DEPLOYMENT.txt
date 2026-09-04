@@ -123,6 +123,23 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING TO v1.3.0 (presentation only)
+  Replace Styles.html, Client.html and Config.gs, then create a new
+  deployment version. No sheet change and no re-seed: v1.3.0 changes only
+  how the content is presented.
+
+  What changed:
+   - Every long page collapses. Sections, problems, teams, funding,
+     resources and drivers open on demand, with Expand all / Collapse all
+     on each list. The evidence page is about five times shorter closed.
+   - Resources are grouped into collapsible categories; a filtered result
+     opens its groups automatically.
+   - Palette moved from bright purple to a deep navy with a single teal
+     accent. Red and green now appear only where a county is compared with
+     the state average, so colour always carries meaning.
+   - Text selection, focus rings, scrollbars and tabular figures are themed
+     rather than left at browser defaults.
+
 UPGRADING AN EXISTING DEPLOYMENT TO v1.2.0
   (Adds the Drivers and CaseStudies tabs, indicator tags on every content
   row, the corrected header, and removes the member-site welcome
