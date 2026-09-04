@@ -126,6 +126,30 @@
   }
   function hasInd(row, field, ind) { return !ind || splitInd(row[field]).indexOf(ind) >= 0; }
 
+  /**
+   * Compares a county value with the Maryland benchmark.
+   * @return {{cls:string, dir:string, label:string}}
+   */
+  function vsMaryland(value, maryland, indicatorName) {
+    var n = parseFloat(value), m = parseFloat(maryland);
+    if (isNaN(n) || isNaN(m) || n === m) return { cls: '', dir: '', label: '' };
+    var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(indicatorName));
+    var above = n > m;
+    var better = higherBetter ? above : !above;
+    return {
+      cls: better ? 'better' : 'worse',
+      dir: above ? 'up' : 'down',
+      label: (above ? 'above' : 'below') + ' Maryland, ' + (better ? 'better' : 'worse')
+    };
+  }
+  // Drawn triangle, rotated by CSS. Carries direction when colour cannot.
+  function trend(v) {
+    if (!v.cls) return '';
+    return '<svg class="trend trend-' + v.dir + '" viewBox="0 0 10 10" aria-hidden="true">' +
+      '<path d="M5 1.5L9 8.5H1z" fill="currentColor"/></svg>' +
+      '<span class="sr-only"> (' + esc(v.label) + ')</span>';
+  }
+
   function countyPill(c) {
     var s = String(c || '').toLowerCase();
     var cls = (s.indexOf('both') >= 0 || s.indexOf('regional') >= 0 || (s.indexOf('cecil') >= 0 && s.indexOf('harford') >= 0)) ? 'both'
@@ -217,13 +241,10 @@
     // state, so no figure on this strip is unattributed.
     strip.innerHTML = rows.map(function (r) {
       var unit = r.Unit === '%' ? '%' : '';
-      var md = parseFloat(r.Maryland);
-      var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(r.Indicator));
       function county(label, value) {
-        var n = parseFloat(value);
-        var cls = (!isNaN(n) && !isNaN(md) && n !== md) ? ((higherBetter ? n > md : n < md) ? ' better' : ' worse') : '';
-        return '<span class="ind-val' + cls + '"><span class="ind-place">' + esc(label) + '</span>' +
-          '<span class="ind-num">' + esc(value) + unit + '</span></span>';
+        var v = vsMaryland(value, r.Maryland, r.Indicator);
+        return '<span class="ind-val' + (v.cls ? ' ' + v.cls : '') + '"><span class="ind-place">' + esc(label) + '</span>' +
+          '<span class="ind-num">' + esc(value) + unit + trend(v) + '</span></span>';
       }
       return '<button class="ind" data-goto="data">' +
         '<span class="ind-name">' + esc(r.Indicator) + (r.Unit && r.Unit !== '%' ? ' <span class="ind-unit">(' + esc(r.Unit) + ')</span>' : '') + '</span>' +
@@ -412,14 +433,11 @@
     var rows = c.data || [];
     function fmt(v, unit) { if (v === '' || v === undefined) return '—'; return unit === '%' ? v + '%' : String(v); }
     function cell(v, md, unit, name) {
-      var n = parseFloat(v), m = parseFloat(md);
-      var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(name));
-      var cls = '';
-      if (!isNaN(n) && !isNaN(m) && n !== m) cls = (higherBetter ? n > m : n < m) ? 'better' : 'worse';
-      return '<td class="num ' + cls + '">' + esc(fmt(v, unit)) + '</td>';
+      var c = vsMaryland(v, md, name);
+      return '<td class="num ' + c.cls + '">' + esc(fmt(v, unit)) + trend(c) + '</td>';
     }
     var html = '<h2>Regional Data: the six indicators</h2>' +
-      '<p class="lead">These six outcomes are the problems the Task Force exists to improve. Red marks a county doing worse than Maryland, green better.</p>' +
+      '<p class="lead">These six outcomes are the problems the Task Force exists to improve. A county figure is red when it is worse than Maryland and green when it is better, with an arrow showing whether it sits above or below the state. Maryland is the benchmark and is never coloured.</p>' +
       pageBar([], [{ id: 'sec-data-table', label: 'Indicator table' }]) +
       '<div class="table-scroll" id="sec-data-table"><table><thead><tr><th>Indicator</th><th>Cecil</th><th>Harford</th><th>Maryland</th><th>Year</th><th>Source</th></tr></thead><tbody>';
     rows.forEach(function (r) {

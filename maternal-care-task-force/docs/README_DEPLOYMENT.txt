@@ -123,6 +123,18 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING TO v1.4.2 (presentation only)
+  Replace Client.html, Styles.html and Config.gs; new deployment version.
+   - County figures read clearly red when worse than Maryland and green when
+     better, on the header tiles and in the Regional Data table. Maryland is
+     the benchmark and is never coloured.
+   - One comparison function now drives both surfaces, so the tiles and the
+     table can never disagree. It inverts correctly for early prenatal care,
+     where a higher figure is better.
+   - Each figure also carries a small arrow showing whether it sits above or
+     below the state, plus hidden text reading, for example, "above Maryland,
+     worse" - so the meaning survives for a colourblind reader.
+
 UPGRADING TO v1.4.1 (presentation only)
   Replace Client.html, Styles.html and Config.gs; new deployment version.
    - Every figure on the header tiles is now labelled with the place it
