@@ -123,6 +123,27 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING TO v1.4.3
+  Replace Client.html, Styles.html, Config.gs and Remediate.gs, then create a
+  new deployment version.
+
+  Then run fixHeaderAndWelcome in Remediate.gs ONCE. Two corrections live in
+  the sheet rather than in code, so replacing files does not apply them:
+   - The header still reads "Maternal Care Task Force - Cecil & Harford
+     Counties" because runSetup's upsertConfig_ never overwrites a Config
+     value that is already set. This rewrites SITE_TITLE and SUBTITLE.
+   - The "Welcome to the member site" announcement was removed from the seed
+     file in v1.2.0, but the row already existed in the sheet. This clears
+     the Announcements tab and rebuilds it from the current seed.
+
+  Presentation changes in this version:
+   - The trend arrow no longer wraps below its figure.
+   - The six indicator tiles are normalised: the unit moved from the
+     indicator name to the benchmark line ("Maryland 5.5 per 1,000"), the
+     name block reserves two lines, and the benchmark is pinned to the
+     bottom of each tile, so all six are the same height with their value
+     rows and rules aligned.
+
 UPGRADING TO v1.4.2 (presentation only)
   Replace Client.html, Styles.html and Config.gs; new deployment version.
    - County figures read clearly red when worse than Maryland and green when
@@ -249,6 +270,8 @@ WHERE EACH RUNNABLE FUNCTION LIVES
   reseedTabs .......... Remediate.gs
   runSetup ............ Setup.gs
   backfillSetupAudit .. Setup.gs   (only if setup logged AUDIT_WRITE_FAILED)
+  fixHeaderAndWelcome . Remediate.gs (corrects the header text and removes the
+                                    welcome announcement on an existing sheet)
   setAdminEmails ...... Setup.gs
   seedAll ............. Seed.gs      (calls seedResources in SeedResources.gs)
   purgeCache .......... Api.gs

@@ -76,24 +76,25 @@
   /* Six tiles across at the 1080px content width: 6 x 160 + 5 x 8 = 1000. */
   .indicators { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin: 20px 0 0; }
   .ind {
-    display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
+    display: flex; flex-direction: column; width: 100%; text-align: left; font: inherit; cursor: pointer;
     background: rgba(255,255,255,.06); border: 1px solid rgba(169,189,214,.28);
     border-radius: var(--radius); padding: 10px 11px; color: #d4deeb;
     transition: background .18s var(--ease), border-color .18s var(--ease);
   }
   .ind:hover { background: rgba(255,255,255,.12); border-color: rgba(169,189,214,.5); }
-  .ind-name { display: block; font-size: 12px; line-height: 1.3; min-height: 29px; color: #cfdcec; font-weight: 600; }
-  .ind-unit { font-weight: 400; color: #93a8c2; }
-  .ind-vals { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; margin-top: 7px; }
+  /* Two lines reserved, so the value row starts level in every tile. */
+  .ind-name { display: block; font-size: 12px; line-height: 1.3; min-height: 32px; color: #cfdcec; font-weight: 600; }
+  .ind-vals { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; margin-top: 8px; }
   .ind-val { display: block; }
   .ind-place { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #93a8c2; }
-  .ind-num { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: #fff; line-height: 1.2; }
+  /* nowrap keeps the trend arrow on the same line as the figure. */
+  .ind-num { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: #fff; line-height: 1.2; white-space: nowrap; }
   .ind-val.worse .ind-num { color: #ff8d7d; }
   .ind-val.better .ind-num { color: #5ee394; }
-  .trend { width: 8px; height: 8px; margin-left: 4px; vertical-align: baseline; }
+  .trend { width: 8px; height: 8px; margin-left: 3px; vertical-align: baseline; flex: none; }
   .trend-down { transform: rotate(180deg); }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-  .ind-bench { display: block; font-size: 11px; margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(169,189,214,.22); color: #93a8c2; }
+  .ind-bench { display: block; font-size: 11px; margin-top: auto; padding-top: 7px; border-top: 1px solid rgba(169,189,214,.22); color: #93a8c2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .indicator-source { margin: 10px 0 0; font-size: 12px; color: #93a8c2; }
   .indicator-source a { color: #9fd4e2; }
 

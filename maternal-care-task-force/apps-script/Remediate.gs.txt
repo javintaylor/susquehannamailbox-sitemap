@@ -194,6 +194,28 @@ function remediateV1_2() {
 }
 
 /**
+ * Two corrections that live in the sheet rather than in code, so replacing
+ * files does not apply them. Run once.
+ *
+ *  1. The site header still shows the old combined title, because runSetup's
+ *     upsertConfig_ deliberately never overwrites a Config value that is
+ *     already set. This rewrites SITE_TITLE and SUBTITLE.
+ *  2. The "Welcome to the member site" announcement was removed from the
+ *     seed file, but the row already existed in the sheet. This clears the
+ *     Announcements tab and rebuilds it from the current seed.
+ *
+ * Lighter than remediateV1_2, which rebuilds nine tabs.
+ */
+function fixHeaderAndWelcome() {
+  setConfigValue('SITE_TITLE', CONFIG.APP_NAME);
+  setConfigValue('SUBTITLE', CONFIG.APP_SUBTITLE);
+  reseedTabs('Announcements',
+    'Remove the welcome announcement and correct the header title and subtitle.');
+  console.log('Header set to: ' + CONFIG.APP_NAME + ' / ' + CONFIG.APP_SUBTITLE);
+  console.log('Announcements rebuilt from the seed file.');
+}
+
+/**
  * READ-ONLY check. Prints what the site would currently serve to an anonymous
  * visitor, so a co-chair can review the actual public surface before the web
  * app is deployed. Prints row counts and the fields most likely to carry a
