@@ -207,19 +207,28 @@
     var src = rows[0] || {};
     var note = $('#indicatorSource');
     if (note) {
-      note.innerHTML = 'Cecil shown. ' + (src.Year ? esc(src.Year) + ', ' : '') +
-        (src.SourceURL ? link(src.SourceURL, src.Source || 'source') : esc(src.Source || '')) +
-        ' · <a href="#data" data-goto="data">All six indicators and sources</a>';
+      var label = truncate(src.Source || 'source', 46);
+      note.innerHTML = 'Both counties compared with Maryland. ' + (src.Year ? esc(src.Year) + ', ' : '') +
+        (src.SourceURL ? link(src.SourceURL, label) : esc(label)) +
+        ' · <a href="#data" data-goto="data">Full table and sources</a>';
       note.hidden = false;
     }
+    // Each county carries its own label and its own comparison with the
+    // state, so no figure on this strip is unattributed.
     strip.innerHTML = rows.map(function (r) {
-      var n = parseFloat(r.Cecil), m = parseFloat(r.Maryland);
-      var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(r.Indicator));
-      var cls = (!isNaN(n) && !isNaN(m) && n !== m) ? ((higherBetter ? n > m : n < m) ? 'better' : 'worse') : '';
       var unit = r.Unit === '%' ? '%' : '';
-      return '<button class="ind ' + cls + '" data-goto="data"><span class="n">' + esc(r.Indicator) + '</span>' +
-        '<span class="v">' + esc(r.Cecil) + unit + '</span>' +
-        '<span class="c">Harford ' + esc(r.Harford) + unit + ' · Maryland ' + esc(r.Maryland) + unit + '</span></button>';
+      var md = parseFloat(r.Maryland);
+      var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(r.Indicator));
+      function county(label, value) {
+        var n = parseFloat(value);
+        var cls = (!isNaN(n) && !isNaN(md) && n !== md) ? ((higherBetter ? n > md : n < md) ? ' better' : ' worse') : '';
+        return '<span class="ind-val' + cls + '"><span class="ind-place">' + esc(label) + '</span>' +
+          '<span class="ind-num">' + esc(value) + unit + '</span></span>';
+      }
+      return '<button class="ind" data-goto="data">' +
+        '<span class="ind-name">' + esc(r.Indicator) + (r.Unit && r.Unit !== '%' ? ' <span class="ind-unit">(' + esc(r.Unit) + ')</span>' : '') + '</span>' +
+        '<span class="ind-vals">' + county('Cecil', r.Cecil) + county('Harford', r.Harford) + '</span>' +
+        '<span class="ind-bench">Maryland ' + esc(r.Maryland) + unit + '</span></button>';
     }).join('');
   }
 

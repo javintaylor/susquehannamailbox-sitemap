@@ -123,6 +123,15 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING TO v1.4.1 (presentation only)
+  Replace Client.html, Styles.html and Config.gs; new deployment version.
+   - Every figure on the header tiles is now labelled with the place it
+     describes. Each tile carries both counties (Cecil and Harford, each
+     coloured against the state) with Maryland stated underneath as the
+     benchmark, instead of one unlabelled number.
+   - Six tiles fit on one row at the full content width, and collapse to
+     one labelled row per indicator on a phone.
+
 UPGRADING TO v1.4.0
   Replace Api.gs, Config.gs, Setup.gs, Client.html and Styles.html, run
   runSetup in Setup.gs (it adds the new Config key without touching rows),
