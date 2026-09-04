@@ -215,6 +215,9 @@ function runSetup() {
   upsertConfig_(ss, 'TAGLINE', 'Finding solutions so that all women and their families have access to quality perinatal services when needed.', 'Shown under the title');
   upsertConfig_(ss, 'CONTACT_EMAIL', '', 'General inbox for the task force (public, non-PHI)');
   upsertConfig_(ss, 'NEXT_MEETING', '', 'Free text, e.g. "Regional System of Care AT — monthly, virtual, date TBD"');
+  upsertConfig_(ss, 'BARRIER_DETAIL_VISIBILITY', CONFIG.BARRIER_DETAIL_VISIBILITY_DEFAULT,
+    "'full' = every barrier report readable by every visitor as soon as it is submitted. " +
+    "'reviewed' = closed-list fields immediately, free text and reporting organization only after a co-chair sets Published = TRUE.");
   upsertConfig_(ss, 'FIND_HELP_URL', 'https://www.findhelp.org', 'Free / reduced-cost resource finder used by Cecil County HD');
 
   console.log('Setup complete. Content SS: ' + ss.getUrl());

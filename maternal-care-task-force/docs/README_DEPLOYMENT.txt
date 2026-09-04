@@ -123,6 +123,26 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING TO v1.4.0
+  Replace Api.gs, Config.gs, Setup.gs, Client.html and Styles.html, run
+  runSetup in Setup.gs (it adds the new Config key without touching rows),
+  then create a new deployment version. No re-seed.
+
+  What changed:
+   - Barrier Log lists every report, each expandable to its full detail:
+     month, county, barrier category, service type, reporting organisation
+     and the written description, with filters and Expand all.
+   - Each report is labelled Reviewed or Not yet reviewed. Publishing no
+     longer waits on review; see COMPLIANCE_NOTES.txt section 7 and the new
+     Config key BARRIER_DETAIL_VISIBILITY if the co-chairs want the gate back.
+   - Free text passes through an identifier scrub (emails, phone numbers,
+     exact dates, long digit strings) before it is served.
+   - Every page gains an action bar: quick actions where they apply (Report
+     a barrier, Suggest a resource) and On this page jump links that scroll
+     to a section, allowing for the sticky tab bar.
+   - Fixed a horizontal-overflow bug on phones: filter menus sized
+     themselves to their longest option and pushed the page to 525px wide.
+
 UPGRADING TO v1.3.1 (presentation only)
   Replace Styles.html, Client.html and Config.gs; create a new deployment
   version. No sheet change, no re-seed.

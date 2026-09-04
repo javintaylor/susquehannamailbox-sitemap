@@ -52,6 +52,30 @@
       (sum.tags ? '<span class="sum-tags">' + sum.tags + '</span>' : '') +
       '</span></summary><div class="disc-body">' + body + '</div></details>';
   }
+  /**
+   * The strip under each page heading. `actions` are the things a member can
+   * do here (open a form); `jumps` scroll to a section on this page. Rendered
+   * only when there is something to put in it.
+   * @param {Array<{href:string,label:string,primary?:boolean}>} actions
+   * @param {Array<{id:string,label:string}>} jumps
+   */
+  function pageBar(actions, jumps) {
+    var a = (actions || []).filter(function (x) { return x && x.href; });
+    var j = (jumps || []).filter(Boolean);
+    if (!a.length && !j.length) return '';
+    var html = '<div class="pagebar">';
+    if (a.length) {
+      html += '<div class="pagebar-actions">' + a.map(function (x) {
+        return '<a class="btn' + (x.primary ? '' : ' secondary') + '" target="_blank" rel="noopener" href="' + esc(x.href) + '">' + esc(x.label) + '</a>';
+      }).join('') + '</div>';
+    }
+    if (j.length) {
+      html += '<nav class="pagebar-jumps" aria-label="On this page"><span class="pagebar-label">On this page</span>' +
+        j.map(function (x) { return '<a href="#' + esc(x.id) + '" data-jump="' + esc(x.id) + '">' + esc(x.label) + '</a>'; }).join('') + '</nav>';
+    }
+    return html + '</div>';
+  }
+
   function accBar(scopeId, countId) {
     return '<div class="acc-bar"><button type="button" data-acc="open" data-scope="' + scopeId + '">Expand all</button>' +
       '<button type="button" data-acc="close" data-scope="' + scopeId + '">Collapse all</button>' +
@@ -64,9 +88,28 @@
       if (scope) $$('details', scope).forEach(function (d) { d.open = b.dataset.acc === 'open'; });
       return;
     }
+    var jump = ev.target.closest && ev.target.closest('[data-jump]');
+    if (jump) {
+      ev.preventDefault();
+      var target = document.getElementById(jump.getAttribute('data-jump'));
+      if (target) {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var top = target.getBoundingClientRect().top + window.scrollY - stickyOffset() - 12;
+        window.scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
+        target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+      }
+      return;
+    }
     var g = ev.target.closest && ev.target.closest('[data-goto]');
     if (g) { ev.preventDefault(); show(g.getAttribute('data-goto')); }
   });
+
+  // The tab bar is sticky, so a jump must stop short of it.
+  function stickyOffset() {
+    var t = $('.tabs');
+    return t ? Math.round(t.getBoundingClientRect().height) : 0;
+  }
 
   /* ---------- indicator tagging ---------- */
   var INDICATOR_ORDER = ['Infant mortality', 'Preterm birth', 'Low birth weight',
@@ -128,17 +171,24 @@
       (sections[k] = sections[k] || []).push(p);
     });
     var keys = Object.keys(sections);
+    var jumps = keys.map(function (sec, i) { return { id: 'sec-purpose-' + i, label: sec }; });
+    if (cfg.NEXT_MEETING) jumps.push({ id: 'sec-next-meeting', label: 'Next meeting' });
     var html = '<h2>Purpose</h2><p class="lead">Why the Task Force exists, what it is working to improve, and how it is organised.</p>' +
+      pageBar([
+        { href: (c.forms || {}).barrierFormUrl, label: 'Report a barrier', primary: true },
+        { href: (c.forms || {}).resourceFormUrl, label: 'Suggest a resource' }
+      ], jumps) +
       accBar('purposeList') + '<div id="purposeList">';
     keys.forEach(function (sec, i) {
       var body = sections[sec].map(function (p) {
         return (p.Heading ? '<h4>' + esc(p.Heading) + '</h4>' : '') + para(p.Body);
       }).join('');
       var n = sections[sec].length;
-      html += disc({ title: esc(sec), meta: n > 1 ? n + ' sections' : '' }, body, i === 0);
+      html += '<div id="sec-purpose-' + i + '">' +
+        disc({ title: esc(sec), meta: n > 1 ? n + ' sections' : '' }, body, i === 0) + '</div>';
     });
     html += '</div>';
-    if (cfg.NEXT_MEETING) html += '<div class="section"><div class="card"><h3>Next meeting</h3><p>' + esc(cfg.NEXT_MEETING) + '</p></div></div>';
+    if (cfg.NEXT_MEETING) html += '<div class="section" id="sec-next-meeting"><div class="card"><h3>Next meeting</h3><p>' + esc(cfg.NEXT_MEETING) + '</p></div></div>';
     if (ann.length > 1) {
       html += '<div class="section"><h3>Announcements</h3>' + ann.map(function (a) {
         return '<div class="card"><p class="meta">' + esc(a.Date) + '</p><h4>' + esc(a.Title) + '</h4>' +
@@ -183,7 +233,9 @@
     var problems = c.problems || [];
     $('#view-problems').innerHTML = '<h2>The Problem</h2>' +
       '<p class="lead">Access concerns the Task Force is working to solve. Each is tied to an Action Team and to the indicators it is expected to move.</p>' +
-      '<div class="filters">' + indicatorSelect('fProbInd', problems, 'TargetIndicators') + '</div>' +
+      pageBar([{ href: (c.forms || {}).barrierFormUrl, label: 'Report a barrier', primary: true }],
+        [{ id: 'sec-problem-filters', label: 'Filter' }, { id: 'problemList', label: 'All problems' }]) +
+      '<div class="filters" id="sec-problem-filters">' + indicatorSelect('fProbInd', problems, 'TargetIndicators') + '</div>' +
       accBar('problemList', 'pCount') + '<div id="problemList"></div>';
     function apply() {
       var ind = $('#fProbInd').value;
@@ -241,9 +293,10 @@
     }
 
     var html = '<h2>Structure</h2><p class="lead">A Steering Committee sets direction. Four Action Teams do the work. Only the Regional System of Care team has met, so the other rosters are empty by fact rather than by omission.</p>' +
+      pageBar([], [{ id: 'structureList', label: 'Steering Committee' }, { id: 'sec-teams', label: 'Action Teams' }]) +
       accBar('structureList') + '<div id="structureList">';
     steering.forEach(function (s) { html += block(s, members.filter(function (m) { return truthy(m.SteeringCommittee); })); });
-    html += '</div><div class="section"><h3>Action Teams</h3><div id="teamList">';
+    html += '</div><div class="section" id="sec-teams"><h3>Action Teams</h3><div id="teamList">';
     teams.forEach(function (t) { html += block(t, members.filter(function (m) { return onTeam(m.ActionTeams, t.Name); })); });
     html += '</div><p class="notice small" style="margin-top:14px">Contact details appear only for members who opted in. Every listing states professional role only. To correct your entry, contact the co-chairs.</p></div>';
     $('#view-structure').innerHTML = html;
@@ -254,7 +307,8 @@
     var funding = c.funding || [];
     $('#view-funding').innerHTML = '<h2>Funding</h2>' +
       '<p class="lead">Grants and programs resourcing the Task Force and the regional system of care.</p>' +
-      accBar('fundingList') + '<div id="fundingList">' + funding.map(function (f) {
+      pageBar([], funding.map(function (f, i) { return { id: 'sec-fund-' + i, label: truncate(f.Name, 34) }; })) +
+      accBar('fundingList') + '<div id="fundingList">' + funding.map(function (f, i) {
         return disc({
           title: esc(f.Name),
           meta: [esc(f.Source), esc(f.Amount)].filter(Boolean).join(' · '),
@@ -262,7 +316,7 @@
         }, para(f.Description) +
           (f.IntendedUse ? '<p><strong>Intended use:</strong> ' + esc(f.IntendedUse) + '</p>' : '') +
           (f.URL ? '<p>' + link(f.URL, 'Program page') + '</p>' : ''));
-      }).join('') + '</div>';
+      }).map(function (h, i) { return '<div id="sec-fund-' + i + '">' + h + '</div>'; }).join('') + '</div>';
   }
 
   /* ---------- resources ---------- */
@@ -296,13 +350,14 @@
     var types = uniq(all.map(function (r) { return r.Type; }));
     $('#view-resources').innerHTML = '<h2>Resources &amp; Programs</h2>' +
       '<p class="lead">Federal, state, and local programs for perinatal care in Cecil and Harford Counties, grouped by what they do. Confirm details with the provider before referring.</p>' +
-      '<div class="filters"><label>County <select id="fCounty"><option value="">All</option><option>Cecil</option><option>Harford</option><option value="both">Both / regional</option><option>Statewide</option></select></label>' +
+      pageBar([{ href: (c.forms || {}).resourceFormUrl, label: 'Suggest a resource', primary: true }],
+        [{ id: 'sec-resource-filters', label: 'Filter' }, { id: 'resourceList', label: 'Directory' }]) +
+      '<div class="filters" id="sec-resource-filters"><label>County <select id="fCounty"><option value="">All</option><option>Cecil</option><option>Harford</option><option value="both">Both / regional</option><option>Statewide</option></select></label>' +
       '<label>Category <select id="fCat"><option value="">All</option>' + cats.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
       '<label>Level <select id="fType"><option value="">All</option>' + types.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
       indicatorSelect('fResInd', all, 'Indicators') +
       '<label>Search <input id="fText" type="search" placeholder="name or keyword"></label></div>' +
-      accBar('resourceList', 'fCount') + '<div id="resourceList"></div>' +
-      (c.forms && c.forms.resourceFormUrl ? '<p style="margin-top:18px"><a class="btn secondary" target="_blank" rel="noopener" href="' + esc(c.forms.resourceFormUrl) + '">Suggest a resource</a></p>' : '');
+      accBar('resourceList', 'fCount') + '<div id="resourceList"></div>';
 
     function apply() {
       var county = $('#fCounty').value.toLowerCase(), cat = $('#fCat').value,
@@ -356,7 +411,8 @@
     }
     var html = '<h2>Regional Data: the six indicators</h2>' +
       '<p class="lead">These six outcomes are the problems the Task Force exists to improve. Red marks a county doing worse than Maryland, green better.</p>' +
-      '<div class="table-scroll"><table><thead><tr><th>Indicator</th><th>Cecil</th><th>Harford</th><th>Maryland</th><th>Year</th><th>Source</th></tr></thead><tbody>';
+      pageBar([], [{ id: 'sec-data-table', label: 'Indicator table' }]) +
+      '<div class="table-scroll" id="sec-data-table"><table><thead><tr><th>Indicator</th><th>Cecil</th><th>Harford</th><th>Maryland</th><th>Year</th><th>Source</th></tr></thead><tbody>';
     rows.forEach(function (r) {
       html += '<tr><td><strong>' + esc(r.Indicator) + '</strong>' +
         (r.Definition ? '<div class="small muted">' + esc(r.Definition) + '</div>' : '') + '</td>' +
@@ -393,13 +449,17 @@
       '<p class="lead">What the research says causes each indicator, what the national, Maryland and local data show, and where comparable communities moved their numbers. Use this to pick actions, not just name problems.</p>' +
       '<p class="notice small">Every figure links to the page it came from. Figures were read from search-index extracts rather than full-text retrieval, so open the primary source before putting a number in front of an external audience. Anything unverified is marked as a gap rather than smoothed over.</p>';
 
-    html += '<div class="section"><h3>What drives each indicator</h3>' +
+    html += pageBar([], [
+      { id: 'sec-drivers', label: 'What drives each indicator' },
+      { id: 'sec-cases', label: 'Communities that moved their numbers' }
+    ]);
+    html += '<div class="section" id="sec-drivers"><h3>What drives each indicator</h3>' +
       '<div class="filters">' +
       '<label>Indicator <select id="fInd"><option value="">All</option>' + keys.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
       '<label>Action Team <select id="fTeam"><option value="">All</option>' + uniq(drivers.map(function (d) { return d.RelatedActionTeam; })).map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
       '</div>' + accBar('driverList', 'dCount') + '<div id="driverList"></div></div>';
 
-    html += '<div class="section"><h3>Communities that moved their numbers</h3>' +
+    html += '<div class="section" id="sec-cases"><h3>Communities that moved their numbers</h3>' +
       '<p class="muted small">Before and after results as reported by the source. Evidence quality is stated: a pre/post result without a comparison group is weaker than a trial. Four entries are included because their result was null or their gains were unequal.</p>' +
       '<div class="filters"><label>Indicator <select id="fCaseInd"><option value="">All</option>' +
       uniq(cases.reduce(function (a, cs) { return a.concat(splitInd(cs.Indicators)); }, [])).map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') +
@@ -477,8 +537,10 @@
         }).join('') + '</tbody></table></div>';
     }
     var html = '<h2>Meetings &amp; Action Items</h2>' +
-      '<div class="section"><h3>Open action items (' + open.length + ')</h3>' + actionTable(open) + '</div>' +
-      '<div class="section"><h3>Meeting summaries</h3><div id="meetingList">' +
+      pageBar([], [{ id: 'sec-open-actions', label: 'Open action items' }, { id: 'sec-meetings', label: 'Meeting summaries' }]
+        .concat(done.length ? [{ id: 'sec-done-actions', label: 'Completed' }] : [])) +
+      '<div class="section" id="sec-open-actions"><h3>Open action items (' + open.length + ')</h3>' + actionTable(open) + '</div>' +
+      '<div class="section" id="sec-meetings"><h3>Meeting summaries</h3><div id="meetingList">' +
       ((c.meetings || []).map(function (m, i) {
         return disc({
           title: esc(m.Title),
@@ -489,7 +551,7 @@
           (m.NotesURL ? '<p>' + link(m.NotesURL, 'Full notes') + '</p>' : ''), i === 0);
       }).join('') || '<p class="muted">No meeting summaries yet.</p>') + '</div></div>';
     if (done.length) {
-      html += '<div class="section">' + disc({ title: 'Completed action items', meta: done.length + ' item' + (done.length === 1 ? '' : 's') }, actionTable(done)) + '</div>';
+      html += '<div class="section" id="sec-done-actions">' + disc({ title: 'Completed action items', meta: done.length + ' item' + (done.length === 1 ? '' : 's') }, actionTable(done)) + '</div>';
     }
     $('#view-meetings').innerHTML = html;
   }
@@ -507,24 +569,65 @@
           Math.round(map[k] / max * 100) + '%"></span></span><span class="n">' + map[k] + '</span></div>';
       }).join('');
     }
+    var reports = b.reports || [];
     var html = '<h2>Access Barrier Log</h2>' +
-      '<p class="lead">A de-identified tally of barriers families hit while trying to reach perinatal care, so the Task Force can see patterns and measure progress. It is not a clinical record and not a referral pathway.</p>' +
-      '<p class="notice"><strong>Never enter identifying details.</strong> No names, initials, dates of birth, addresses, exact dates, or anything that could identify a patient or family. Describe the barrier, not the person.</p>' +
-      (c.forms && c.forms.barrierFormUrl ? '<p style="margin:16px 0"><a class="btn" target="_blank" rel="noopener" href="' + esc(c.forms.barrierFormUrl) + '">Report a barrier</a></p>' : '') +
-      '<div class="grid"><div class="card"><h3>Total reports</h3><p style="font-size:34px;font-weight:700;color:var(--navy-800);margin:0">' + esc(b.total) + '</p></div>' +
+      '<p class="lead">A de-identified record of barriers families hit while trying to reach perinatal care, so the Task Force can see patterns and measure progress. Every report is listed below; open one to read it in full. This is not a clinical record and not a referral pathway.</p>' +
+      '<p class="notice"><strong>Never enter identifying details.</strong> No names, initials, dates of birth, addresses, exact dates, or anything that could identify a patient or family. Describe the barrier, not the person. Reports are visible to everyone who can open this page as soon as they are submitted, so there is no step between what you type and what is published.</p>' +
+      pageBar([{ href: (c.forms || {}).barrierFormUrl, label: 'Report a barrier', primary: true }],
+        [{ id: 'sec-barrier-summary', label: 'Summary' }, { id: 'sec-barrier-reports', label: 'Reports' }]) +
+      '<div class="grid" id="sec-barrier-summary"><div class="card"><h3>Total reports</h3><p style="font-size:34px;font-weight:700;color:var(--navy-800);margin:0">' + esc(b.total) + '</p></div>' +
       '<div class="card"><h3>By county</h3>' + bars(b.byCounty) + '</div>' +
       '<div class="card"><h3>By month</h3>' + bars(b.byMonth, true) + '</div></div>' +
       '<div class="section" style="margin-top:14px"><div class="card"><h3>By barrier category</h3>' + bars(b.byCategory) + '</div></div>';
-    if (b.published.length) {
-      html += '<div class="section">' + disc({
-        title: 'Reviewed examples',
-        meta: b.published.length + ' entry' + (b.published.length === 1 ? '' : 'ies') + ' · shown only after a co-chair reviewed it for identifying details'
-      }, b.published.map(function (p) {
-        return '<div class="card"><p class="meta">' + esc(p.month) + ' · ' + esc(p.county) + ' · ' + esc(p.service) + '</p>' +
-          '<span class="pill">' + esc(p.category) + '</span>' + para(p.description) + '</div>';
-      }).join('')) + '</div>';
+
+    html += '<div class="section" id="sec-barrier-reports"><h3>Reports (' + reports.length + ')</h3>';
+    if (!reports.length) {
+      html += '<p class="muted">No barriers have been reported yet. The first report will appear here as soon as it is submitted.</p></div>';
+    } else {
+      html += '<div class="filters">' +
+        '<label>County <select id="fBarCounty"><option value="">All</option>' +
+        uniq(reports.map(function (r) { return r.county; })).map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
+        '<label>Category <select id="fBarCat"><option value="">All</option>' +
+        uniq(reports.map(function (r) { return r.category; })).map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
+        '<label>Service <select id="fBarSvc"><option value="">All</option>' +
+        uniq(reports.map(function (r) { return r.service; })).map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
+        '</div>' + accBar('barrierList', 'bCount') + '<div id="barrierList"></div></div>';
     }
     $('#view-barriers').innerHTML = html;
+
+    if (!reports.length) return;
+    function applyBarriers() {
+      var county = $('#fBarCounty').value, cat = $('#fBarCat').value, svc = $('#fBarSvc').value;
+      var list = reports.filter(function (r) {
+        return (!county || r.county === county) && (!cat || r.category === cat) && (!svc || r.service === svc);
+      });
+      $('#bCount').textContent = list.length + ' of ' + reports.length;
+      $('#barrierList').innerHTML = list.map(function (r) {
+        var body =
+          '<dl class="report">' +
+          '<dt>Month of occurrence</dt><dd>' + esc(r.month) + '</dd>' +
+          '<dt>County</dt><dd>' + esc(r.county) + '</dd>' +
+          '<dt>Barrier category</dt><dd>' + esc(r.category) + '</dd>' +
+          '<dt>Service type</dt><dd>' + esc(r.service) + '</dd>' +
+          (r.org ? '<dt>Reporting organisation</dt><dd>' + esc(r.org) + '</dd>' : '') +
+          '</dl>' +
+          '<h4>What happened</h4>' +
+          (r.textWithheld
+            ? '<p class="muted">The written description is held until a co-chair has reviewed it for identifying details.</p>'
+            : (r.description ? para(r.description) : '<p class="muted">No description was entered.</p>')) +
+          '<p class="meta">' + esc(r.reviewStatus) +
+          '. The reporter\'s identity is never published. Contact the co-chairs to follow up on a report.</p>';
+        return disc({
+          title: esc(r.category),
+          meta: [esc(r.month), esc(r.county), esc(r.service)].filter(Boolean).join(' · '),
+          tags: r.reviewed
+            ? '<span class="pill both">Reviewed</span>'
+            : '<span class="pill status-pending">Not yet reviewed</span>'
+        }, body);
+      }).join('') || '<p class="muted">No reports match.</p>';
+    }
+    ['fBarCounty', 'fBarCat', 'fBarSvc'].forEach(function (id) { $('#' + id).addEventListener('change', applyBarriers); });
+    applyBarriers();
   }
 
   /* ---------- utils ---------- */

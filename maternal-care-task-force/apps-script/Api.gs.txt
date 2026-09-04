@@ -113,7 +113,7 @@ function buildSiteContent_() {
     meetings: readPublished_(T.MEETINGS).sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
     actionItems: readPublished_(T.ACTION_ITEMS),
     announcements: announcements.sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
-    barriers: buildBarrierSummary_(),
+    barriers: buildBarrierSummary_(configAll),
     forms: {
       barrierFormUrl: configAll.BARRIER_FORM_URL || '',
       resourceFormUrl: configAll.RESOURCE_FORM_URL || ''
@@ -181,15 +181,31 @@ function normalizeMonth_(v) {
 }
 
 /**
- * Aggregates the de-identified BarrierLog into counts. Free-text descriptions
- * are exposed ONLY for rows an admin has marked Published = TRUE after review.
- * Reporter email addresses and reporting organizations are never returned.
+ * Aggregates the BarrierLog into counts and returns every report so members
+ * can open the full detail of each one.
+ *
+ * VISIBILITY is governed by the Config key BARRIER_DETAIL_VISIBILITY:
+ *   'full'     — every field of every report is served as soon as it is
+ *                submitted (the Task Force's chosen default).
+ *   'reviewed' — the closed-list fields of every report are served, but the
+ *                free-text description and the reporting organization are
+ *                withheld until a co-chair sets Published = TRUE.
+ *
+ * The reporter's email address is NEVER served under either setting.
+ * Free text is passed through scrubIdentifiers_ first. That is a safety net
+ * for obvious identifiers, not de-identification: no pattern can catch a
+ * name typed into a sentence, so the form's instructions remain the real
+ * control.
  * @return {Object}
  */
-function buildBarrierSummary_() {
+function buildBarrierSummary_(configAll) {
+  var empty = { total: 0, byCategory: {}, byCounty: {}, byMonth: {}, reports: [], visibility: 'full' };
   var rows;
-  try { rows = readTable_(CONFIG.TABS.BARRIER_LOG); } catch (e) { return { total: 0, byCategory: {}, byCounty: {}, byMonth: {}, published: [] }; }
-  var byCategory = {}, byCounty = {}, byMonth = {}, published = [];
+  try { rows = readTable_(CONFIG.TABS.BARRIER_LOG); } catch (e) { return empty; }
+  var visibility = String((configAll && configAll.BARRIER_DETAIL_VISIBILITY) || CONFIG.BARRIER_DETAIL_VISIBILITY_DEFAULT)
+    .trim().toLowerCase();
+  if (visibility !== 'reviewed') visibility = 'full';
+  var byCategory = {}, byCounty = {}, byMonth = {}, reports = [];
   rows.forEach(function (r) {
     // Closed-list fields come from Form dropdowns, but never trust that a
     // header still maps to a dropdown — anything unrecognized becomes a
@@ -201,19 +217,57 @@ function buildBarrierSummary_() {
     byCategory[cat] = (byCategory[cat] || 0) + 1;
     byCounty[county] = (byCounty[county] || 0) + 1;
     byMonth[month] = (byMonth[month] || 0) + 1;
-    if (isTruthyFlag_(r[CONFIG.PUBLISHED_COLUMN])) {
-      // The reporting organization is deliberately NOT published. In a
-      // two-county region a single-site program plus a month plus a service
-      // type can re-identify one family; the org adds nothing the Task Force
-      // cannot get from the sheet itself.
-      published.push({
-        month: month, county: county, category: cat,
-        service: oneOf_(r['Service type'], BARRIER_SERVICES_),
-        description: String(r['Brief description'] || '').slice(0, CONFIG.BARRIER_TEXT_MAX)
-      });
-    }
+    var reviewed = isTruthyFlag_(r[CONFIG.PUBLISHED_COLUMN]);
+    var showText = (visibility === 'full') || reviewed;
+    reports.push({
+      // Closed-list fields, always served. These carry no free text.
+      month: month,
+      county: county,
+      category: cat,
+      service: oneOf_(r['Service type'], BARRIER_SERVICES_),
+      // Free text and the reporting organization, subject to visibility.
+      // The organization plus a month plus a service type can point at one
+      // family where a program has a single site, so it travels with the
+      // description rather than with the closed-list fields.
+      org: showText ? scrubIdentifiers_(r['Reporting organization'], 120) : '',
+      description: showText ? scrubIdentifiers_(r['Brief description'], CONFIG.BARRIER_TEXT_MAX) : '',
+      textWithheld: !showText,
+      reviewed: reviewed,
+      reviewStatus: reviewed ? 'Reviewed by a co-chair'
+        : (String(r['Review status'] || '').trim() || 'Not yet reviewed')
+    });
   });
-  return { total: rows.length, byCategory: byCategory, byCounty: byCounty, byMonth: byMonth, published: published };
+  // Newest first so the log reads as a feed.
+  reports.sort(function (a, b) { return String(b.month).localeCompare(String(a.month)); });
+  return {
+    total: rows.length, byCategory: byCategory, byCounty: byCounty, byMonth: byMonth,
+    reports: reports, visibility: visibility,
+    reviewedCount: reports.filter(function (x) { return x.reviewed; }).length
+  };
+}
+
+/**
+ * Removes patterns that are unmistakably identifiers before free text is
+ * served. A safety net, NOT de-identification — it cannot catch a name or a
+ * place written into a sentence, which is why the form tells reporters not
+ * to enter them and the page repeats that instruction.
+ *
+ * @param {*} v raw cell value
+ * @param {number} max characters to keep
+ * @return {string}
+ */
+function scrubIdentifiers_(v, max) {
+  var s = String(v === undefined || v === null ? '' : v);
+  s = s.replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '[email removed]');
+  s = s.replace(/(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g, '[phone removed]');
+  s = s.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[identifier removed]');
+  // Full calendar dates. The form asks for month only; an exact date narrows
+  // a birth to a single day, so it is removed wherever it appears.
+  s = s.replace(/\b\d{4}-\d{2}-\d{2}\b/g, '[date removed]');
+  s = s.replace(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g, '[date removed]');
+  s = s.replace(/\b\d{7,}\b/g, '[number removed]');
+  s = s.replace(/\s{2,}/g, ' ').trim();
+  return s.length > max ? s.slice(0, max) + '…' : s;
 }
 
 /**

@@ -16,7 +16,7 @@ var CONFIG = {
   APP_NAME: 'Maternal Care Task Force',
   APP_SUBTITLE: 'Cecil and Harford Counties, Maryland',
   APP_SHORT_NAME: 'MCTF',
-  VERSION: '1.3.1',
+  VERSION: '1.4.0',
 
   // Script Property keys (values written by Setup.gs, never hardcoded here)
   PROP_CONTENT_SS_ID: 'MCTF_CONTENT_SPREADSHEET_ID',
@@ -59,7 +59,16 @@ var CONFIG = {
 
   // Barrier log free-text field maximum length (kept short to discourage
   // narrative that could re-identify a person).
-  BARRIER_TEXT_MAX: 500
+  BARRIER_TEXT_MAX: 500,
+
+  // Who can read the full detail of a barrier report.
+  //   'full'     — every field of every report is visible to every visitor as
+  //                soon as it is submitted. Task Force decision, 2026-09-04.
+  //   'reviewed' — closed-list fields visible immediately; free text and the
+  //                reporting organization held until a co-chair reviews.
+  // Overridden per-deployment by the Config tab key BARRIER_DETAIL_VISIBILITY,
+  // so the co-chairs can tighten this by editing one cell.
+  BARRIER_DETAIL_VISIBILITY_DEFAULT: 'full'
 };
 
 /**

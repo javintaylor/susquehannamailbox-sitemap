@@ -146,11 +146,43 @@ Prepared for the Task Force co-chairs and county health department privacy offic
        anonymous URL parameter reaches the log.
      - Only allowlisted Config keys are served; the Config tab cannot be gated.
 
-7. OPEN QUESTIONS FOR THE TASK FORCE
+7. BARRIER REPORT VISIBILITY (owner decision, 2026-09-04)
+   Every barrier report is now readable in full by every visitor as soon as
+   it is submitted, replacing the co-chair review gate that previously held
+   free text back until Published = TRUE. Reports remain listed with their
+   review state so a reader can see which have been checked.
+
+   // COMPLIANCE ASSUMPTION: Members will follow the form's instruction not
+   //   to enter identifying details, so unreviewed free text is safe to
+   //   publish immediately.
+   // BASIS: Owner decision, 2026-09-04. The Task Force needs to see what is
+   //   being reported to act on it; a review queue that delays publication
+   //   was judged to cost more than it protects.
+   // RISK IF WRONG: The web app is deployed anonymously ("Anyone"), so a
+   //   reporter's slip becomes world-readable with no step in between and no
+   //   way to un-publish what has already been read or indexed. In a
+   //   two-county region a month plus a service type plus a single-site
+   //   organisation can identify one family even without a name.
+   // MITIGATIONS IN CODE: reporter email is never served; scrubIdentifiers_
+   //   removes emails, phone numbers, exact dates and long digit strings
+   //   before any text leaves the server (a safety net, NOT
+   //   de-identification — no pattern catches a name in a sentence); the
+   //   form and the page both state the rule; and the Config key
+   //   BARRIER_DETAIL_VISIBILITY = reviewed restores the review gate for
+   //   free text and the reporting organisation by editing one cell, with
+   //   no code change or redeploy.
+   // NEEDS CONFIRMATION FROM: Dr. Karyl Rattay and Lauren Levy (co-chairs),
+   //   and the county health department privacy officers.
+   // DATE: 2026-09-04
+
+8. OPEN QUESTIONS FOR THE TASK FORCE
    a. Do the co-chairs accept the public-URL model, and PHG hosting during
       development, with handoff to a county account when they are ready?
    b. Which county staff should be added as admins alongside
       admin@performancehealthgroup.org?
+   c. Do the co-chairs accept publishing barrier reports unreviewed on an
+      anonymous URL, or should BARRIER_DETAIL_VISIBILITY be set to
+      'reviewed' so free text waits for a check? See section 7.
    c. Who reviews BarrierLog submissions and on what cadence?
    d. Should member contact details be shown at all, or should the site
       point to the co-chairs as the single contact?

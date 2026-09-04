@@ -151,6 +151,19 @@
   .disc .disc[open] > summary { border-bottom: 0; }
   .disc .disc > .disc-body { padding: 0 4px 14px 32px; }
 
+  /* Page action bar: what you can do here, and where you can jump to. */
+  .pagebar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .pagebar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pagebar-jumps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-left: auto; }
+  .pagebar-label { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; }
+  .pagebar-jumps a { font-size: 13px; font-weight: 600; color: var(--accent-dark); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 1px; transition: border-color .16s var(--ease), color .16s var(--ease); }
+  .pagebar-jumps a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  [tabindex="-1"]:focus { outline: none; }
+  @media (max-width: 640px) {
+    .pagebar-jumps { margin-left: 0; width: 100%; }
+    .pagebar-actions .btn { flex: 1 1 auto; text-align: center; }
+  }
+
   .acc-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
   .acc-bar button { border: 1px solid var(--line-strong); background: var(--card); color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 600; padding: 5px 11px; border-radius: 6px; cursor: pointer; transition: background .16s var(--ease), border-color .16s var(--ease); }
   .acc-bar button:hover { background: var(--navy-050); border-color: var(--muted); }
@@ -185,8 +198,13 @@
 
   /* ---------------- filters ---------------- */
   .filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; align-items: center; }
-  .filters label { font-size: 13px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
-  .filters select, .filters input { font: inherit; font-size: 14px; padding: 6px 9px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--card); color: var(--ink); min-width: 150px; }
+  .filters label { font-size: 13px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+  .filters select, .filters input {
+    font: inherit; font-size: 14px; padding: 6px 9px; border: 1px solid var(--line-strong);
+    border-radius: 6px; background: var(--card); color: var(--ink);
+    min-width: 0; width: 100%; max-width: 260px; flex: 1 1 auto;
+    text-overflow: ellipsis;
+  }
   .filters select:hover, .filters input:hover { border-color: var(--muted); }
   .count { font-size: 13px; color: var(--muted); margin-left: auto; }
 
@@ -198,6 +216,12 @@
   .cite.muted { color: var(--muted); font-style: italic; }
   .implication { background: var(--accent-050); border: 1px solid #cfe3e9; border-radius: var(--radius); padding: 10px 12px; margin-top: 10px; font-size: 14px; }
   .result { color: var(--pos); font-weight: 650; }
+
+  /* barrier report detail */
+  dl.report { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0 0 14px; font-size: 14px; }
+  dl.report dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding-top: 2px; }
+  dl.report dd { margin: 0; }
+  @media (max-width: 640px) { dl.report { grid-template-columns: 1fr; gap: 0 0; } dl.report dt { margin-top: 8px; } }
 
   /* ---------------- bars ---------------- */
   .bar { display: flex; align-items: center; gap: 10px; margin: 5px 0; font-size: 13.5px; }
@@ -233,5 +257,8 @@
     th, td { font-size: 13px; padding: 8px 10px; }
     .bar .lbl { min-width: 130px; }
     .count { margin-left: 0; width: 100%; }
+    .filters { gap: 8px; }
+    .filters label { width: 100%; }
+    .filters select, .filters input { max-width: none; }
   }
 </style>

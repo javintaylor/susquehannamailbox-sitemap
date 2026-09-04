@@ -4,6 +4,17 @@ read by header name) but header text must match exactly. A column named
 "Published" gates what the site shows; TRUE/yes/y/1 publish the row.
 
 Config           Key | Value | Notes
+  BARRIER_DETAIL_VISIBILITY controls how much of each barrier report the
+  site shows:
+    full     - every field of every report is readable by every visitor as
+               soon as it is submitted. This is the Task Force's setting.
+    reviewed - the closed-list fields (month, county, category, service) are
+               shown for every report immediately, but the written
+               description and the reporting organisation are held until a
+               co-chair sets Published = TRUE on that row.
+  Change it by editing that one cell; no code change and no redeploy.
+  The reporter's email address is never served under either setting.
+
   Keys used by the site: SITE_TITLE, SUBTITLE, TAGLINE, CONTACT_EMAIL, NEXT_MEETING,
   FIND_HELP_URL, BARRIER_FORM_URL, RESOURCE_FORM_URL.
 
@@ -83,6 +94,10 @@ Announcements    Date | Title | Body | LinkURL | ExpiresOn | Published
   Rows past ExpiresOn are hidden automatically.
 
 BarrierLog       (Google Form destination — do not edit header)
+  Every row is shown on the site. The Published column no longer decides
+  whether a report appears; it records that a co-chair has reviewed it, and
+  the site labels each report Reviewed or Not yet reviewed accordingly.
+  Under BARRIER_DETAIL_VISIBILITY = reviewed it also gates the free text.
                  Timestamp | Email Address | Month of occurrence | County |
                  Barrier category | Service type | Reporting organization |
                  Brief description | May a co-chair contact you for more
