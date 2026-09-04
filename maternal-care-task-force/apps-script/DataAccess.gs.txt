@@ -60,8 +60,23 @@ function readTable_(tabName) {
 function readPublished_(tabName) {
   var rows = readTable_(tabName);
   if (!rows.length) return rows;
-  var hasFlag = Object.prototype.hasOwnProperty.call(rows[0], CONFIG.PUBLISHED_COLUMN);
-  if (!hasFlag) return rows;
+  // FAIL CLOSED. If the Published header has been deleted, renamed, or typed
+  // with a stray character, the publish gate cannot be evaluated — so serve
+  // NOTHING rather than everything. Returning all rows here would silently
+  // publish the whole tab to an anonymous URL.
+  var headerPresent = rows.some(function (r) {
+    return Object.prototype.hasOwnProperty.call(r, CONFIG.PUBLISHED_COLUMN);
+  });
+  if (!headerPresent) {
+    console.error('PUBLISH_GATE_MISSING tab=' + tabName + ' — serving 0 rows. ' +
+                  'Restore the "' + CONFIG.PUBLISHED_COLUMN + '" header.');
+    writeAudit_({
+      actor: 'system', actorRole: 'system', action: 'PUBLISH_GATE_MISSING',
+      resourceType: 'Tab', resourceId: tabName, outcome: 'DENIED',
+      justification: 'Published column absent; tab withheld from the site.'
+    });
+    return [];
+  }
   return rows.filter(function (r) { return isTruthyFlag_(r[CONFIG.PUBLISHED_COLUMN]); });
 }
 

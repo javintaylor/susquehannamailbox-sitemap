@@ -50,8 +50,11 @@
   </main>
 
   <footer class="foot wrap">
+    <p class="emergency"><strong>In an emergency, call 911.</strong> This site is a reference directory. It provides no medical advice, no triage, and no clinical care, and it is not monitored. If you are pregnant or postpartum and need mental health support now, call or text the National Maternal Mental Health Hotline at 1-833-852-6262 (1-833-TLC-MAMA), available 24/7.</p>
     <p><strong>Reference site for Task Force members.</strong> This site holds no patient information. Do not enter names, dates of birth, or any detail that could identify a patient or family anywhere on this site or its forms.</p>
-    <p class="muted">Content is maintained by the Task Force co-chairs. Version <?= version ?> · <span id="generatedAt"></span></p>
+    <p><strong>Not an official government publication.</strong> This site is not published by the Cecil County Health Department, the Harford County Health Department, or the Maryland Department of Health. Content is maintained by the Task Force co-chairs. Program details are compiled from public sources and member reports and change frequently — confirm directly with a provider before relying on or referring to any listing.</p>
+    <p class="muted">Hosted for the Task Force on a Google Workspace account operated by Performance Health Group LLC. Hosting is a technical role only; editorial decisions belong to the co-chairs, and no member organization's services are promoted here.</p>
+    <p class="muted">Version <?= version ?> · <span id="generatedAt"></span></p>
   </footer>
 
   <?!= include('Client') ?>

@@ -1,0 +1,152 @@
+PRE-LAUNCH AUDIT — MATERNAL CARE TASK FORCE MEMBER SITE
+Conducted 2026-09-04, before any public deployment
+Version audited 1.0.0 -> remediated in 1.1.0
+
+METHOD
+Seven independent review lenses over the 125 seeded content rows and the
+front-end code, followed by adversarial verification of every finding: each
+claim was handed to a skeptic instructed to refute it, with blocker/high
+findings independently checked twice (once for factual accuracy, once for
+practical consequence before launch). 28 raw findings; 26 survived; 2 refuted.
+
+Lenses: PHI/re-identification; neutrality and conflict of interest; factual
+accuracy and citation honesty; personal data of named members; front-end
+security under anonymous access; data integrity against real values; clinical
+scope and legal exposure.
+
+EXPOSURE AT TIME OF AUDIT
+None. The web app had not been deployed. The content spreadsheet was shared
+with no one. Every finding below was corrected before the site became
+reachable.
+
+SEVERITY COUNTS
+Blocker 5 (three describing the same defect from different lenses)
+High 13, Medium 7, Low 1.
+
+--------------------------------------------------------------------------
+BLOCKERS
+--------------------------------------------------------------------------
+B1. Action item AI-009 could re-identify one patient. (Found independently by
+    three lenses.) The row read "Follow up on induction cancellation and
+    transport case with OB nurse navigator (details shared privately, not on
+    this site)", owned by two named clinicians. Combined with three other
+    published rows — the member row naming a residential SUD program for
+    pregnant women, that program's single Elkton address in Resources, and the
+    Problems row attributing the account to "residential SUD treatment
+    provider" — the singular "case" narrowed to one identifiable person in a
+    program that holds a handful of residents.
+    FIXED: rewritten as a standing process item owned by the co-chairs, with
+    no case reference and no clinician owners. The Problems row attribution was
+    genericised and the episode detail removed.
+
+B2. A Task Force member's not-yet-open midwifery practice was published in the
+    resource directory, together with her affiliated nonprofit in formation.
+    A practice with no address, hours, or eligibility is not referable, and
+    pre-announcing a member's for-profit business breaches the neutrality rule.
+    FIXED: Published set to FALSE; the contact routing through a named member
+    removed.
+
+B3. Formula injection into the audit log. doGet passed the anonymous, unbounded
+    ?page= URL parameter straight into the audit record. appendRow uses
+    setValues semantics, so a value beginning with = + - @ is stored as a live
+    formula — meaning an anonymous visitor could write executable content into
+    the security log.
+    FIXED: the parameter is allowlisted against known view names at the entry
+    point, and auditSafe_ now coerces, control-strips, apostrophe-prefixes and
+    truncates every audit field. An audit log must never execute what it
+    records.
+
+B4. Unverified adverse claims about a named hospital carried Confidence High.
+    The ChristianaCare row asserted that scheduled inductions "are requests,
+    not fixed appointments" and that Maryland Medicaid is accepted "for the
+    time being", citing the hospital's own marketing page as source.
+    FIXED: the induction claim removed from the directory row (it survives as a
+    hedged, attributed statement in Problems), eligibility rewritten to direct
+    readers to confirm coverage with the hospital, Confidence lowered to Medium.
+
+--------------------------------------------------------------------------
+HIGH
+--------------------------------------------------------------------------
+H1.  Barrier log published the reporting organization beside 500 characters of
+     narrative. Month + county + service + a single-site organization can
+     re-identify a family. FIXED: org removed from the served payload and from
+     the rendered card.
+H2.  Member rows carried service advertising in role fields while other members
+     got a bare line. FIXED: role fields reduced to professional identity.
+H3.  "Delaware MFM practices do not accept Maryland Medicaid" stated as flat
+     fact in two places with no source. FIXED: hedged and attributed in both,
+     flagged as an open verification item for the Insurance team.
+H4.  Voices of Hope recovery house rated High while the research report listed
+     it as unverified. FIXED: rewritten to state what is actually known;
+     Confidence lowered to Low.
+H5.  Dr. Karen Blakemore, not a member, named publicly as a recruitment target
+     in an action item and a meeting summary. FIXED: de-identified to role and
+     institution in both.
+H6.  The ShareContact gate covers only the Members tab; members named in
+     free text elsewhere are not protected. DOCUMENTED as a review rule; the
+     recruitment de-identification removes the live instances.
+H7.  The entire Config tab was serialized to every browser with no gate (it has
+     no Published column and cannot have one). FIXED: an explicit allowlist —
+     only SITE_TITLE, TAGLINE and NEXT_MEETING are served; form URLs are read
+     server-side.
+H8.  Unreviewed barrier free text could reach the page as a chart label,
+     bypassing co-chair review, because the month bucket was raw input.
+     FIXED: month is parsed to strict YYYY-MM, and category/county/service are
+     matched against closed vocabularies; anything else becomes "Unspecified".
+H9.  The Data tab cited a 2024 Vital Statistics report that does not exist —
+     VSA's latest published reports are 2023. FIXED: provenance restated as the
+     Task Force slide deck citing 2024 VSA figures.
+H10. Three of four Action Teams rendered with zero members, because the roster
+     join matched on the team name's first word, so "Regional" swallowed
+     everyone. FIXED: exact normalized token matching, verified in a browser.
+     Empty rosters now reflect reality — only the Regional System of Care team
+     has met.
+H11. No publisher disclosure, official-status disclaimer, medical-advice
+     disclaimer, or emergency guidance on a page branded with two county names.
+     FIXED: footer now carries all four, including 911 and the National
+     Maternal Mental Health Hotline.
+
+--------------------------------------------------------------------------
+MEDIUM AND LOW
+--------------------------------------------------------------------------
+M1. The served bundle was a denylist superset of what the page renders, so any
+    new sheet column would ship silently. PARTIALLY ADDRESSED via the Config
+    allowlist; a per-tab field allowlist remains open work.
+M2. Confidence inflated to High on member-led organizations' unverified claims
+    about themselves. FIXED, and a standing rule added: a fact sourced only to
+    a member's report about that member's own organization is never High.
+M3. Upper Bay rated High while its own text said the service was in
+    development. FIXED: Medium, future tense, call-first caveat.
+M4. DateVerified stamped on rows whose only source was a member report, so the
+    page printed "Verified <date>" for something never checked. FIXED: those
+    rows carry no DateVerified and the client renders "Reported by a Task Force
+    member — not independently verified".
+M5. The Members tab has no provenance column while every other content tab has
+    one. DOCUMENTED: unconfirmed credentials removed pending confirmation; a
+    consent note added; adding SourceOfRole/DateVerified remains open work.
+M6. readPublished_ failed OPEN when the Published header was missing or
+    renamed, publishing an entire tab. FIXED: fails closed, returns nothing,
+    logs an audit row naming the tab.
+M7. The "Both" county filter hid all statewide and national rows. FIXED.
+L1. A non-URL SourceURL rendered as a dead "Source" label. FIXED.
+
+--------------------------------------------------------------------------
+REFUTED (reported, then dropped on verification)
+--------------------------------------------------------------------------
+Two findings did not survive. One duplicated B1 from a weaker angle. One
+claimed the workforce problem statement was written to point at a member's
+future practice; reading the row showed it describes a regional shortage and
+mentions the practice only as a fact about capacity.
+
+--------------------------------------------------------------------------
+OPEN WORK (not blocking launch)
+--------------------------------------------------------------------------
+1. Per-tab field allowlist in buildSiteContent_, so a new sheet column is
+   invisible until explicitly served (M1).
+2. SourceOfRole and DateVerified columns on the Members tab (M5).
+3. Every named member should confirm their own row before the site is shared.
+4. Convert the barrier form's month question to a dropdown; the server-side
+   normalization already contains the risk.
+5. Confirm with ChristianaCare which Maryland HealthChoice MCOs are accepted
+   and when free transport ends — the single most consequential unknown for
+   families.

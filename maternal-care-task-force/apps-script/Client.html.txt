@@ -114,7 +114,7 @@
 
     html += '<div class="section"><h3>Action Teams</h3></div>';
     teams.forEach(function (t) {
-      var teamMembers = members.filter(function (m) { return String(m.ActionTeams || '').toLowerCase().indexOf(String(t.Name).toLowerCase().split(' ')[0]) >= 0; });
+      var teamMembers = members.filter(function (m) { return onTeam(m.ActionTeams, t.Name); });
       html += '<div class="team-block"><div class="card accent"><h3>' + esc(t.Name) + '</h3>' + para(t.Purpose) +
         (t.CoChairs ? '<p><strong>Co-chairs:</strong> ' + esc(t.CoChairs) + '</p>' : '') +
         (t.StaffSupport ? '<p><strong>Staff support:</strong> ' + esc(t.StaffSupport) + '</p>' : '') +
@@ -141,7 +141,7 @@
     var cats = uniq(all.map(function (r) { return r.Category; }));
     var types = uniq(all.map(function (r) { return r.Type; }));
     var html = '<h2>Resources &amp; Programs</h2><p class="lead">Current federal, state, and local programs for perinatal care in Cecil and Harford Counties. Verified dates are shown on each card; confirm details before referring.</p>' +
-      '<div class="filters"><label>County <select id="fCounty"><option value="">All</option><option>Cecil</option><option>Harford</option><option>Both</option><option>Statewide</option></select></label>' +
+      '<div class="filters"><label>County <select id="fCounty"><option value="">All</option><option>Cecil</option><option>Harford</option><option value="both">Both / regional</option><option>Statewide</option></select></label>' +
       '<label>Category <select id="fCat"><option value="">All</option>' + cats.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
       '<label>Level <select id="fType"><option value="">All</option>' + types.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
       '<label>Search <input id="fText" type="search" placeholder="name or keyword"></label><span class="count" id="fCount"></span></div>' +
@@ -163,8 +163,7 @@
         return '<div class="card"><h3>' + esc(r.Name) + '</h3><p class="meta">' + esc(r.Type) + ' · ' + esc(r.Category) + '</p>' + countyPill(r.Counties) +
           para(r.Description) + (r.Eligibility ? '<p><strong>Eligibility:</strong> ' + esc(r.Eligibility) + '</p>' : '') +
           (r.Contact ? '<p><strong>Contact:</strong> ' + esc(r.Contact) + '</p>' : '') +
-          '<p>' + link(r.URL, 'Website') + (r.SourceURL && r.SourceURL !== r.URL ? ' · ' + link(r.SourceURL, 'Source') : '') + '</p>' +
-          '<p class="meta">Verified ' + esc(r.DateVerified || 'n/a') + (r.Confidence ? ' · Confidence: ' + esc(r.Confidence) : '') + '</p></div>';
+          linksLine(r) + provenanceLine(r) + '</div>';
       }).join('') || '<p class="muted">No resources match.</p>';
     }
     ['fCounty', 'fCat', 'fType'].forEach(function (id) { $('#' + id).addEventListener('change', apply); });
@@ -224,7 +223,7 @@
       '<div class="section" style="margin-top:20px"><div class="card"><h3>By barrier category</h3>' + bars(b.byCategory) + '</div></div>';
     if (b.published.length) {
       html += '<div class="section"><h3>Reviewed examples</h3><p class="muted small">Shown only after a co-chair has reviewed the entry for identifying details.</p>' + b.published.map(function (p) {
-        return '<div class="card"><p class="meta">' + esc(p.month) + ' · ' + esc(p.county) + ' · ' + esc(p.service) + ' · reported by ' + esc(p.org) + '</p><span class="pill">' + esc(p.category) + '</span>' + para(p.description) + '</div>';
+        return '<div class="card"><p class="meta">' + esc(p.month) + ' · ' + esc(p.county) + ' · ' + esc(p.service) + '</p><span class="pill">' + esc(p.category) + '</span>' + para(p.description) + '</div>';
       }).join('') + '</div>';
     }
     $('#view-barriers').innerHTML = html;
@@ -239,13 +238,48 @@
     }
   }
 
+  /* ---------- resource rendering helpers ---------- */
+  // Renders the Website / Source links, omitting a Source that is not a real
+  // URL (several rows carry "Task Force member report ..." there, which would
+  // otherwise print as a dead "Source" label after a stray separator).
+  function linksLine(r) {
+    var parts = [];
+    if (isUrl(r.URL)) parts.push(link(r.URL, 'Website'));
+    if (isUrl(r.SourceURL) && r.SourceURL !== r.URL) parts.push(link(r.SourceURL, 'Source'));
+    return parts.length ? '<p>' + parts.join(' · ') + '</p>' : '';
+  }
+  // States provenance honestly. A row whose only source is a member report was
+  // never independently verified, so it must not display "Verified <date>".
+  function provenanceLine(r) {
+    var src = String(r.SourceURL || '');
+    var memberReport = src && !isUrl(src);
+    var bits = [];
+    if (memberReport) bits.push('Reported by a Task Force member — not independently verified');
+    else if (r.DateVerified) bits.push('Verified ' + esc(r.DateVerified));
+    if (r.Confidence) bits.push('Confidence: ' + esc(r.Confidence));
+    if (memberReport && src) bits.push(esc(src));
+    return bits.length ? '<p class="meta">' + bits.join(' · ') + '</p>' : '';
+  }
+  function isUrl(u) { return /^https?:\/\//i.test(String(u || '')); }
+
   /* ---------- utils ---------- */
+  // Exact team matching. The previous first-word heuristic matched any member
+  // whose ActionTeams string contained the team's first word, so "Regional"
+  // swallowed everyone and the other three teams rendered empty.
+  function onTeam(memberTeams, teamName) {
+    var norm = function (s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); };
+    var target = norm(teamName);
+    if (!target) return false;
+    return String(memberTeams || '').split(/[;,]/).map(norm).filter(Boolean).some(function (t) {
+      return t === target || target.indexOf(t) === 0 || t.indexOf(target) === 0;
+    });
+  }
   // Filter value -> which Counties cell text should match.
   function countyMatches(cellText, filter) {
     var wide = cellText.indexOf('both') >= 0 || cellText.indexOf('regional') >= 0;
     var statewide = cellText.indexOf('statewide') >= 0 || cellText.indexOf('national') >= 0;
     if (filter === 'cecil' || filter === 'harford') return cellText.indexOf(filter) >= 0 || wide || statewide;
-    if (filter === 'both') return wide;
+    if (filter === 'both') return wide || statewide;
     if (filter === 'statewide') return statewide;
     return true;
   }

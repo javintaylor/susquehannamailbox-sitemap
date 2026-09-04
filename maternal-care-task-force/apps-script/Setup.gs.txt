@@ -88,7 +88,8 @@ function verifyProject() {
     { file: 'Api.gs',           symbol: 'getSiteContent',         kind: 'function' },
     { file: 'Setup.gs',         symbol: 'runSetup',               kind: 'function' },
     { file: 'Seed.gs',          symbol: 'seedAll',                kind: 'function' },
-    { file: 'SeedResources.gs', symbol: 'seedResources',          kind: 'function' }
+    { file: 'SeedResources.gs', symbol: 'seedResources',          kind: 'function' },
+    { file: 'Remediate.gs',     symbol: 'reseedTabs',             kind: 'function' }
   ];
   var missing = [];
   var lines = expected.map(function (e) {

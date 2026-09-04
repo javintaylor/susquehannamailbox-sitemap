@@ -14,13 +14,22 @@
  * No write endpoint exists in the web app by design (see Auth.gs).
  */
 
+/** View names the site can be deep-linked to. Anything else is 'invalid'. */
+var VALID_PAGES_ = ['home', 'problems', 'structure', 'funding', 'resources',
+                    'data', 'meetings', 'barriers'];
+
 /**
  * Serves the single-page member site.
  * @param {GoogleAppsScript.Events.DoGet} e
  * @return {GoogleAppsScript.HTML.HtmlOutput}
  */
 function doGet(e) {
-  authorizeRead_('SitePage', (e && e.parameter && e.parameter.page) || 'home');
+  // The page parameter is anonymous, attacker-controlled input that ends up
+  // in the audit spreadsheet. Allowlist it at the entry point; anything that
+  // is not a known view name is recorded as 'invalid', never echoed.
+  var page = String((e && e.parameter && e.parameter.page) || 'home');
+  if (VALID_PAGES_.indexOf(page) < 0) page = 'invalid';
+  authorizeRead_('SitePage', page);
   var tpl = HtmlService.createTemplateFromFile('Index');
   tpl.appName = CONFIG.APP_NAME;
   tpl.version = CONFIG.VERSION;
@@ -65,13 +74,23 @@ function getSiteContent() {
   return bundle;
 }
 
+/** The only Config keys ever sent to a browser. */
+var SERVED_CONFIG_KEYS_ = ['SITE_TITLE', 'TAGLINE', 'NEXT_MEETING'];
+
 /**
  * Assembles the published content bundle from the sheet. Internal.
  * @return {Object}
  */
 function buildSiteContent_() {
   var T = CONFIG.TABS;
-  var config = readConfigMap_();
+  var configAll = readConfigMap_();
+  // The Config tab has NO Published column and cannot have one, so it can
+  // never be gated. Serve only the keys the UI actually renders; everything
+  // else (form IDs, notes, future operational keys) stays server-side.
+  var config = SERVED_CONFIG_KEYS_.reduce(function (o, k) {
+    o[k] = configAll[k] || '';
+    return o;
+  }, {});
   var members = readPublished_(T.MEMBERS).map(redactMemberContact_);
   var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   var announcements = readPublished_(T.ANNOUNCEMENTS).filter(function (a) {
@@ -94,8 +113,8 @@ function buildSiteContent_() {
     announcements: announcements.sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
     barriers: buildBarrierSummary_(),
     forms: {
-      barrierFormUrl: config.BARRIER_FORM_URL || '',
-      resourceFormUrl: config.RESOURCE_FORM_URL || ''
+      barrierFormUrl: configAll.BARRIER_FORM_URL || '',
+      resourceFormUrl: configAll.RESOURCE_FORM_URL || ''
     }
   };
 }
@@ -119,10 +138,50 @@ function redactMemberContact_(m) {
   return out;
 }
 
+/** Closed vocabularies mirroring the Form's dropdown choices (Setup.gs). */
+var BARRIER_COUNTIES_ = ['Cecil', 'Harford', 'Both / Regional', 'Other'];
+var BARRIER_CATEGORIES_ = [
+  'Transportation cost or availability', 'Emergency / EMS transport',
+  'Insurance not accepted (incl. Maryland Medicaid out of state)',
+  'No in-county provider for service', 'Appointment availability / scheduling',
+  'Maternal-fetal medicine access', 'Behavioral health / perinatal mental health',
+  'Substance use treatment access', 'Material needs (car seat, crib, supplies)',
+  'Language / communication', 'Housing instability',
+  'Childcare to attend appointments', 'Other'];
+var BARRIER_SERVICES_ = [
+  'Prenatal care', 'Labor and delivery', 'Induction / scheduled procedure',
+  'Postpartum care', 'Newborn / pediatric', 'Lactation', 'Behavioral health',
+  'WIC / nutrition', 'Home visiting', 'Other'];
+
+/**
+ * Returns the value only when it is in the allowed list, else 'Unspecified'.
+ * @param {*} v
+ * @param {string[]} allowed
+ * @return {string}
+ */
+function oneOf_(v, allowed) {
+  var s = String(v === undefined || v === null ? '' : v).trim();
+  return allowed.indexOf(s) >= 0 ? s : 'Unspecified';
+}
+
+/**
+ * Accepts only YYYY-MM. Anything else counts toward the total but
+ * contributes no text to the page.
+ * @param {*} v
+ * @return {string}
+ */
+function normalizeMonth_(v) {
+  var m = String(v === undefined || v === null ? '' : v).match(/^(\d{4})-(\d{2})/);
+  if (!m) return 'Unspecified';
+  var mo = parseInt(m[2], 10);
+  if (mo < 1 || mo > 12) return 'Unspecified';
+  return m[1] + '-' + m[2];
+}
+
 /**
  * Aggregates the de-identified BarrierLog into counts. Free-text descriptions
  * are exposed ONLY for rows an admin has marked Published = TRUE after review.
- * Reporter email addresses are never returned.
+ * Reporter email addresses and reporting organizations are never returned.
  * @return {Object}
  */
 function buildBarrierSummary_() {
@@ -130,17 +189,24 @@ function buildBarrierSummary_() {
   try { rows = readTable_(CONFIG.TABS.BARRIER_LOG); } catch (e) { return { total: 0, byCategory: {}, byCounty: {}, byMonth: {}, published: [] }; }
   var byCategory = {}, byCounty = {}, byMonth = {}, published = [];
   rows.forEach(function (r) {
-    var cat = String(r['Barrier category'] || 'Unspecified');
-    var county = String(r['County'] || 'Unspecified');
-    var month = String(r['Month of occurrence'] || '').slice(0, 7) || 'Unspecified';
+    // Closed-list fields come from Form dropdowns, but never trust that a
+    // header still maps to a dropdown — anything unrecognized becomes a
+    // fixed bucket label so unreviewed free text can never surface as a
+    // chart label, bypassing co-chair review.
+    var cat = oneOf_(r['Barrier category'], BARRIER_CATEGORIES_);
+    var county = oneOf_(r['County'], BARRIER_COUNTIES_);
+    var month = normalizeMonth_(r['Month of occurrence']);
     byCategory[cat] = (byCategory[cat] || 0) + 1;
     byCounty[county] = (byCounty[county] || 0) + 1;
     byMonth[month] = (byMonth[month] || 0) + 1;
     if (isTruthyFlag_(r[CONFIG.PUBLISHED_COLUMN])) {
+      // The reporting organization is deliberately NOT published. In a
+      // two-county region a single-site program plus a month plus a service
+      // type can re-identify one family; the org adds nothing the Task Force
+      // cannot get from the sheet itself.
       published.push({
         month: month, county: county, category: cat,
-        service: String(r['Service type'] || ''),
-        org: String(r['Reporting organization'] || ''),
+        service: oneOf_(r['Service type'], BARRIER_SERVICES_),
         description: String(r['Brief description'] || '').slice(0, CONFIG.BARRIER_TEXT_MAX)
       });
     }

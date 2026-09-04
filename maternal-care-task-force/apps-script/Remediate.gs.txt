@@ -1,0 +1,170 @@
+/**
+ * FILE: Remediate.gs
+ *
+ * Applies corrections to the LIVE content spreadsheet after the seed files
+ * have been fixed.
+ *
+ * Why this file exists: seedIfEmpty_ (Seed.gs) deliberately skips any tab that
+ * already has data rows, so editing Seed.gs or SeedResources.gs changes
+ * NOTHING on a sheet that has already been seeded. The live rows are the ones
+ * the site serves, so they are the ones that must change.
+ *
+ * Approach: clear the data rows of the named content tabs (keeping the header
+ * row) and re-run the corresponding seed function. This is safer than
+ * surgical row edits — the seed files are the reviewed source of truth, so a
+ * clear-and-reseed guarantees the sheet matches them exactly.
+ *
+ * SAFETY:
+ *  - Only the nine CONTENT tabs can be cleared. The Google Form destination
+ *    tabs (BarrierLog, ResourceSubmissions) hold real submissions and are
+ *    hard-blocked; a request naming one is refused, not skipped silently.
+ *  - Every run is admin-gated and audited before anything is written, with a
+ *    justification recording exactly which tabs were rewritten.
+ *  - Any manual edit an admin made in the sheet is DESTROYED. Read the
+ *    warning in remediateV1_1 before running.
+ */
+
+/** Content tabs that may be cleared, mapped to the function that rebuilds them. */
+var RESEEDABLE_ = {
+  Purpose: 'seedPurpose',
+  Problems: 'seedProblems',
+  Structure: 'seedStructure',
+  Members: 'seedMembers',
+  Funding: 'seedFunding',
+  Data: 'seedData',
+  Meetings: 'seedMeetings',
+  ActionItems: 'seedActionItems',
+  Announcements: 'seedAnnouncements',
+  Resources: 'seedResources'
+};
+
+/**
+ * MAIN REMEDIATION for the 2026-09-04 pre-launch audit.
+ *
+ * WARNING: this DELETES every data row on the tabs it touches and rebuilds
+ * them from the seed files. Any edit made by hand in those tabs is lost. If
+ * anyone has edited the sheet since seeding, export a copy first
+ * (File > Download) so the edits can be reapplied afterwards.
+ *
+ * What it corrects (see docs/AUDIT_2026-09-04.txt):
+ *  - ActionItems: removes the action item that referenced one identifiable
+ *    patient case, and de-identifies two recruitment items naming a
+ *    non-member individual.
+ *  - Problems: hedges an unverified categorical claim about Delaware payer
+ *    acceptance; removes an episode detail and a source attribution that
+ *    together pointed at one reporting organization.
+ *  - Meetings: de-identifies the recruitment list in NextSteps.
+ *  - Members: removes service descriptions from role fields, drops
+ *    credentials that were not confirmed.
+ *  - Data: restates provenance (the figures come from the Task Force slide
+ *    deck citing 2024 VSA data; VSA's latest published reports are 2023).
+ *  - Resources: unpublishes a member's not-yet-open practice, corrects
+ *    inflated Confidence ratings, removes unverified adverse claims about a
+ *    named hospital, and clears DateVerified on member-report-only rows.
+ */
+function remediateV1_1() {
+  reseedTabs('ActionItems,Problems,Meetings,Members,Data,Resources',
+             'Pre-launch audit remediation 2026-09-04: PHI re-identification, ' +
+             'neutrality, and citation-accuracy corrections.');
+}
+
+/**
+ * Clears and rebuilds the named content tabs from the seed files.
+ *
+ * @param {string} csvTabNames Comma-separated tab names, e.g. 'Members,Data'.
+ * @param {string} justification Why — recorded in the audit log.
+ */
+function reseedTabs(csvTabNames, justification) {
+  requireAdmin_('RESEED_TABS');
+  if (!csvTabNames) throw new Error("Pass tab names, e.g. reseedTabs('Members,Data', 'why')");
+  if (!justification) throw new Error('Pass a justification — this is a destructive, audited operation.');
+
+  var names = csvTabNames.split(',').map(function (n) { return n.trim(); }).filter(Boolean);
+  var blocked = names.filter(function (n) { return !RESEEDABLE_.hasOwnProperty(n); });
+  if (blocked.length) {
+    writeAudit_({
+      actor: Session.getEffectiveUser().getEmail(), actorRole: 'admin',
+      action: 'RESEED_TABS', resourceType: 'Tab', resourceId: blocked.join(' '),
+      outcome: 'DENIED', justification: 'Tab is not re-seedable (form responses or unknown).'
+    });
+    throw new Error('Refusing to clear: ' + blocked.join(', ') +
+      '. Only these may be re-seeded: ' + Object.keys(RESEEDABLE_).join(', ') +
+      '. Form response tabs hold real submissions and are never cleared.');
+  }
+
+  var ss = openContentSpreadsheet_();
+  var report = [];
+  names.forEach(function (name) {
+    var sheet = ss.getSheetByName(name);
+    if (!sheet) throw new Error('Tab not found: ' + name);
+    var before = Math.max(0, sheet.getLastRow() - 1);
+
+    writeAudit_({
+      actor: Session.getEffectiveUser().getEmail(), actorRole: 'admin',
+      action: 'RESEED_TAB', resourceType: 'Tab', resourceId: name,
+      outcome: 'SUCCESS',
+      justification: justification + ' Cleared ' + before + ' row(s) for rebuild.'
+    });
+
+    if (before > 0) sheet.deleteRows(2, before);
+    SpreadsheetApp.flush();
+    callSeed_(RESEEDABLE_[name]);
+    var after = Math.max(0, ss.getSheetByName(name).getLastRow() - 1);
+    report.push(name + ': ' + before + ' -> ' + after);
+  });
+
+  purgeCacheInternal_();
+  console.log('Re-seeded ' + names.length + ' tab(s):');
+  report.forEach(function (r) { console.log('  ' + r); });
+  console.log('Cache purged. Reload the site to see the corrected content.');
+}
+
+/**
+ * Invokes a seed function by name. Apps Script has no reliable global object
+ * across files, so the mapping is explicit rather than dynamic.
+ * @param {string} fnName
+ */
+function callSeed_(fnName) {
+  switch (fnName) {
+    case 'seedPurpose': return seedPurpose();
+    case 'seedProblems': return seedProblems();
+    case 'seedStructure': return seedStructure();
+    case 'seedMembers': return seedMembers();
+    case 'seedFunding': return seedFunding();
+    case 'seedData': return seedData();
+    case 'seedMeetings': return seedMeetings();
+    case 'seedActionItems': return seedActionItems();
+    case 'seedAnnouncements': return seedAnnouncements();
+    case 'seedResources': return seedResources();
+    default: throw new Error('Unknown seed function: ' + fnName);
+  }
+}
+
+/**
+ * READ-ONLY check. Prints what the site would currently serve to an anonymous
+ * visitor, so a co-chair can review the actual public surface before the web
+ * app is deployed. Prints row counts and the fields most likely to carry a
+ * problem; it does not print whole rows.
+ */
+function previewPublicSurface() {
+  requireAdmin_('PREVIEW_PUBLIC_SURFACE');
+  var b = buildSiteContent_();
+  console.log('=== What an anonymous visitor would see ===');
+  ['purpose', 'problems', 'structure', 'members', 'funding', 'resources', 'data',
+   'meetings', 'actionItems', 'announcements'].forEach(function (k) {
+    console.log(k + ': ' + b[k].length + ' published row(s)');
+  });
+  console.log('barrier reports: ' + b.barriers.total + ' total, ' +
+              b.barriers.published.length + ' with narrative shown');
+  console.log('config keys served: ' + Object.keys(b.config).join(', '));
+  console.log('');
+  console.log('--- Action items (highest re-identification risk) ---');
+  b.actionItems.forEach(function (a) { console.log('  [' + a.ID + '] ' + a.Item + '  (owner: ' + a.Owner + ')'); });
+  console.log('');
+  console.log('--- Members with contact details published ---');
+  var shared = b.members.filter(function (m) { return m.Email || m.Phone; });
+  console.log(shared.length ? shared.map(function (m) { return '  ' + m.Name; }).join('\n') : '  none');
+  console.log('');
+  console.log('--- Resources still rated High confidence: ' +
+              b.resources.filter(function (r) { return r.Confidence === 'High'; }).length + ' ---');
+}

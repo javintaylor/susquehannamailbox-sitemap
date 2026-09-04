@@ -131,7 +131,22 @@ Prepared for the Task Force co-chairs and county health department privacy offic
      folder no portal user can reach, Editor access limited to named
      admins, and Drive file-level revision history retained.
 
-6. OPEN QUESTIONS FOR THE TASK FORCE
+6. PRE-LAUNCH AUDIT
+   A seven-lens adversarial audit was run on 2026-09-04 before deployment.
+   26 verified findings, including 5 blockers — one of which (a published
+   action item that could re-identify a single patient) would have been a
+   reportable disclosure had the site been live. All blockers and all high
+   findings were corrected in version 1.1.0. Full record and remaining open
+   work: docs/AUDIT_2026-09-04.txt.
+
+   The audit is the reason for three standing rules now in the code:
+     - readPublished_ fails CLOSED, so a damaged Published header withholds a
+       tab rather than publishing it.
+     - Every audit field is neutralized against formula injection, because an
+       anonymous URL parameter reaches the log.
+     - Only allowlisted Config keys are served; the Config tab cannot be gated.
+
+7. OPEN QUESTIONS FOR THE TASK FORCE
    a. Do the co-chairs accept the public-URL model, and PHG hosting during
       development, with handoff to a county account when they are ready?
    b. Which county staff should be added as admins alongside

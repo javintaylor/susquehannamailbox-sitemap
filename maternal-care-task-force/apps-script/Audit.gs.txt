@@ -12,6 +12,28 @@
  */
 
 /**
+ * Makes one value safe to store in a spreadsheet cell.
+ *
+ * appendRow uses setValues semantics, so a string beginning with = + - @
+ * (or a leading tab/CR) is stored as a live FORMULA. Audit fields can carry
+ * attacker-controlled text (an anonymous URL parameter reaches resourceId),
+ * so every field is coerced to a string, prefixed with an apostrophe when it
+ * could be parsed as a formula, and truncated. An audit log must never
+ * execute what it records.
+ *
+ * @param {*} v
+ * @param {number} [max]
+ * @return {string}
+ */
+function auditSafe_(v, max) {
+  var s = (v === undefined || v === null) ? '' : String(v);
+  s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ' ');
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  var limit = max || 300;
+  return s.length > limit ? s.slice(0, limit) + '…' : s;
+}
+
+/**
  * Entries that could not be written because the audit spreadsheet did not
  * exist yet (only possible during the very first runSetup, before step 2
  * creates it). Held in memory for the current execution and replayed by
@@ -59,14 +81,14 @@ function writeAudit_(entry) {
     sheet.appendRow([
       Utilities.formatDate(now, 'UTC', "yyyy-MM-dd'T'HH:mm:ss'Z'"),
       Session.getScriptTimeZone(),
-      entry.actor || 'unknown',
-      entry.actorRole || 'unknown',
-      entry.action || 'UNKNOWN',
-      entry.resourceType || '',
-      entry.resourceId || '',
-      entry.outcome || 'UNKNOWN',
-      entry.session || '',
-      entry.justification || '',
+      auditSafe_(entry.actor || 'unknown', 254),
+      auditSafe_(entry.actorRole || 'unknown', 40),
+      auditSafe_(entry.action || 'UNKNOWN', 40),
+      auditSafe_(entry.resourceType || '', 60),
+      auditSafe_(entry.resourceId || '', 200),
+      auditSafe_(entry.outcome || 'UNKNOWN', 20),
+      auditSafe_(entry.session || '', 40),
+      auditSafe_(entry.justification || '', 500),
       CONFIG.VERSION
     ]);
     return true;

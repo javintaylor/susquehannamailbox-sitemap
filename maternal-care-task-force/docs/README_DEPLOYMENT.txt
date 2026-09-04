@@ -20,6 +20,7 @@ FILES (all delivered as .txt; strip the .txt when creating each file)
   apps-script/Setup.gs.txt          -> Setup.gs
   apps-script/Seed.gs.txt           -> Seed.gs
   apps-script/SeedResources.gs.txt  -> SeedResources.gs
+  apps-script/Remediate.gs.txt      -> Remediate.gs
   apps-script/Index.html.txt        -> Index.html
   apps-script/Styles.html.txt       -> Styles.html
   apps-script/Client.html.txt       -> Client.html
@@ -88,6 +89,18 @@ STEP 3 — Seed starting content
      fill Email/Phone AND set ShareContact = TRUE after the member opts in.
   3. In the Config tab, set TAGLINE, CONTACT_EMAIL, NEXT_MEETING as desired.
 
+STEP 3.5 — Pre-launch content review (REQUIRED)
+  1. Run previewPublicSurface in Remediate.gs. It prints exactly what an
+     anonymous visitor would see: row counts per tab, every action item with
+     its owner, any member whose contact details are published, and how many
+     resource rows still claim High confidence.
+  2. Read every action item and meeting summary yourself, looking for anything
+     that describes ONE person's situation. On a public URL, "case", "the
+     patient", or a single-site organization plus a month is enough to
+     re-identify someone in a two-county region.
+  3. Have each named member confirm their own row.
+  4. See docs/AUDIT_2026-09-04.txt for the findings this step exists to catch.
+
 STEP 4 — Deploy the web app
   1. Deploy > New deployment > type: Web app.
      Execute as: Me.
@@ -144,7 +157,10 @@ HANDOFF TO A COUNTY ACCOUNT (when the Task Force is ready)
   6. Record the handoff date in COMPLIANCE_NOTES.txt.
 
 WHERE EACH RUNNABLE FUNCTION LIVES
-  verifyProject ....... Setup.gs   (run this first)
+  verifyProject ....... Setup.gs      (run this first)
+  previewPublicSurface  Remediate.gs (what an anonymous visitor would see)
+  remediateV1_1 ....... Remediate.gs (applies audit fixes to an already-seeded sheet)
+  reseedTabs .......... Remediate.gs
   runSetup ............ Setup.gs
   backfillSetupAudit .. Setup.gs   (only if setup logged AUDIT_WRITE_FAILED)
   setAdminEmails ...... Setup.gs
