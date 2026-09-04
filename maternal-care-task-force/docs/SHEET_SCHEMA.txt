@@ -65,6 +65,12 @@ CaseStudies      Order | Name | Location | Years | ProblemFaced | WhatTheyDid |
                  Indicators | SourceURL | Published
   Communities that measurably improved comparable numbers.
 
+TEXT FORMATTING IN ANY CELL
+  A blank line starts a new paragraph. A single line break also starts a new
+  paragraph; the site never renders a forced mid-sentence break.
+  Decisions and NextSteps are the exception: put ONE ITEM PER LINE and they
+  render as a bulleted list.
+
 Meetings         Date | ActionTeam | Title | Summary | Decisions | NextSteps |
                  NotesURL | Published
   Summaries must not contain patient stories with identifying details.

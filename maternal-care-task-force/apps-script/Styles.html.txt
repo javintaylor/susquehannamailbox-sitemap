@@ -68,7 +68,7 @@
   .hero { background: linear-gradient(178deg, var(--navy-800), var(--navy-900)); color: #fff; padding: 34px 0 24px; }
   .hero h1 { margin: 0; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.12; font-weight: 700; letter-spacing: -.02em; }
   .subtitle { margin: 6px 0 0; font-size: 15px; font-weight: 600; color: #a9bdd6; letter-spacing: .01em; }
-  .tagline { margin: 14px 0 0; max-width: 62ch; font-size: 15px; color: #d4deeb; }
+  .tagline { margin: 14px 0 0; max-width: 58ch; font-size: 15px; color: #d4deeb; text-wrap: pretty; }
   .announce { margin-top: 18px; background: rgba(255,255,255,.07); border: 1px solid rgba(169,189,214,.32); border-radius: var(--radius); padding: 11px 14px; font-size: 14px; color: #e4ebf3; }
   .announce a { color: #9fd4e2; }
 
@@ -100,11 +100,17 @@
   .status { padding: 13px 16px; border-radius: var(--radius); background: var(--navy-100); color: var(--navy-800); font-weight: 600; }
   .status.error { background: var(--neg-050); color: var(--neg); }
 
+  h2, h3, h4 { text-wrap: balance; }
   h2 { font-size: 24px; margin: 0 0 6px; color: var(--navy-800); letter-spacing: -.02em; font-weight: 700; }
   h3 { font-size: 17px; margin: 0 0 6px; letter-spacing: -.01em; }
-  h4 { font-size: 15px; margin: 0 0 4px; }
+  h4 { font-size: 15px; margin: 14px 0 4px; }
+  h4:first-child { margin-top: 0; }
+  p, li { text-wrap: pretty; }
   p { margin: 0 0 10px; }
-  .lead { color: var(--muted); margin: 0 0 22px; max-width: 68ch; }
+  ul { margin: 0 0 10px; padding-left: 20px; }
+  li { margin: 0 0 5px; max-width: 72ch; }
+  li::marker { color: var(--muted); }
+  .lead { color: var(--muted); margin: 0 0 22px; max-width: 66ch; }
   .section { margin-bottom: 30px; }
   .section > h3 { margin-bottom: 10px; padding-top: 6px; }
   .muted { color: var(--muted); }
@@ -124,11 +130,14 @@
   .disc .chev { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 3px; color: var(--muted); transition: transform .22s var(--ease); }
   .disc[open] > summary .chev { transform: rotate(90deg); }
   .disc .sum { flex: 1 1 auto; min-width: 0; }
-  .disc .sum-title { font-weight: 650; color: var(--ink); display: block; }
-  .disc .sum-meta { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); }
+  .disc .sum-title { font-weight: 650; color: var(--ink); display: block; max-width: 62ch; text-wrap: balance; }
+  .disc .sum-meta {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+    margin-top: 3px; font-size: 13px; color: var(--muted); max-width: 84ch; text-wrap: pretty;
+  }
   .disc .sum-tags { margin-top: 6px; }
   .disc-body { padding: 14px 15px 16px 43px; }
-  .disc-body > p, .disc-body > h4, .disc-body > .implication, .disc-body > .notice { max-width: 74ch; }
+  .disc-body > p, .disc-body > h4, .disc-body > ul, .disc-body > .implication, .disc-body > .notice { max-width: 72ch; }
   .disc-body > :last-child { margin-bottom: 0; }
   @keyframes reveal { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
   .disc[open] > .disc-body { animation: reveal .26s var(--ease); }
@@ -183,7 +192,7 @@
 
   /* ---------------- evidence ---------------- */
   .cols { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin: 10px 0; }
-  .cols > div { background: var(--navy-050); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; font-size: 13.5px; }
+  .cols > div { background: var(--navy-050); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; font-size: 13.5px; text-wrap: pretty; }
   .cols strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--navy-700); margin-bottom: 4px; }
   .cite { display: block; margin-top: 7px; font-size: 12px; }
   .cite.muted { color: var(--muted); font-style: italic; }
@@ -204,7 +213,7 @@
 
   .notice { border: 1px solid #e6d5ae; background: var(--warn-050); color: #6b4712; border-radius: var(--radius); padding: 11px 13px; font-size: 13.5px; }
 
-  .foot { padding: 22px 24px 44px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); max-width: 78ch; }
+  .foot { padding: 22px 24px 44px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); max-width: 72ch; }
   .foot p { margin: 0 0 9px; }
 
   @media (max-width: 640px) {

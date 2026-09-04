@@ -12,10 +12,19 @@
     return String(s === undefined || s === null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
-  function para(s) { // newlines -> paragraphs, plain text only
-    return String(s || '').split(/\n{2,}|\r\n\r\n/).map(function (p) {
-      return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>';
-    }).join('');
+  // Every newline starts a new paragraph. A forced <br> mid-sentence reads
+  // as a broken line, so this never emits one.
+  function para(s) {
+    return String(s || '').split(/\r?\n+/).map(function (t) { return t.trim(); })
+      .filter(Boolean).map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('');
+  }
+  // Fields that hold one item per line (decisions, next steps) render as a
+  // real list rather than run-on text split by line breaks.
+  function bullets(s) {
+    var items = String(s || '').split(/\r?\n+/).map(function (t) { return t.trim(); }).filter(Boolean);
+    if (!items.length) return '';
+    if (items.length === 1) return '<p>' + esc(items[0]) + '</p>';
+    return '<ul>' + items.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
   }
   function isUrl(u) { return /^https?:\/\//i.test(String(u || '')); }
   function link(url, label) {
@@ -475,8 +484,8 @@
           title: esc(m.Title),
           meta: [esc(m.Date), esc(m.ActionTeam)].filter(Boolean).join(' · ')
         }, para(m.Summary) +
-          (m.Decisions ? '<h4>Decisions</h4>' + para(m.Decisions) : '') +
-          (m.NextSteps ? '<h4>Next steps</h4>' + para(m.NextSteps) : '') +
+          (m.Decisions ? '<h4>Decisions</h4>' + bullets(m.Decisions) : '') +
+          (m.NextSteps ? '<h4>Next steps</h4>' + bullets(m.NextSteps) : '') +
           (m.NotesURL ? '<p>' + link(m.NotesURL, 'Full notes') + '</p>' : ''), i === 0);
       }).join('') || '<p class="muted">No meeting summaries yet.</p>') + '</div></div>';
     if (done.length) {

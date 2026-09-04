@@ -123,6 +123,18 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING TO v1.3.1 (presentation only)
+  Replace Styles.html, Client.html and Config.gs; create a new deployment
+  version. No sheet change, no re-seed.
+   - A newline in a sheet cell no longer becomes a forced mid-sentence line
+     break. It starts a new paragraph instead.
+   - Meeting Decisions and Next steps render as bulleted lists, one item per
+     line, rather than run-on text split by hard breaks.
+   - Paragraphs use balanced wrapping so a sentence no longer ends with a
+     single word stranded on its own line.
+   - Prose is held to about 72 characters per line; summary lines clamp to
+     two lines instead of running the full card width.
+
 UPGRADING TO v1.3.0 (presentation only)
   Replace Styles.html, Client.html and Config.gs, then create a new
   deployment version. No sheet change and no re-seed: v1.3.0 changes only
