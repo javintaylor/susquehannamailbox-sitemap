@@ -16,7 +16,7 @@
 
 /** View names the site can be deep-linked to. Anything else is 'invalid'. */
 var VALID_PAGES_ = ['home', 'problems', 'structure', 'funding', 'resources',
-                    'data', 'meetings', 'barriers'];
+                    'data', 'evidence', 'meetings', 'barriers'];
 
 /**
  * Serves the single-page member site.
@@ -75,7 +75,7 @@ function getSiteContent() {
 }
 
 /** The only Config keys ever sent to a browser. */
-var SERVED_CONFIG_KEYS_ = ['SITE_TITLE', 'TAGLINE', 'NEXT_MEETING'];
+var SERVED_CONFIG_KEYS_ = ['SITE_TITLE', 'SUBTITLE', 'TAGLINE', 'NEXT_MEETING'];
 
 /**
  * Assembles the published content bundle from the sheet. Internal.
@@ -108,6 +108,8 @@ function buildSiteContent_() {
     funding: sortByOrder_(readPublished_(T.FUNDING)),
     resources: sortByOrder_(readPublished_(T.RESOURCES)),
     data: sortByOrder_(readPublished_(T.DATA)),
+    drivers: sortByOrder_(readPublished_(T.DRIVERS)),
+    caseStudies: sortByOrder_(readPublished_(T.CASE_STUDIES)),
     meetings: readPublished_(T.MEETINGS).sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
     actionItems: readPublished_(T.ACTION_ITEMS),
     announcements: announcements.sort(function (a, b) { return String(b.Date).localeCompare(String(a.Date)); }),
@@ -230,7 +232,7 @@ function purgeCache() {
 function smokeTest() {
   requireAdmin_('SMOKE_TEST');
   var b = buildSiteContent_();
-  var summary = ['purpose', 'problems', 'structure', 'members', 'funding', 'resources', 'data', 'meetings', 'actionItems', 'announcements']
+  var summary = ['purpose', 'problems', 'structure', 'members', 'funding', 'resources', 'data', 'drivers', 'caseStudies', 'meetings', 'actionItems', 'announcements']
     .map(function (k) { return k + '=' + b[k].length; }).join(', ');
   console.log('Published row counts: ' + summary + ', barriers=' + b.barriers.total);
 }

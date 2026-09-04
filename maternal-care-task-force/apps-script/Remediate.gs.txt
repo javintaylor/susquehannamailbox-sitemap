@@ -35,7 +35,9 @@ var RESEEDABLE_ = {
   Meetings: 'seedMeetings',
   ActionItems: 'seedActionItems',
   Announcements: 'seedAnnouncements',
-  Resources: 'seedResources'
+  Resources: 'seedResources',
+  Drivers: 'seedDrivers',
+  CaseStudies: 'seedCaseStudies'
 };
 
 /**
@@ -136,8 +138,58 @@ function callSeed_(fnName) {
     case 'seedActionItems': return seedActionItems();
     case 'seedAnnouncements': return seedAnnouncements();
     case 'seedResources': return seedResources();
+    case 'seedDrivers': return seedDrivers();
+    case 'seedCaseStudies': return seedCaseStudies();
     default: throw new Error('Unknown seed function: ' + fnName);
   }
+}
+
+/**
+ * Sets a Config key to a new value, overwriting whatever is there. runSetup's
+ * upsertConfig_ deliberately keeps existing values, so this is the way to
+ * change one after provisioning. Audited.
+ *   setConfigValue('SITE_TITLE', 'Maternal Care Task Force')
+ * @param {string} key
+ * @param {string} value
+ */
+function setConfigValue(key, value) {
+  requireAdmin_('SET_CONFIG');
+  if (!key) throw new Error('Pass a Config key.');
+  var sheet = openContentSpreadsheet_().getSheetByName(CONFIG.TABS.CONFIG);
+  var last = sheet.getLastRow();
+  var keys = last >= 2 ? sheet.getRange(2, 1, last - 1, 1).getValues() : [];
+  for (var i = 0; i < keys.length; i++) {
+    if (String(keys[i][0]).trim() === key) {
+      sheet.getRange(i + 2, 2).setValue(value === undefined ? '' : value);
+      writeAudit_({ actor: Session.getEffectiveUser().getEmail(), actorRole: 'admin', action: 'SET_CONFIG',
+        resourceType: 'Config', resourceId: key, outcome: 'SUCCESS' });
+      purgeCacheInternal_();
+      console.log('Config ' + key + ' updated.');
+      return;
+    }
+  }
+  sheet.appendRow([key, value === undefined ? '' : value, 'Set by setConfigValue']);
+  writeAudit_({ actor: Session.getEffectiveUser().getEmail(), actorRole: 'admin', action: 'SET_CONFIG',
+    resourceType: 'Config', resourceId: key, outcome: 'SUCCESS', justification: 'Key created.' });
+  purgeCacheInternal_();
+  console.log('Config ' + key + ' created.');
+}
+
+/**
+ * Applies the 2026-09-04 header, indicator-tagging, and evidence changes to
+ * an already-provisioned sheet (version 1.2.0):
+ *  - runSetup adds the new columns (TargetIndicators, Indicators) and the
+ *    Drivers and CaseStudies tabs without touching existing rows.
+ *  - The header title/subtitle are corrected.
+ *  - The tagged content tabs are cleared and rebuilt from the seed files.
+ * Run runSetup FIRST so the new columns and tabs exist, then this.
+ */
+function remediateV1_2() {
+  setConfigValue('SITE_TITLE', CONFIG.APP_NAME);
+  setConfigValue('SUBTITLE', CONFIG.APP_SUBTITLE);
+  reseedTabs('Purpose,Problems,Structure,Funding,Resources,ActionItems,Announcements,Drivers,CaseStudies',
+             'v1.2.0: indicator tagging on every content row, Drivers and CaseStudies tabs, ' +
+             'welcome announcement removed.');
 }
 
 /**
@@ -151,7 +203,7 @@ function previewPublicSurface() {
   var b = buildSiteContent_();
   console.log('=== What an anonymous visitor would see ===');
   ['purpose', 'problems', 'structure', 'members', 'funding', 'resources', 'data',
-   'meetings', 'actionItems', 'announcements'].forEach(function (k) {
+   'drivers', 'caseStudies', 'meetings', 'actionItems', 'announcements'].forEach(function (k) {
     console.log(k + ': ' + b[k].length + ' published row(s)');
   });
   console.log('barrier reports: ' + b.barriers.total + ' total, ' +

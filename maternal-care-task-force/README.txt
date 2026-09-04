@@ -6,9 +6,14 @@ docs/README_DEPLOYMENT.txt   Step-by-step setup, deployment, and Sites embed
 docs/SHEET_SCHEMA.txt        Every tab and column in the content spreadsheet
 docs/COMPLIANCE_NOTES.txt    PHI statement, controls, assumptions, open questions
 docs/RESEARCH_REPORT.txt     Federal/state/local perinatal programs, verified 2026-09-03
+docs/DRIVERS_AND_EVIDENCE.txt Causes behind the six indicators + 24 case studies
+docs/AUDIT_2026-09-04.txt    Pre-launch adversarial audit and remediation record
 
 Runnable functions and where they live:
   verifyProject .................. Setup.gs  (run FIRST — checks all files present)
   runSetup, setAdminEmails ....... Setup.gs
-  seedAll ........................ Seed.gs (resources in SeedResources.gs)
+  seedAll ........................ Seed.gs (resources in SeedResources.gs,
+                                   drivers and case studies in SeedEvidence.gs)
+  remediateV1_2 .................. Remediate.gs (upgrade an existing sheet)
+  previewPublicSurface ........... Remediate.gs
   purgeCache, smokeTest .......... Api.gs

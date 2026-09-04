@@ -23,6 +23,17 @@
     if (!safe) return esc(label || url);
     return '<a href="' + esc(safe) + '" target="_blank" rel="noopener">' + esc(label || 'Website') + '</a>';
   }
+  var INDICATOR_ORDER = ['Infant mortality', 'Preterm birth', 'Low birth weight', 'Very low birth weight', 'Early prenatal care', 'No prenatal care', 'Cross-cutting'];
+  function splitInd(s) { return String(s || '').split(/[;,]/).map(function (x) { return x.trim(); }).filter(Boolean); }
+  function indicatorPills(s) {
+    return splitInd(s).map(function (x) { return '<span class="pill ind-tag" title="Targets this indicator">' + esc(x) + '</span>'; }).join('');
+  }
+  function indicatorSelect(id, rows, field) {
+    var present = uniq(rows.reduce(function (acc, r) { return acc.concat(splitInd(r[field])); }, []))
+      .sort(function (a, b) { var ia = INDICATOR_ORDER.indexOf(a), ib = INDICATOR_ORDER.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
+    return '<label>Indicator <select id="' + id + '"><option value="">All</option>' + present.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>';
+  }
+  function hasInd(row, field, ind) { return !ind || splitInd(row[field]).indexOf(ind) >= 0; }
   function countyPill(c) {
     var s = String(c || '').toLowerCase();
     var cls = s.indexOf('both') >= 0 || s.indexOf('regional') >= 0 ? 'both' : s.indexOf('cecil') >= 0 && s.indexOf('harford') >= 0 ? 'both' : s.indexOf('cecil') >= 0 ? 'cecil' : s.indexOf('harford') >= 0 ? 'harford' : '';
@@ -44,12 +55,18 @@
     window.scrollTo({ top: 0 });
   }
   $$('.tab').forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.view); }); });
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest && ev.target.closest('[data-goto]');
+    if (a) { ev.preventDefault(); show(a.getAttribute('data-goto')); }
+  });
 
   /* ---------- renderers ---------- */
   function renderHome(c) {
     var cfg = c.config || {};
     $('#siteTitle').textContent = cfg.SITE_TITLE || 'Maternal Care Task Force';
+    $('#siteSubtitle').textContent = cfg.SUBTITLE || 'Cecil and Harford Counties, Maryland';
     $('#siteTagline').textContent = cfg.TAGLINE || '';
+    renderIndicatorStrip(c.data || []);
     var ann = c.announcements || [];
     var bar = $('#announcementBar');
     if (ann.length) {
@@ -75,15 +92,39 @@
     $('#view-home').innerHTML = html;
   }
 
+  // Six tiles in the hero: the outcomes the whole site is organized around.
+  function renderIndicatorStrip(rows) {
+    var strip = $('#indicatorStrip');
+    if (!strip) return;
+    if (!rows.length) { strip.hidden = true; return; }
+    strip.hidden = false;
+    strip.innerHTML = rows.map(function (r) {
+      var n = parseFloat(r.Cecil), m = parseFloat(r.Maryland);
+      var higherBetter = /early prenatal|adequate|coverage|breastfeed/i.test(String(r.Indicator));
+      var cls = (!isNaN(n) && !isNaN(m) && n !== m) ? ((higherBetter ? n > m : n < m) ? 'better' : 'worse') : '';
+      var unit = r.Unit === '%' ? '%' : '';
+      return '<button class="ind ' + cls + '" data-goto="data" title="Open Regional Data"><span class="n">' + esc(r.Indicator) + '</span>' +
+        '<span class="v">' + esc(r.Cecil) + unit + '</span><span class="c">Cecil · Harford ' + esc(r.Harford) + unit + ' · MD ' + esc(r.Maryland) + unit + '</span></button>';
+    }).join('');
+  }
+
   function renderProblems(c) {
-    var html = '<h2>The Problem</h2><p class="lead">Access concerns the Task Force is working to solve. Each is tied to an Action Team.</p><div class="grid">';
-    (c.problems || []).forEach(function (p) {
-      html += '<div class="card accent"><h3>' + esc(p.Title) + '</h3>' + countyPill(p.Counties) +
-        (p.RelatedActionTeam ? '<span class="pill">' + esc(p.RelatedActionTeam) + '</span>' : '') +
-        para(p.Description) + (p.SourceOrEvidence ? '<p class="meta">Evidence: ' + esc(p.SourceOrEvidence) + '</p>' : '') + '</div>';
-    });
-    html += '</div>';
+    var problems = c.problems || [];
+    var html = '<h2>The Problem</h2><p class="lead">Access concerns the Task Force is working to solve. Each is tied to an Action Team and to the indicators it is expected to move.</p>' +
+      '<div class="filters">' + indicatorSelect('fProbInd', problems, 'TargetIndicators') + '<span class="count" id="pCount"></span></div><div id="problemList" class="grid"></div>';
     $('#view-problems').innerHTML = html;
+    function apply() {
+      var ind = $('#fProbInd').value;
+      var list = problems.filter(function (p) { return hasInd(p, 'TargetIndicators', ind); });
+      $('#pCount').textContent = list.length + ' of ' + problems.length;
+      $('#problemList').innerHTML = list.map(function (p) {
+        return '<div class="card accent"><h3>' + esc(p.Title) + '</h3>' + countyPill(p.Counties) +
+          (p.RelatedActionTeam ? '<span class="pill">' + esc(p.RelatedActionTeam) + '</span>' : '') +
+          '<div>' + indicatorPills(p.TargetIndicators) + '</div>' +
+          para(p.Description) + (p.SourceOrEvidence ? '<p class="meta">Evidence: ' + esc(p.SourceOrEvidence) + '</p>' : '') + '</div>';
+      }).join('') || '<p class="muted">No problems match.</p>';
+    }
+    $('#fProbInd').addEventListener('change', apply); apply();
   }
 
   function renderStructure(c) {
@@ -108,7 +149,8 @@
     steering.forEach(function (s) {
       html += '<div class="team-block band"><h3>' + esc(s.Name) + '</h3>' + para(s.Purpose) +
         (s.CoChairs ? '<p><strong>Co-chairs:</strong> ' + esc(s.CoChairs) + '</p>' : '') +
-        (s.MeetingCadence ? '<p><strong>Cadence:</strong> ' + esc(s.MeetingCadence) + '</p>' : '') + statusPill(s.Status) + '</div>';
+        (s.MeetingCadence ? '<p><strong>Cadence:</strong> ' + esc(s.MeetingCadence) + '</p>' : '') + statusPill(s.Status) +
+        (s.TargetIndicators ? '<p class="small"><strong>Indicators:</strong> ' + indicatorPills(s.TargetIndicators) + '</p>' : '') + '</div>';
       html += memberCards(members.filter(function (m) { return truthy(m.SteeringCommittee); }));
     });
 
@@ -118,7 +160,8 @@
       html += '<div class="team-block"><div class="card accent"><h3>' + esc(t.Name) + '</h3>' + para(t.Purpose) +
         (t.CoChairs ? '<p><strong>Co-chairs:</strong> ' + esc(t.CoChairs) + '</p>' : '') +
         (t.StaffSupport ? '<p><strong>Staff support:</strong> ' + esc(t.StaffSupport) + '</p>' : '') +
-        (t.MeetingCadence ? '<p><strong>Cadence:</strong> ' + esc(t.MeetingCadence) + '</p>' : '') + statusPill(t.Status) + '</div>' +
+        (t.MeetingCadence ? '<p><strong>Cadence:</strong> ' + esc(t.MeetingCadence) + '</p>' : '') + statusPill(t.Status) +
+        (t.TargetIndicators ? '<p class="small"><strong>Indicators:</strong> ' + indicatorPills(t.TargetIndicators) + '</p>' : '') + '</div>' +
         '<details><summary>Members (' + teamMembers.length + ')</summary>' + memberCards(teamMembers) + '</details></div>';
     });
     html += '<p class="notice">Contact details appear only for members who opted in. To update your listing, contact the co-chairs.</p>';
@@ -129,7 +172,7 @@
     var html = '<h2>Funding</h2><p class="lead">Grants and programs resourcing the Task Force and the regional system of care.</p><div class="grid">';
     (c.funding || []).forEach(function (f) {
       html += '<div class="card"><h3>' + esc(f.Name) + '</h3><p class="meta">' + esc(f.Source) + (f.Level ? ' · ' + esc(f.Level) : '') + '</p>' +
-        countyPill(f.Counties) + statusPill(f.Status) + (f.Amount ? '<p><strong>Amount:</strong> ' + esc(f.Amount) + '</p>' : '') +
+        countyPill(f.Counties) + statusPill(f.Status) + '<div>' + indicatorPills(f.Indicators) + '</div>' + (f.Amount ? '<p><strong>Amount:</strong> ' + esc(f.Amount) + '</p>' : '') +
         para(f.Description) + (f.IntendedUse ? '<p><strong>Use:</strong> ' + esc(f.IntendedUse) + '</p>' : '') + (f.URL ? '<p>' + link(f.URL, 'Program page') + '</p>' : '') + '</div>';
     });
     html += '</div>';
@@ -144,6 +187,7 @@
       '<div class="filters"><label>County <select id="fCounty"><option value="">All</option><option>Cecil</option><option>Harford</option><option value="both">Both / regional</option><option>Statewide</option></select></label>' +
       '<label>Category <select id="fCat"><option value="">All</option>' + cats.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
       '<label>Level <select id="fType"><option value="">All</option>' + types.map(function (x) { return '<option>' + esc(x) + '</option>'; }).join('') + '</select></label>' +
+      indicatorSelect('fResInd', all, 'Indicators') +
       '<label>Search <input id="fText" type="search" placeholder="name or keyword"></label><span class="count" id="fCount"></span></div>' +
       '<div id="resourceList" class="grid"></div>' +
       (c.forms && c.forms.resourceFormUrl ? '<p style="margin-top:18px"><a class="btn secondary" target="_blank" rel="noopener" href="' + esc(c.forms.resourceFormUrl) + '">Suggest a resource</a></p>' : '');
@@ -155,32 +199,34 @@
         if (county && !countyMatches(rc, county)) return false;
         if (cat && r.Category !== cat) return false;
         if (type && r.Type !== type) return false;
+        if (!hasInd(r, 'Indicators', $('#fResInd').value)) return false;
         if (q && (String(r.Name) + ' ' + String(r.Description) + ' ' + String(r.Eligibility)).toLowerCase().indexOf(q) < 0) return false;
         return true;
       });
       $('#fCount').textContent = list.length + ' of ' + all.length;
       $('#resourceList').innerHTML = list.map(function (r) {
-        return '<div class="card"><h3>' + esc(r.Name) + '</h3><p class="meta">' + esc(r.Type) + ' · ' + esc(r.Category) + '</p>' + countyPill(r.Counties) +
+        return '<div class="card"><h3>' + esc(r.Name) + '</h3><p class="meta">' + esc(r.Type) + ' · ' + esc(r.Category) + '</p>' + countyPill(r.Counties) + indicatorPills(r.Indicators) +
           para(r.Description) + (r.Eligibility ? '<p><strong>Eligibility:</strong> ' + esc(r.Eligibility) + '</p>' : '') +
           (r.Contact ? '<p><strong>Contact:</strong> ' + esc(r.Contact) + '</p>' : '') +
           linksLine(r) + provenanceLine(r) + '</div>';
       }).join('') || '<p class="muted">No resources match.</p>';
     }
-    ['fCounty', 'fCat', 'fType'].forEach(function (id) { $('#' + id).addEventListener('change', apply); });
+    ['fCounty', 'fCat', 'fType', 'fResInd'].forEach(function (id) { $('#' + id).addEventListener('change', apply); });
     $('#fText').addEventListener('input', apply);
     apply();
   }
 
   function renderData(c) {
     var rows = c.data || [];
-    var html = '<h2>Maternal &amp; Infant Health Data</h2><p class="lead">County-level indicators compared with Maryland. Red marks where a county is doing worse than the state; green marks where it is doing better. These are aggregate public statistics, not patient data.</p>' +
+    var html = '<h2>Regional Data: the six indicators</h2><p class="lead">These six outcomes are the problems the Task Force exists to improve. County-level values compared with Maryland. Red marks where a county is doing worse than the state; green marks where it is doing better. These are aggregate public statistics, not patient data.</p>' +
       '<div class="table-scroll"><table><thead><tr><th>Indicator</th><th>Cecil</th><th>Harford</th><th>Maryland</th><th>Year</th><th>Source</th></tr></thead><tbody>';
     rows.forEach(function (r) {
       html += '<tr><td><strong>' + esc(r.Indicator) + '</strong>' + (r.Definition ? '<div class="small muted">' + esc(r.Definition) + '</div>' : '') + '</td>' +
         cell(r.Cecil, r.Maryland, r.Unit, r.Indicator) + cell(r.Harford, r.Maryland, r.Unit, r.Indicator) +
         '<td class="num">' + esc(fmt(r.Maryland, r.Unit)) + '</td><td>' + esc(r.Year) + '</td><td class="small">' + (r.SourceURL ? link(r.SourceURL, r.Source) : esc(r.Source)) + '</td></tr>';
     });
-    html += '</tbody></table></div><p class="legend">For most indicators lower is better. For "Early prenatal care" higher is better. Comparison direction is inferred from the indicator name.</p>';
+    html += '</tbody></table></div><p class="legend">For most indicators lower is better. For "Early prenatal care" higher is better. Comparison direction is inferred from the indicator name.</p>' +
+      '<p><a href="#evidence" class="btn secondary" data-goto="evidence">Why these numbers? See Drivers &amp; Evidence</a></p>';
     $('#view-data').innerHTML = html;
     function fmt(v, unit) { if (v === '' || v === undefined) return '—'; return unit === '%' ? v + '%' : String(v); }
     function cell(v, md, unit, name) {
@@ -190,6 +236,80 @@
       if (!isNaN(n) && !isNaN(m) && n !== m) cls = (higherBetter ? n > m : n < m) ? 'better' : 'worse';
       return '<td class="num ' + cls + '">' + esc(fmt(v, unit)) + '</td>';
     }
+  }
+
+  function renderEvidence(c) {
+    var drivers = c.drivers || [];
+    var cases = c.caseStudies || [];
+    var byIndicator = {};
+    drivers.forEach(function (d) { (byIndicator[d.Indicator || 'Cross-cutting'] = byIndicator[d.Indicator || 'Cross-cutting'] || []).push(d); });
+    var html = '<h2>Drivers &amp; Evidence</h2><p class="lead">What the research says causes each indicator, what the national, Maryland, and local data show, and where comparable communities moved their numbers. Use this to pick actions, not just name problems.</p>';
+
+    var indicatorOrder = ['Infant mortality', 'Preterm birth', 'Low birth weight', 'Very low birth weight', 'Early prenatal care', 'No prenatal care', 'Cross-cutting'];
+    var keys = Object.keys(byIndicator).sort(function (a, b) {
+      var ia = indicatorOrder.indexOf(a), ib = indicatorOrder.indexOf(b);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    if (keys.length) {
+      html += '<div class="filters"><label>Indicator <select id="fInd"><option value="">All</option>' + keys.map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
+        '<label>Action Team <select id="fTeam"><option value="">All</option>' + uniq(drivers.map(function (d) { return d.RelatedActionTeam; })).map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label><span class="count" id="dCount"></span></div>' +
+        '<div id="driverList"></div>';
+    } else {
+      html += '<p class="muted">No driver evidence published yet.</p>';
+    }
+    html += '<div class="section" style="margin-top:32px"><h3>Case studies: communities that moved their numbers</h3><p class="muted small">Before/after results as reported by the source. Evidence quality is noted; a pre/post result without a comparison group is weaker than a trial.</p>';
+    if (cases.length) {
+      html += '<div class="filters"><label>Indicator <select id="fCaseInd"><option value="">All</option>' + uniq(cases.reduce(function (acc, cs) { return acc.concat(String(cs.Indicators || '').split(/[;,]/).map(function (x) { return x.trim(); })); }, [])).map(function (k) { return '<option>' + esc(k) + '</option>'; }).join('') + '</select></label><span class="count" id="cCount"></span></div><div id="caseList"></div>';
+    } else {
+      html += '<p class="muted">No case studies published yet.</p>';
+    }
+    html += '</div>';
+    $('#view-evidence').innerHTML = html;
+
+    function driverCard(d) {
+      return '<div class="card driver"><h3>' + esc(d.Driver) + '</h3><p class="meta">' + esc(d.Indicator) + (d.RelatedActionTeam ? ' · ' + esc(d.RelatedActionTeam) : '') + (d.Confidence ? ' · Confidence: ' + esc(d.Confidence) : '') + '</p>' +
+        para(d.WhatTheEvidenceShows) +
+        '<div class="cols">' +
+        (d.NationalData ? '<div><strong>National</strong>' + esc(d.NationalData) + '</div>' : '') +
+        (d.MarylandData ? '<div><strong>Maryland</strong>' + esc(d.MarylandData) + '</div>' : '') +
+        (d.LocalData ? '<div><strong>Cecil / Harford</strong>' + esc(d.LocalData) + '</div>' : '') +
+        '</div>' +
+        (d.ImplicationForAction ? '<p class="implication"><strong>Implication for action:</strong> ' + esc(d.ImplicationForAction) + '</p>' : '') +
+        (d.DataSystem ? '<p class="small muted"><strong>Where to get county-level data:</strong> ' + esc(d.DataSystem) + '</p>' : '') +
+        '<p class="meta">' + (d.SourceURL ? link(d.SourceURL, d.Source || 'Source') : esc(d.Source || '')) + '</p></div>';
+    }
+    function caseCard(cs) {
+      return '<div class="card case"><h3>' + esc(cs.Name) + '</h3><p class="meta">' + esc(cs.Location) + (cs.Years ? ' · ' + esc(cs.Years) : '') + (cs.EvidenceQuality ? ' · ' + esc(cs.EvidenceQuality) : '') + '</p>' +
+        String(cs.Indicators || '').split(/[;,]/).filter(function (x) { return x.trim(); }).map(function (x) { return '<span class="pill">' + esc(x.trim()) + '</span>'; }).join('') +
+        '<p><strong>Problem:</strong> ' + esc(cs.ProblemFaced) + '</p>' +
+        '<p><strong>What they did:</strong> ' + esc(cs.WhatTheyDid) + '</p>' +
+        '<p class="result">Result: ' + esc(cs.Result) + '</p>' +
+        (cs.Funding ? '<p class="small"><strong>Funding:</strong> ' + esc(cs.Funding) + '</p>' : '') +
+        (cs.Transferability ? '<p class="implication"><strong>For Cecil / Harford:</strong> ' + esc(cs.Transferability) + '</p>' : '') +
+        '<p class="meta">' + link(cs.SourceURL, 'Source') + '</p></div>';
+    }
+    function applyDrivers() {
+      if (!$('#driverList')) return;
+      var ind = $('#fInd').value, team = $('#fTeam').value;
+      var list = drivers.filter(function (d) { return (!ind || (d.Indicator || 'Cross-cutting') === ind) && (!team || d.RelatedActionTeam === team); });
+      $('#dCount').textContent = list.length + ' of ' + drivers.length;
+      var out = '';
+      keys.forEach(function (k) {
+        var group = list.filter(function (d) { return (d.Indicator || 'Cross-cutting') === k; });
+        if (!group.length) return;
+        out += '<div class="section"><h3>' + esc(k) + '</h3>' + group.map(driverCard).join('') + '</div>';
+      });
+      $('#driverList').innerHTML = out || '<p class="muted">No drivers match.</p>';
+    }
+    function applyCases() {
+      if (!$('#caseList')) return;
+      var ind = $('#fCaseInd').value;
+      var list = cases.filter(function (cs) { return !ind || String(cs.Indicators || '').split(/[;,]/).map(function (x) { return x.trim(); }).indexOf(ind) >= 0; });
+      $('#cCount').textContent = list.length + ' of ' + cases.length;
+      $('#caseList').innerHTML = '<div class="grid">' + list.map(caseCard).join('') + '</div>';
+    }
+    if ($('#fInd')) { $('#fInd').addEventListener('change', applyDrivers); $('#fTeam').addEventListener('change', applyDrivers); applyDrivers(); }
+    if ($('#fCaseInd')) { $('#fCaseInd').addEventListener('change', applyCases); applyCases(); }
   }
 
   function renderMeetings(c) {
@@ -206,8 +326,8 @@
     $('#view-meetings').innerHTML = html;
     function actionTable(list) {
       if (!list.length) return '<p class="muted small">None.</p>';
-      return '<div class="table-scroll"><table><thead><tr><th>Item</th><th>Team</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>' + list.map(function (a) {
-        return '<tr><td>' + esc(a.Item) + '</td><td>' + esc(a.ActionTeam) + '</td><td>' + esc(a.Owner) + '</td><td>' + esc(a.DueDate) + '</td><td>' + statusPill(a.Status) + '</td></tr>';
+      return '<div class="table-scroll"><table><thead><tr><th>Item</th><th>Team</th><th>Indicators</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>' + list.map(function (a) {
+        return '<tr><td>' + esc(a.Item) + '</td><td>' + esc(a.ActionTeam) + '</td><td>' + indicatorPills(a.Indicators) + '</td><td>' + esc(a.Owner) + '</td><td>' + esc(a.DueDate) + '</td><td>' + statusPill(a.Status) + '</td></tr>';
       }).join('') + '</tbody></table></div>';
     }
   }
@@ -291,7 +411,7 @@
     STATE.content = c;
     $('#status').hidden = true;
     $('#generatedAt').textContent = 'Content refreshed ' + new Date(c.generatedAt).toLocaleString();
-    renderHome(c); renderProblems(c); renderStructure(c); renderFunding(c); renderResources(c); renderData(c); renderMeetings(c); renderBarriers(c);
+    renderHome(c); renderProblems(c); renderStructure(c); renderFunding(c); renderResources(c); renderData(c); renderEvidence(c); renderMeetings(c); renderBarriers(c);
     var initial = (location.hash || '#home').replace('#', '');
     show($$('.tab').some(function (t) { return t.dataset.view === initial; }) ? initial : 'home');
   }

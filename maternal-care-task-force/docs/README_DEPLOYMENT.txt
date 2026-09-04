@@ -21,6 +21,7 @@ FILES (all delivered as .txt; strip the .txt when creating each file)
   apps-script/Seed.gs.txt           -> Seed.gs
   apps-script/SeedResources.gs.txt  -> SeedResources.gs
   apps-script/Remediate.gs.txt      -> Remediate.gs
+  apps-script/SeedEvidence.gs.txt   -> SeedEvidence.gs
   apps-script/Index.html.txt        -> Index.html
   apps-script/Styles.html.txt       -> Styles.html
   apps-script/Client.html.txt       -> Client.html
@@ -122,6 +123,19 @@ STEP 5 — Google Site
      web app URL, so never publish a row that must not be public.
   4. Publish.
 
+UPGRADING AN EXISTING DEPLOYMENT TO v1.2.0
+  (Adds the Drivers and CaseStudies tabs, indicator tags on every content
+  row, the corrected header, and removes the member-site welcome
+  announcement and the public-facing emergency paragraph.)
+  1. Replace the changed files (see the release note).
+  2. Run runSetup in Setup.gs. It is safe on an existing sheet: it adds the
+     new columns (TargetIndicators, Indicators) to the end of existing tabs
+     and creates the Drivers and CaseStudies tabs. No rows are touched.
+  3. Run remediateV1_2 in Remediate.gs. It corrects the header title and
+     subtitle, then clears and rebuilds the tagged content tabs and seeds
+     Drivers and CaseStudies. Members, Data, and Meetings are not touched.
+  4. Deploy > Manage deployments > Edit > Version: New.
+
 UPDATING CONTENT
   - Edit rows in the content sheet. Changes appear within 5 minutes
     (cache), or immediately after running purgeCache in Api.gs.
@@ -160,6 +174,8 @@ WHERE EACH RUNNABLE FUNCTION LIVES
   verifyProject ....... Setup.gs      (run this first)
   previewPublicSurface  Remediate.gs (what an anonymous visitor would see)
   remediateV1_1 ....... Remediate.gs (applies audit fixes to an already-seeded sheet)
+  remediateV1_2 ....... Remediate.gs (indicator tags, Drivers/CaseStudies, header; run runSetup first)
+  setConfigValue ...... Remediate.gs
   reseedTabs .......... Remediate.gs
   runSetup ............ Setup.gs
   backfillSetupAudit .. Setup.gs   (only if setup logged AUDIT_WRITE_FAILED)

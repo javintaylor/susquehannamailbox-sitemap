@@ -16,9 +16,10 @@
   <a class="skip" href="#main">Skip to content</a>
   <header class="hero">
     <div class="wrap">
-      <p class="eyebrow">Cecil County &amp; Harford County, Maryland</p>
       <h1 id="siteTitle">Maternal Care Task Force</h1>
+      <p class="subtitle" id="siteSubtitle">Cecil and Harford Counties, Maryland</p>
       <p class="tagline" id="siteTagline">Loading…</p>
+      <div id="indicatorStrip" class="indicators" hidden></div>
       <div id="announcementBar" class="announce" hidden></div>
     </div>
   </header>
@@ -30,7 +31,8 @@
       <button class="tab" data-view="structure">Structure</button>
       <button class="tab" data-view="funding">Funding</button>
       <button class="tab" data-view="resources">Resources</button>
-      <button class="tab" data-view="data">Data</button>
+      <button class="tab" data-view="data">Regional Data</button>
+      <button class="tab" data-view="evidence">Drivers &amp; Evidence</button>
       <button class="tab" data-view="meetings">Meetings &amp; Actions</button>
       <button class="tab" data-view="barriers">Barrier Log</button>
     </div>
@@ -45,14 +47,14 @@
     <section id="view-funding" class="view" hidden></section>
     <section id="view-resources" class="view" hidden></section>
     <section id="view-data" class="view" hidden></section>
+    <section id="view-evidence" class="view" hidden></section>
     <section id="view-meetings" class="view" hidden></section>
     <section id="view-barriers" class="view" hidden></section>
   </main>
 
   <footer class="foot wrap">
-    <p class="emergency"><strong>In an emergency, call 911.</strong> This site is a reference directory. It provides no medical advice, no triage, and no clinical care, and it is not monitored. If you are pregnant or postpartum and need mental health support now, call or text the National Maternal Mental Health Hotline at 1-833-852-6262 (1-833-TLC-MAMA), available 24/7.</p>
     <p><strong>Reference site for Task Force members.</strong> This site holds no patient information. Do not enter names, dates of birth, or any detail that could identify a patient or family anywhere on this site or its forms.</p>
-    <p><strong>Not an official government publication.</strong> This site is not published by the Cecil County Health Department, the Harford County Health Department, or the Maryland Department of Health. Content is maintained by the Task Force co-chairs. Program details are compiled from public sources and member reports and change frequently — confirm directly with a provider before relying on or referring to any listing.</p>
+    <p><strong>Working reference for Task Force members, not an official publication</strong> of the Cecil County Health Department, the Harford County Health Department, or the Maryland Department of Health. Content is maintained by the co-chairs. Program details are compiled from public sources and member reports and change frequently; confirm with the provider before referring.
     <p class="muted">Hosted for the Task Force on a Google Workspace account operated by Performance Health Group LLC. Hosting is a technical role only; editorial decisions belong to the co-chairs, and no member organization's services are promoted here.</p>
     <p class="muted">Version <?= version ?> · <span id="generatedAt"></span></p>
   </footer>

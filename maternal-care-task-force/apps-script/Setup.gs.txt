@@ -23,14 +23,16 @@
 var TAB_HEADERS = {
   Config: ['Key', 'Value', 'Notes'],
   Purpose: ['Order', 'Section', 'Heading', 'Body', 'Published'],
-  Problems: ['Order', 'Title', 'Description', 'Counties', 'RelatedActionTeam', 'SourceOrEvidence', 'Published'],
-  Structure: ['Order', 'Level', 'Name', 'Purpose', 'CoChairs', 'StaffSupport', 'MeetingCadence', 'Status', 'Published'],
+  Problems: ['Order', 'Title', 'Description', 'Counties', 'RelatedActionTeam', 'TargetIndicators', 'SourceOrEvidence', 'Published'],
+  Structure: ['Order', 'Level', 'Name', 'Purpose', 'CoChairs', 'StaffSupport', 'MeetingCadence', 'TargetIndicators', 'Status', 'Published'],
   Members: ['Order', 'Name', 'Credentials', 'Organization', 'RoleTitle', 'County', 'ActionTeams', 'SteeringCommittee', 'Email', 'Phone', 'ShareContact', 'Status', 'InternalNotes', 'Published'],
-  Funding: ['Order', 'Name', 'Source', 'Level', 'Amount', 'Status', 'Description', 'IntendedUse', 'Counties', 'URL', 'Published'],
-  Resources: ['Order', 'Name', 'Type', 'Category', 'Counties', 'Description', 'Eligibility', 'Contact', 'URL', 'SourceURL', 'DateVerified', 'Confidence', 'Published'],
+  Funding: ['Order', 'Name', 'Source', 'Level', 'Amount', 'Status', 'Description', 'IntendedUse', 'Counties', 'Indicators', 'URL', 'Published'],
+  Resources: ['Order', 'Name', 'Type', 'Category', 'Counties', 'Indicators', 'Description', 'Eligibility', 'Contact', 'URL', 'SourceURL', 'DateVerified', 'Confidence', 'Published'],
   Data: ['Order', 'Indicator', 'Definition', 'Cecil', 'Harford', 'Maryland', 'Unit', 'Year', 'Source', 'SourceURL', 'Published'],
+  Drivers: ['Order', 'Indicator', 'Driver', 'WhatTheEvidenceShows', 'NationalData', 'MarylandData', 'LocalData', 'DataSystem', 'ImplicationForAction', 'RelatedActionTeam', 'Source', 'SourceURL', 'Confidence', 'Published'],
+  CaseStudies: ['Order', 'Name', 'Location', 'Years', 'ProblemFaced', 'WhatTheyDid', 'Result', 'EvidenceQuality', 'Funding', 'Transferability', 'Indicators', 'SourceURL', 'Published'],
   Meetings: ['Date', 'ActionTeam', 'Title', 'Summary', 'Decisions', 'NextSteps', 'NotesURL', 'Published'],
-  ActionItems: ['ID', 'ActionTeam', 'Item', 'Owner', 'DueDate', 'Status', 'Created', 'Updated', 'Published'],
+  ActionItems: ['ID', 'ActionTeam', 'Item', 'Owner', 'DueDate', 'Status', 'Indicators', 'Created', 'Updated', 'Published'],
   Announcements: ['Date', 'Title', 'Body', 'LinkURL', 'ExpiresOn', 'Published']
 };
 
@@ -89,7 +91,8 @@ function verifyProject() {
     { file: 'Setup.gs',         symbol: 'runSetup',               kind: 'function' },
     { file: 'Seed.gs',          symbol: 'seedAll',                kind: 'function' },
     { file: 'SeedResources.gs', symbol: 'seedResources',          kind: 'function' },
-    { file: 'Remediate.gs',     symbol: 'reseedTabs',             kind: 'function' }
+    { file: 'Remediate.gs',     symbol: 'reseedTabs',             kind: 'function' },
+    { file: 'SeedEvidence.gs',  symbol: 'seedDrivers',            kind: 'function' }
   ];
   var missing = [];
   var lines = expected.map(function (e) {
@@ -208,6 +211,7 @@ function runSetup() {
 
   // 5. Default config keys
   upsertConfig_(ss, 'SITE_TITLE', CONFIG.APP_NAME, 'Shown in the site header');
+  upsertConfig_(ss, 'SUBTITLE', CONFIG.APP_SUBTITLE, 'Shown under the title');
   upsertConfig_(ss, 'TAGLINE', 'Finding solutions so that all women and their families have access to quality perinatal services when needed.', 'Shown under the title');
   upsertConfig_(ss, 'CONTACT_EMAIL', '', 'General inbox for the task force (public, non-PHI)');
   upsertConfig_(ss, 'NEXT_MEETING', '', 'Free text, e.g. "Regional System of Care AT — monthly, virtual, date TBD"');

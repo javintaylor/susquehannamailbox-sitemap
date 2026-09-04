@@ -103,8 +103,12 @@ H10. Three of four Action Teams rendered with zero members, because the roster
      has met.
 H11. No publisher disclosure, official-status disclaimer, medical-advice
      disclaimer, or emergency guidance on a page branded with two county names.
-     FIXED: footer now carries all four, including 911 and the National
-     Maternal Mental Health Hotline.
+     FIXED: footer carries publisher disclosure and official-status wording.
+     NOTE 2026-09-04: the emergency/hotline paragraph was subsequently
+     removed at the owner's direction because the site is a member working
+     reference, not a public-facing service; language addressed to families
+     or the public is out of scope. The footer keeps the member-facing
+     no-PHI rule and the not-an-official-publication statement.
 
 --------------------------------------------------------------------------
 MEDIUM AND LOW

@@ -4,18 +4,19 @@ read by header name) but header text must match exactly. A column named
 "Published" gates what the site shows; TRUE/yes/y/1 publish the row.
 
 Config           Key | Value | Notes
-  Keys used by the site: SITE_TITLE, TAGLINE, CONTACT_EMAIL, NEXT_MEETING,
+  Keys used by the site: SITE_TITLE, SUBTITLE, TAGLINE, CONTACT_EMAIL, NEXT_MEETING,
   FIND_HELP_URL, BARRIER_FORM_URL, RESOURCE_FORM_URL.
 
 Purpose          Order | Section | Heading | Body | Published
   Section groups paragraphs into bands (Purpose, Who we serve, How we work).
 
 Problems         Order | Title | Description | Counties | RelatedActionTeam |
-                 SourceOrEvidence | Published
-  Counties: Cecil, Harford, Both.
+                 TargetIndicators | SourceOrEvidence | Published
+  Counties: Cecil, Harford, Both. TargetIndicators: semicolon-separated
+  names from the Data tab (the six indicators) or "Cross-cutting".
 
 Structure        Order | Level | Name | Purpose | CoChairs | StaffSupport |
-                 MeetingCadence | Status | Published
+                 MeetingCadence | TargetIndicators | Status | Published
   Level: "Steering Committee" or "Action Team".
 
 Members          Order | Name | Credentials | Organization | RoleTitle |
@@ -26,9 +27,11 @@ Members          Order | Name | Credentials | Organization | RoleTitle |
   leaves the sheet.
 
 Funding          Order | Name | Source | Level | Amount | Status |
-                 Description | IntendedUse | Counties | URL | Published
+                 Description | IntendedUse | Counties | Indicators | URL |
+                 Published
 
-Resources        Order | Name | Type | Category | Counties | Description |
+Resources        Order | Name | Type | Category | Counties | Indicators |
+                 Description |
                  Eligibility | Contact | URL | SourceURL | DateVerified |
                  Confidence | Published
   Type: Federal, State, Local, Data. Category: Funding, Clinical,
@@ -41,12 +44,23 @@ Data             Order | Indicator | Definition | Cecil | Harford | Maryland |
   Aggregate public statistics only. Never a cell count small enough to
   identify a person (follow the source's suppression rules).
 
+Drivers          Order | Indicator | Driver | WhatTheEvidenceShows |
+                 NationalData | MarylandData | LocalData | DataSystem |
+                 ImplicationForAction | RelatedActionTeam | Source |
+                 SourceURL | Confidence | Published
+  One row per cause/risk factor per indicator. Shown on Drivers & Evidence.
+
+CaseStudies      Order | Name | Location | Years | ProblemFaced | WhatTheyDid |
+                 Result | EvidenceQuality | Funding | Transferability |
+                 Indicators | SourceURL | Published
+  Communities that measurably improved comparable numbers.
+
 Meetings         Date | ActionTeam | Title | Summary | Decisions | NextSteps |
                  NotesURL | Published
   Summaries must not contain patient stories with identifying details.
 
 ActionItems      ID | ActionTeam | Item | Owner | DueDate | Status |
-                 Created | Updated | Published
+                 Indicators | Created | Updated | Published
   Status: Open, In progress, Done. Do not delete; mark Done.
 
 Announcements    Date | Title | Body | LinkURL | ExpiresOn | Published

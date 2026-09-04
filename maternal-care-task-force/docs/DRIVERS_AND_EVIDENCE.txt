@@ -1,0 +1,228 @@
+DRIVERS AND EVIDENCE BEHIND THE SIX INDICATORS
+Research record for the Maternal Care Task Force, Cecil and Harford Counties
+Compiled 2026-09-04
+
+WHAT THIS IS
+The Task Force measures itself against six indicators. This document records
+what the research says causes each one, what the national, Maryland and local
+data show, which data system would reveal each driver at county level, and
+which communities have measurably improved comparable numbers. It is the
+source behind the Drivers and Case Studies tabs on the member site.
+
+METHOD AND LIMITATION
+Three parallel research passes: national etiology, Maryland and local drivers,
+and case studies. Roughly 230 searches in total. Direct page retrieval was
+blocked for nearly every source domain, so figures come from search-index
+extracts of the cited pages rather than from full-text reads. Every number
+below appeared in an extract of the page cited. Items that could not be
+confirmed are flagged as gaps rather than smoothed over. Before any figure
+goes on a slide for an external audience, open the primary source.
+
+======================================================================
+THE HEADLINE FINDING
+======================================================================
+Read together, the six indicators carry diagnostic information that no single
+indicator carries alone.
+
+Cecil's very low birth weight rate (1.9%) is far above Harford (1.2%) and
+Maryland (1.5%), while its total low birth weight rate (9.2%) is barely above
+the state (8.9%). At the same time Cecil's prenatal care entry is BETTER than
+the state (72.6% versus 69.3%) and its no-care rate is LOWER (4.5% versus
+7.1%).
+
+That combination points at extreme prematurity and where those infants are
+delivered, not at late prenatal care and not at term growth restriction.
+
+Two consequences for strategy:
+ 1. Prenatal care initiation should be treated as a targeting tool for finding
+    a small high-risk group, not as the headline problem. Cecil already beats
+    the state on both care measures.
+ 2. The highest-value question is where Cecil's very low birth weight infants
+    are now being delivered, because mortality is 62% higher when such an
+    infant is born outside a Level III centre.
+
+======================================================================
+DRIVERS BY INDICATOR
+======================================================================
+Full detail with sources is in the Drivers tab on the site (17 rows). Summary:
+
+INFANT MORTALITY (Cecil 7.6 / Harford 4.4 / Maryland 5.5 per 1,000)
+ - Prematurity is the engine. Short gestation and low birthweight cause 14.5%
+   of US infant deaths and are the leading cause of neonatal death in
+   Maryland. About 54% of infant deaths occur among the 2% born before 32
+   weeks.
+ - The rural excess is postneonatal. Rural infant mortality runs 27% above
+   large metro, but neonatal is only 15% higher while POSTNEONATAL is 50%
+   higher. Postneonatal deaths are dominated by sudden unexpected infant death
+   and injury, and about half are considered preventable.
+ - Smoking drives sudden unexpected infant death. Adjusted odds ratio 2.44;
+   eliminating prenatal smoking would prevent roughly 22% of such deaths.
+   Maryland Child Fatality Review found 60% bed-sharing and 68% of families
+   HAD a crib available, so the gap is behaviour and counselling, not supply
+   alone.
+
+PRETERM BIRTH (12.1 / 10.1 / 10.5%)
+ - Prior preterm birth (relative risk 5.64) and interpregnancy interval under
+   6 months (adjusted odds ratio 2.2 for extremely preterm). Both identifiable
+   at the first visit; both have established responses.
+ - Substance use. Cannabis raises preterm odds 1.52. For opioid use disorder,
+   continuous medication treatment lowers preterm odds to 0.6 and low birth
+   weight to 0.4 versus untreated, so treatment CONTINUITY is the variable.
+ - Losing the obstetric unit. Measured, not theoretical: +0.67 percentage
+   points preterm in rural non-adjacent counties the year after closure, and
+   24% higher odds of inadequate prenatal care (38% among Medicaid) in Iowa.
+ - Chronic conditions before pregnancy. Among US preterm births, 34.8% of
+   mothers had unhealthy weight and 10.4% hypertension in pregnancy.
+
+LOW AND VERY LOW BIRTH WEIGHT (9.2 / 9.0 / 8.9% and 1.9 / 1.2 / 1.5%)
+ - Smoking is the largest modifiable cause of restricted growth, with the
+   highest population attributable fraction of any behavioural factor.
+ - Delivery location decides very low birth weight survival. 62% higher odds
+   of death outside a Level III hospital; hospitals under 50 such deliveries a
+   year show 15-36% higher odds of death or severe haemorrhage; regionalization
+   modelling suggests 21% of these deaths are preventable.
+
+EARLY AND NO PRENATAL CARE (72.6 / 78.7 / 69.3% and 4.5 / 3.2 / 7.1%)
+ - Documented reasons for late care are operational, not attitudinal: did not
+   know she was pregnant (33-42%), could not get an appointment (25-36%), the
+   practice would not start earlier (28%), money or insurance (25-31%), no
+   Medicaid card (19-36%).
+ - Measure ADEQUACY, not just the first visit. The Kotelchuck index separates
+   a woman who booked early then stopped attending from one who completed care.
+   After a closure the failure mode is attendance across the pregnancy.
+ - Cecil's no-care group is roughly 50 women a year. That is small enough to
+   characterise individually rather than address with a campaign. Fear of being
+   identified as a substance user is documented in 73.3% of pregnant women with
+   substance use disorder.
+
+CROSS-CUTTING
+ - Perinatal mental health. Maryland PRAMS: 15.6% postpartum depressive
+   symptoms; 91% attended a postpartum visit but 35% never discussed
+   depression with a provider. Behavioural health is the leading cause of
+   pregnancy-associated death in Maryland.
+ - Material hardship. Threatened eviction relative risk 1.73 for low birth
+   weight or preterm; food insecurity odds ratio 1.25 for low birth weight;
+   64% of Maryland sudden unexpected infant deaths were in high-poverty ZIPs.
+
+======================================================================
+LOCAL DRIVERS WITH EVIDENCE
+======================================================================
+CECIL
+ - Overdose mortality 82.0 per 100,000 (2023), second highest in Maryland
+   behind Baltimore City and about double the state rate of 41.8. A 2025 CDC
+   Epi-Aid found medetomidine in 48.8% of Cecil drug-check samples against
+   8.2% in Harford. This is the best-documented local risk factor available.
+ - About 70% of Union Hospital deliveries were Maryland Medicaid; Medicaid
+   births carry higher preterm rates nationally (11.7% versus 9.6%).
+ - Roughly 1,123 births in 2024, about one third high risk; Union delivered
+   661 of them. The Family Birth Center closed 2026-06-30.
+ - Nearest Level III neonatal intensive care is Christiana Hospital in Newark,
+   Delaware, about 13 miles. UM Upper Chesapeake is about 40 miles and Level II.
+ - Ranked in the bottom quartile of Maryland counties on health outcomes (2021).
+
+HARFORD
+ - Adult smoking 16% against 13% statewide.
+ - Below its own Community Health Improvement Plan target of 80% first
+   trimester prenatal care, at 78.7%.
+ - CHIP targets already adopted: infant mortality at or below 4.0, low birth
+   weight at or below 6.1%, first trimester care at or above 80%, and
+   substance-exposed newborns at or below 30.0 per 1,000.
+ - Lowest educational attainment and highest poverty concentrate in the
+   Aberdeen and Edgewood corridor. Within-county disparity data was not found.
+
+======================================================================
+DATA GAPS THE TASK FORCE SHOULD FILL
+======================================================================
+These are the specific things nobody could verify, in priority order.
+
+1. Cecil and Harford infant deaths 2019-2023 split by neonatal versus
+   postneonatal and by cause. This single pull decides the whole strategy.
+2. Where Cecil residents now give birth. The facility-of-birth field on the
+   birth certificate, including Delaware and Pennsylvania facilities, for the
+   second half of 2026 against prior years.
+3. Very low birth weight births by hospital of delivery and whether that
+   hospital is Level III or higher. This is Title V national performance
+   measure 3 and the most defensible outcome metric available.
+4. Maternal smoking rate on birth certificates for both counties. Decides
+   whether cessation is the top intervention.
+5. County neonatal abstinence and substance-exposed newborn rates, from HSCRC
+   newborn discharge data and Department of Human Services reports.
+6. Prenatal care adequacy (Kotelchuck) distribution by county and payer, not
+   just first-trimester entry.
+7. Which HealthChoice managed care organizations Christiana Hospital accepts,
+   and when the six-month free transport arrangement ends. Most consequential
+   unresolved question, and it has a deadline.
+8. Whether a Fetal and Infant Mortality Review team can be established for
+   Cecil. Identified Maryland teams are Howard, Montgomery, Baltimore City,
+   Charles and Wicomico. Neither Cecil nor Harford appeared, unconfirmed.
+9. Cecil and Harford sleep-related infant death case summaries from Child
+   Fatality Review.
+10. March of Dimes 2026 maternity care desert designation for both counties.
+    Cecil now has zero birthing facilities, so its designation should change.
+
+RECOMMENDED FIRST STEP
+One consolidated data request to MDH Vital Statistics covering items 1-6 for
+both counties, submitted jointly by the two health departments. Everything
+else on the list is a phone call or a letter.
+
+======================================================================
+CASE STUDIES: WHAT HAS ACTUALLY WORKED
+======================================================================
+24 case studies are on the site with before and after numbers, evidence
+quality, funding and a transferability note. Grouped by what they support:
+
+STRONGEST EVIDENCE, AND RUNNABLE WITHOUT A HOSPITAL
+ - CenteringPregnancy group prenatal care. Randomised trial: preterm 9.8%
+   versus 13.8%. South Carolina Medicaid: 36% lower preterm, 44% lower low
+   birth weight, positive return on investment. Can run in a federally
+   qualified health centre.
+ - Baby and Me Tobacco Free. Low birth weight 4.9% for completers versus
+   11.6%. Runs out of a health department or WIC office. Cheapest item here.
+ - Progesterone and aspirin screening at every visit (Ohio). Births before 32
+   weeks down 20.5% among women with a prior preterm birth.
+ - Medicaid-billed paraprofessional home visiting. Kentucky low birth weight
+   odds ratio 0.54; Wisconsin 17% lower preterm and reduced infant mortality.
+ - Telemedicine maternal-fetal medicine and regionalization (Arkansas).
+   Very low birth weight deliveries at non-NICU hospitals fell 13.1% to 7.0%;
+   statewide infant mortality 8.5 to 7.0.
+ - Perinatal substance use integration (West Virginia, Kentucky). Birthweight
+   +208 grams and preterm odds ratio 0.56; neonatal intensive care admission
+   39.1% versus 48.8%.
+
+MOST TRANSFERABLE BY INSTITUTIONAL FIT
+ - B'more for Healthy Babies. Same state, same Title V agency. Infant
+   mortality down 35% over a decade; sleep-related deaths roughly halved.
+ - Babies Born Healthy sites. Wicomico down 22.4% and Prince George's down
+   26.8%, while Somerset with no site rose 31.2%. Cecil is not a site. This is
+   the cleanest state-level ask available.
+ - Delaware Healthy Mother and Infant Consortium. Infant mortality 9.3 to 5.9.
+   Cecil families now deliver inside this system, which makes a cross-border
+   arrangement concrete rather than aspirational.
+ - HRSA Rural Maternity and Obstetrics Management Strategies. The closest
+   federal template for a county that just lost labour and delivery.
+
+CAUTIONARY, INCLUDED DELIBERATELY
+ - Nurse-Family Partnership. Three randomised trials, largely null for birth
+   outcomes. Do not present it as a preterm birth reducer.
+ - Rideshare transportation. Randomised trial found no change in prenatal care
+   adequacy or preterm delivery. Transport matters, but rides alone do not fix
+   attendance.
+ - Michigan safe sleep education mandate. Twelve years, no significant change.
+   Education without saturation does not move deaths.
+ - Alabama Infant Mortality Reduction Initiative. Statewide rate improved, but
+   infant mortality fell 39.8% among white married mothers and ROSE 54.7%
+   among Black married mothers. A targeted bundle can widen gaps. Pre-specify
+   equity metrics before launching anything.
+
+======================================================================
+SOURCES
+======================================================================
+Every driver and case study row on the site carries its own source URL. The
+principal sources are: NCHS National Vital Statistics Reports and Data Briefs
+(74-7, 534, 550, 458); Maryland Vital Statistics Administration infant
+mortality and annual reports; Maryland PRAMS via Title V narratives; Maryland
+Child Fatality Review; Maryland Maternal Mortality Review; Maryland Overdose
+Data Report 2023; CDC Epi-Aid Cecil County 2025; March of Dimes 2025 report
+card and 2026 maternity care desert report; County Health Rankings; JAMA
+(Kozhimannil 2018, Lasswell 2010); Journal of Rural Health (Radke 2023); and
+the program pages and peer-reviewed evaluations cited on each case study row.

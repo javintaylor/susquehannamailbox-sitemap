@@ -40,6 +40,8 @@ function seedAll() {
   seedActionItems();
   seedAnnouncements();
   seedResources(); // SeedResources.gs
+  seedDrivers();   // SeedEvidence.gs
+  seedCaseStudies(); // SeedEvidence.gs
   purgeCacheInternal_();
   console.log('Seeding complete.');
 }
@@ -64,16 +66,19 @@ function seedPurpose() {
     { Order: 2, Section: 'Purpose', Heading: 'Starting point and horizon',
       Body: 'The immediate focus is perinatal care: prenatal, labor and delivery, and postpartum services. The work was catalyzed by the closure of labor and delivery at ChristianaCare Union Hospital in Elkton, but it responds to longstanding gaps in maternal and infant outcomes in the region.\n\nOver time the Task Force expects to look across the full continuum: preconception, prenatal, peripartum, postpartum, interconception, and women\'s health broadly.',
       Published: true },
-    { Order: 3, Section: 'Who we serve', Heading: 'Populations of focus',
+    { Order: 3, Section: 'What we are working to improve', Heading: 'Six indicators',
+      Body: 'The Task Force measures itself against six maternal and infant health indicators from Maryland Vital Statistics: infant mortality, preterm birth, low birth weight, very low birth weight, early (first-trimester) prenatal care, and no prenatal care. Cecil County is worse than Maryland on the first four; both counties beat the state on prenatal care entry but have room to reach every family.\n\nEvery problem statement, Action Team, funding stream, resource, and action item on this site is tagged with the indicators it is meant to move, so the work stays tied to outcomes. Current values are on the Regional Data page; the evidence behind each indicator is on Drivers & Evidence.',
+      Published: true },
+    { Order: 4, Section: 'Who we serve', Heading: 'Populations of focus',
       Body: 'Significant disparities exist in access to care and birth outcomes for minority populations, geographically isolated families, and people experiencing housing insecurity, mental health concerns, or substance use disorder. The Task Force intentionally includes members who represent and can reach these communities, and welcomes members of the public with lived experience.',
       Published: true },
-    { Order: 4, Section: 'How we work', Heading: 'Steering Committee and Action Teams',
+    { Order: 5, Section: 'How we work', Heading: 'Steering Committee and Action Teams',
       Body: 'The Steering Committee provides leadership-level direction and receives reports from the Action Teams. The Action Teams are where the work happens: reviewing data, developing plans, piloting solutions, and monitoring progress.\n\nCo-chair roles on each Action Team are open to any member who wishes to step in; the Health Officers are serving as initial co-chairs to get the teams stood up.',
       Published: true },
-    { Order: 5, Section: 'How we work', Heading: 'Staffing and support',
+    { Order: 6, Section: 'How we work', Heading: 'Staffing and support',
       Body: 'The Cecil County Health Department currently staffs the Task Force. Funding from the Rural Health Transformation Program will add a consultant to support the Action Teams and lead the data work, which is expected to speed the work considerably.',
       Published: true },
-    { Order: 6, Section: 'How we work', Heading: 'Meeting cadence',
+    { Order: 7, Section: 'How we work', Heading: 'Meeting cadence',
       Body: 'Action Teams meet monthly, virtually, at a standing time, with periodic in-person sessions. The Steering Committee first met in July 2026.',
       Published: true }
   ]);
@@ -83,34 +88,34 @@ function seedProblems() {
   seedIfEmpty_(CONFIG.TABS.PROBLEMS, [
     { Order: 1, Title: 'No in-county labor and delivery in Cecil County', Counties: 'Cecil', RelatedActionTeam: 'Regional System of Care',
       Description: 'ChristianaCare Union Hospital in Elkton closed its Family Birth Center on 2026-06-30, citing fewer than 0.5 deliveries a day and physician and nursing shortages. Cecil County has no birthing hospital. Families now deliver at Christiana Hospital in Newark, DE (about 13 miles), UM Upper Chesapeake in Bel Air (about 40 miles), or further. Union\'s emergency department still treats patients arriving in active labor and transfers mother and baby separately.',
-      SourceOrEvidence: 'ChristianaCare announcement 2026-05; MHCC public hearing 2026-06-11; Task Force kickoff 2026-09. Union Hospital OB nurse navigator role created in response.', Published: true },
+      SourceOrEvidence: 'ChristianaCare announcement 2026-05; MHCC public hearing 2026-06-11; Task Force kickoff 2026-09. Union Hospital OB nurse navigator role created in response.', TargetIndicators: 'Infant mortality; Preterm birth; Very low birth weight; No prenatal care', Published: true },
     { Order: 2, Title: 'Worse infant and birth outcomes than Maryland', Counties: 'Cecil', RelatedActionTeam: 'Data for Action',
       Description: 'Cecil County\'s infant mortality (7.6 per 1,000), preterm birth (12.1%), low birth weight (9.2%), and very low birth weight (1.9%) all exceed Maryland rates. Harford does better than the state on most indicators, but every indicator has room to improve.',
-      SourceOrEvidence: 'Maryland Vital Statistics Administration, 2024 data (see Data tab).', Published: true },
+      SourceOrEvidence: 'Maryland Vital Statistics Administration, 2024 data (see Data tab).', TargetIndicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true },
     { Order: 3, Title: 'Maternal-fetal medicine access', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
       Description: 'Higher-risk pregnancies need maternal-fetal medicine (MFM). Members report that the Delaware MFM practices they have contacted do not accept Maryland Medicaid; this has not been confirmed practice by practice and is an open verification item for the Insurance Coverage, Policy & Workforce Development team. Members also report a Johns Hopkins MFM clinic at the Union campus three Fridays a month with limited, insurance-dependent slots; the next closest options are Bel Air (University of Maryland) or Towson.',
-      SourceOrEvidence: 'Member report, Regional System of Care Action Team, 2026-09. Payer acceptance unverified.', Published: true },
+      SourceOrEvidence: 'Member report, Regional System of Care Action Team, 2026-09. Payer acceptance unverified.', TargetIndicators: 'Preterm birth; Very low birth weight; Infant mortality', Published: true },
     { Order: 4, Title: 'Insurance does not follow the patient across the state line', Counties: 'Both', RelatedActionTeam: 'Insurance Coverage, Policy & Workforce Development',
       Description: 'About 70% of Union Hospital deliveries were covered by Maryland Medicaid, and many Cecil families now deliver in Delaware. Christiana Hospital reportedly agreed to accept Maryland Medicaid "for the time being" and ChristianaCare offered free transport to Newark for six months from July 2026; which managed care organizations are contracted, and what happens after the six months, is unconfirmed. The Task Force wants to ensure that wherever women need care, insurance is not a barrier.',
-      SourceOrEvidence: 'Task Force kickoff, 2026-09; Baltimore Banner and WMAR coverage of the closure, 2026.', Published: true },
+      SourceOrEvidence: 'Task Force kickoff, 2026-09; Baltimore Banner and WMAR coverage of the closure, 2026.', TargetIndicators: 'Early prenatal care; No prenatal care', Published: true },
     { Order: 5, Title: 'Transportation cost and reliability', Counties: 'Both', RelatedActionTeam: 'EMS Transport & Transportation',
       Description: 'A one-way cab ride from Elkton to a Newark, DE, maternity hospital was reported at about $67 before tolls. Members also report that scheduled induction dates can function as requests rather than fixed appointments and may be deferred when the receiving unit is full, requiring a second trip.',
-      SourceOrEvidence: 'Member report, Regional System of Care Action Team, 2026-09.', Published: true },
+      SourceOrEvidence: 'Member report, Regional System of Care Action Team, 2026-09.', TargetIndicators: 'Early prenatal care; No prenatal care; Preterm birth', Published: true },
     { Order: 6, Title: 'Emergency transport out of county', Counties: 'Cecil', RelatedActionTeam: 'EMS Transport & Transportation',
       Description: 'With no in-county delivery unit, EMS must transport laboring or obstetric-emergency patients out of Cecil County. The EMS Transport & Transportation Action Team is examining protocols, capacity, and destination decisions with the Department of Emergency Services.',
-      SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true },
+      SourceOrEvidence: 'Task Force kickoff, 2026-09.', TargetIndicators: 'Infant mortality; Very low birth weight', Published: true },
     { Order: 7, Title: 'Perinatal mental health support is thin', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
       Description: 'There is little postpartum behavioral health support in the region, for mothers or for partners. Local behavioral health providers are beginning measurement-based perinatal screening and a postpartum group; Josie\'s Grace in Newark, DE, offers free perinatal mental health services that Cecil families use.',
-      SourceOrEvidence: 'Member reports, 2026-09.', Published: true },
+      SourceOrEvidence: 'Member reports, 2026-09.', TargetIndicators: 'Preterm birth; Low birth weight; Cross-cutting', Published: true },
     { Order: 8, Title: 'Material needs at delivery', Counties: 'Both', RelatedActionTeam: 'Regional System of Care',
       Description: 'Hospital staff report that many families delivering at Upper Chesapeake need car seats, cribs, and basic supplies. Cecil County Health Department and Healthy Families offer supplies for enrolled families; a shared, current list across both counties is needed.',
-      SourceOrEvidence: 'UM Upper Chesapeake Family Birthplace, 2026-09.', Published: true },
+      SourceOrEvidence: 'UM Upper Chesapeake Family Birthplace, 2026-09.', TargetIndicators: 'Infant mortality', Published: true },
     { Order: 9, Title: 'Workforce shortages', Counties: 'Both', RelatedActionTeam: 'Insurance Coverage, Policy & Workforce Development',
       Description: 'OB/GYN, advanced practice nursing, midwifery, and other maternal care provider capacity is limited, especially in rural parts of both counties. A new midwifery practice is expected to open in Cecil County in early 2027 (prenatal and well-woman care, no deliveries).',
-      SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true },
+      SourceOrEvidence: 'Task Force kickoff, 2026-09.', TargetIndicators: 'Early prenatal care; No prenatal care; Preterm birth', Published: true },
     { Order: 10, Title: 'Data gaps', Counties: 'Both', RelatedActionTeam: 'Data for Action',
       Description: 'The Task Force needs more granular, timely data on access, disparities, and outcomes to guide and monitor its work. A consultant funded through the Rural Health Transformation grant will support this.',
-      SourceOrEvidence: 'Task Force kickoff, 2026-09.', Published: true }
+      SourceOrEvidence: 'Task Force kickoff, 2026-09.', TargetIndicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true }
   ]);
 }
 
@@ -118,19 +123,19 @@ function seedStructure() {
   seedIfEmpty_(CONFIG.TABS.STRUCTURE, [
     { Order: 1, Level: 'Steering Committee', Name: 'Maternal Care Task Force Steering Committee',
       Purpose: 'Leadership-level body that sets direction, receives Action Team reports, and engages county, hospital, state, and community leadership. Membership includes county leaders (including the Cecil County Executive), county departments, hospital leadership and professionals, perinatal care experts, community representatives for harder-to-reach populations, and a Maryland Department of Health seat. Hospital members are also a key source of data for the Task Force.',
-      CoChairs: 'Cecil County Executive; Karyl Rattay, MD (Cecil County Health Officer)', StaffSupport: 'Cecil County Health Department', MeetingCadence: 'First met July 2026; cadence TBD', Status: 'Active', Published: true },
+      CoChairs: 'Cecil County Executive; Karyl Rattay, MD (Cecil County Health Officer)', StaffSupport: 'Cecil County Health Department', MeetingCadence: 'First met July 2026; cadence TBD', Status: 'Active', TargetIndicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true },
     { Order: 2, Level: 'Action Team', Name: 'Regional System of Care / Pilot Development',
       Purpose: 'To develop a regional system of care by working with professionals, experts and the public to improve access to perinatal services for all women and families in Cecil and Harford Counties.\n\nExpected to move quickly into pilot work in both counties. The largest and most complex of the four teams.',
-      CoChairs: 'Karyl Rattay, MD (Cecil County Health Officer); Lauren Levy (Harford County Health Officer)', StaffSupport: 'Lindsey Scott, Cecil County Health Department', MeetingCadence: 'Monthly, virtual, standing time', Status: 'Active', Published: true },
+      CoChairs: 'Karyl Rattay, MD (Cecil County Health Officer); Lauren Levy (Harford County Health Officer)', StaffSupport: 'Lindsey Scott, Cecil County Health Department', MeetingCadence: 'Monthly, virtual, standing time', Status: 'Active', TargetIndicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true },
     { Order: 3, Level: 'Action Team', Name: 'EMS Transport & Transportation',
       Purpose: 'To identify maternal care access concerns and solutions related to EMS and transportation by working with other professionals, experts and members of the public.\n\nCovers both emergency transport after the Union Hospital closure and broader non-emergency transportation to out-of-county care.',
-      CoChairs: 'TBD', StaffSupport: 'Cecil County Department of Emergency Services; Cecil County Health Department', MeetingCadence: 'Monthly, virtual', Status: 'Active', Published: true },
+      CoChairs: 'TBD', StaffSupport: 'Cecil County Department of Emergency Services; Cecil County Health Department', MeetingCadence: 'Monthly, virtual', Status: 'Active', TargetIndicators: 'Infant mortality; Very low birth weight; Preterm birth', Published: true },
     { Order: 4, Level: 'Action Team', Name: 'Insurance Coverage, Policy & Workforce Development',
       Purpose: 'To understand and address insurance barriers to maternal and infant care, especially when crossing state lines, assess how policies impact access, and identify opportunities for workforce development to recruit and retain maternal care professionals in this rural region.',
-      CoChairs: 'TBD', StaffSupport: 'TBD', MeetingCadence: 'Monthly, virtual', Status: 'Active', Published: true },
+      CoChairs: 'TBD', StaffSupport: 'TBD', MeetingCadence: 'Monthly, virtual', Status: 'Active', TargetIndicators: 'Early prenatal care; No prenatal care; Preterm birth; Low birth weight', Published: true },
     { Order: 5, Level: 'Action Team', Name: 'Data for Action',
       Purpose: 'To assemble and analyze the data that will drive and monitor the Task Force\'s work: access, disparities, outcomes, and progress measures. To be supported by a consultant funded under the Rural Health Transformation Program.',
-      CoChairs: 'TBD', StaffSupport: 'Consultant (recruiting)', MeetingCadence: 'Forming', Status: 'Forming', Published: true }
+      CoChairs: 'TBD', StaffSupport: 'Consultant (recruiting)', MeetingCadence: 'Forming', Status: 'Forming', TargetIndicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true }
   ]);
 }
 
@@ -171,19 +176,19 @@ function seedFunding() {
       Amount: '$3.16 million (Rooted & Resilient) within more than $4.65 million of RHTP funding announced for Cecil County 2026-08-19', Status: 'Awarded',
       Description: 'The Rural Health Transformation Program is a $50 billion, five-year CMS program created by the 2025 reconciliation law. CMS awarded Maryland $168.2 million for the first budget period (state plan approved 2025-12-29). MDH announced $80 million in first-round subawards to 41 recipients effective 2026-08-10 across workforce, sustainable access and innovative care (including regional mobile health and community care teams), and nutrition. Cecil County applied under MDH\'s competitive solicitation "Rooted and Resilient Rural Maryland: Transformation through Sustainable Access, Innovative Care, and Tech Innovation" (PHPA 3936) jointly with Union Hospital and the Department of Emergency Services; one component focuses on maternal care. On 2026-08-19 Cecil County announced more than $4.65 million in RHTP funding, including about $3.16 million under Rooted & Resilient, $1.267 million for a Mobile Health Services Program, about $229,000 for chronic disease prevention and management, and about $1.16 million associated with West Cecil Health Center. Announced initiatives include Connect to Care, community health worker development, mobile health, maternal and perinatal planning, transportation, and community-based services. The maternity-specific share of the award is not yet published.',
       IntendedUse: 'Consultant to staff the Task Force and lead the Data for Action work; maternal and perinatal planning; EMS coordination; transportation; community health workers.', Counties: 'Cecil',
-      URL: 'https://www.cms.gov/priorities/rural-health-transformation-rht-program', Published: true },
+      URL: 'https://www.cms.gov/priorities/rural-health-transformation-rht-program', Indicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true },
     { Order: 2, Name: 'Mobile Health funding (Maryland Department of Health)', Source: 'Maryland Department of Health', Level: 'State → Local',
       Amount: 'Cecil: $1.267 million (Mobile Health Services Program, announced 2026-08-19). Harford: amount TBD', Status: 'Awarded',
       Description: 'RHTP-funded mobile health awards to Cecil and Harford County Health Departments, aligned with the state focus on regional mobile health and mobile integrated health models. The state asked the two counties to take a regional approach; each is also pursuing jurisdiction-specific maternal and child health activities (Harford to share its proposal summary).',
-      IntendedUse: 'Mobile maternal and child health outreach; transportation program design; regional coordination.', Counties: 'Both', URL: 'https://health.maryland.gov/pophealth/Pages/Rural-Health-Transformation-Program.aspx', Published: true },
+      IntendedUse: 'Mobile maternal and child health outreach; transportation program design; regional coordination.', Counties: 'Both', URL: 'https://health.maryland.gov/pophealth/Pages/Rural-Health-Transformation-Program.aspx', Indicators: 'Early prenatal care; No prenatal care; Low birth weight', Published: true },
     { Order: 3, Name: 'Title V MCH Block Grant core funds (local health departments)', Source: 'HRSA via Maryland Department of Health', Level: 'Federal → State → Local',
       Amount: 'Existing allocation', Status: 'Active',
       Description: 'Cecil and Harford County Health Departments already use Title V core funds for maternal health enabling services, including perinatal care coordination and home visiting (FY24).',
-      IntendedUse: 'Perinatal care coordination; Healthy Families home visiting.', Counties: 'Both', URL: 'https://health.maryland.gov/phpa/mch/', Published: true },
+      IntendedUse: 'Perinatal care coordination; Healthy Families home visiting.', Counties: 'Both', URL: 'https://health.maryland.gov/phpa/mch/', Indicators: 'Early prenatal care; Low birth weight; Infant mortality', Published: true },
     { Order: 4, Name: 'Potential future opportunities', Source: 'HRSA / CMS', Level: 'Federal',
       Amount: 'n/a', Status: 'Not applied',
       Description: 'Programs the region is not currently funded under but could pursue: HRSA Healthy Start (Maryland\'s only grantee is in Baltimore City), MIECHV home visiting expansion (MDH readiness assessments), and RMOMS rural obstetric networks (Maryland\'s only awardee is on the Lower Shore). Maryland is not a participant in the CMS Transforming Maternal Health model.',
-      IntendedUse: 'For the Insurance Coverage, Policy & Workforce Development and Data for Action teams to evaluate.', Counties: 'Both', URL: 'https://mchb.hrsa.gov/programs-impact/healthy-start', Published: true }
+      IntendedUse: 'For the Insurance Coverage, Policy & Workforce Development and Data for Action teams to evaluate.', Counties: 'Both', URL: 'https://mchb.hrsa.gov/programs-impact/healthy-start', Indicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true }
   ]);
 }
 
@@ -218,29 +223,28 @@ function seedActionItems() {
   var now = '2026-09-03';
   var RSC = 'Regional System of Care';
   seedIfEmpty_(CONFIG.TABS.ACTION_ITEMS, [
-    { ID: 'AI-001', ActionTeam: RSC, Item: 'Invite a maternal-fetal medicine specialist (Johns Hopkins) to join the Action Team', Owner: 'Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-002', ActionTeam: RSC, Item: 'Invite a lay community member (Mothers and Munchkins, Cecil County) to represent recent parents', Owner: 'T. O\'Bryan / Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-003', ActionTeam: RSC, Item: 'Identify a Harford County DSS representative', Owner: 'S. Shrewsbury / L. Levy', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-004', ActionTeam: RSC, Item: 'Re-invite regional OB/GYN and recovery-services providers; reach practices directly', Owner: 'Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-005', ActionTeam: RSC, Item: 'Share Hello Baby event flyer (late Sept, Cecil County HD) with the group and with Upper Chesapeake and Susquehanna OB/GYN', Owner: 'E. Grauer', DueDate: '2026-09-15', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-006', ActionTeam: RSC, Item: 'Compile a broader list of material-supply resources (car seats, cribs) across both counties for hospital staff', Owner: 'E. Grauer / L. Scott', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-007', ActionTeam: RSC, Item: 'Share recent DSS county data ahead of next meeting', Owner: 'L. Beeman / S. Shrewsbury', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-008', ActionTeam: RSC, Item: 'Send Harford County Mobile Health proposal summary with meeting notes', Owner: 'L. Levy', DueDate: '2026-09-17', Status: 'Open', Created: now, Updated: now, Published: true },
+    { ID: 'AI-001', ActionTeam: RSC, Item: 'Invite a maternal-fetal medicine specialist (Johns Hopkins) to join the Action Team', Owner: 'Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Preterm birth; Very low birth weight; Infant mortality', Published: true },
+    { ID: 'AI-002', ActionTeam: RSC, Item: 'Invite a lay community member (Mothers and Munchkins, Cecil County) to represent recent parents', Owner: 'T. O\'Bryan / Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Early prenatal care', Published: true },
+    { ID: 'AI-003', ActionTeam: RSC, Item: 'Identify a Harford County DSS representative', Owner: 'S. Shrewsbury / L. Levy', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Cross-cutting', Published: true },
+    { ID: 'AI-004', ActionTeam: RSC, Item: 'Re-invite regional OB/GYN and recovery-services providers; reach practices directly', Owner: 'Co-chairs', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Early prenatal care; No prenatal care', Published: true },
+    { ID: 'AI-005', ActionTeam: RSC, Item: 'Share Hello Baby event flyer (late Sept, Cecil County HD) with the group and with Upper Chesapeake and Susquehanna OB/GYN', Owner: 'E. Grauer', DueDate: '2026-09-15', Status: 'Open', Created: now, Updated: now, Indicators: 'Infant mortality; Early prenatal care', Published: true },
+    { ID: 'AI-006', ActionTeam: RSC, Item: 'Compile a broader list of material-supply resources (car seats, cribs) across both counties for hospital staff', Owner: 'E. Grauer / L. Scott', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Infant mortality', Published: true },
+    { ID: 'AI-007', ActionTeam: RSC, Item: 'Share recent DSS county data ahead of next meeting', Owner: 'L. Beeman / S. Shrewsbury', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Infant mortality; Preterm birth; Low birth weight; Very low birth weight; Early prenatal care; No prenatal care', Published: true },
+    { ID: 'AI-008', ActionTeam: RSC, Item: 'Send Harford County Mobile Health proposal summary with meeting notes', Owner: 'L. Levy', DueDate: '2026-09-17', Status: 'Open', Created: now, Updated: now, Indicators: 'Early prenatal care; No prenatal care', Published: true },
     // Rewritten as a standing process item. The original wording referenced a
     // single patient's case and named the two clinicians involved, which — with
     // the Members and Resources rows — could re-identify one person. Individual
     // follow-ups are tracked off this site.
-    { ID: 'AI-009', ActionTeam: RSC, Item: 'Establish a standing escalation path with the OB nurse navigator for induction scheduling and out-of-county transport problems', Owner: 'Co-chairs', DueDate: '2026-10-15', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-010', ActionTeam: RSC, Item: 'Stand up a de-identified barrier log and decide historian / share-drive approach', Owner: 'Co-chairs / consultant', DueDate: '2026-10-15', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-011', ActionTeam: RSC, Item: 'Ensure partner free/reduced-cost resources are listed in the findhelp.org trusted network', Owner: 'L. Scott', DueDate: '2026-11-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-012', ActionTeam: RSC, Item: 'Raise teen pregnancy resources with high school guidance counselors; loop in Judy Centers', Owner: 'E. Grauer', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Published: true },
-    { ID: 'AI-013', ActionTeam: RSC, Item: 'Set standing monthly meeting time and send calendar invitations', Owner: 'L. Scott', DueDate: '2026-09-17', Status: 'Open', Created: now, Updated: now, Published: true }
+    { ID: 'AI-009', ActionTeam: RSC, Item: 'Establish a standing escalation path with the OB nurse navigator for induction scheduling and out-of-county transport problems', Owner: 'Co-chairs', DueDate: '2026-10-15', Status: 'Open', Created: now, Updated: now, Indicators: 'Preterm birth; Infant mortality', Published: true },
+    { ID: 'AI-010', ActionTeam: RSC, Item: 'Stand up a de-identified barrier log and decide historian / share-drive approach', Owner: 'Co-chairs / consultant', DueDate: '2026-10-15', Status: 'Open', Created: now, Updated: now, Indicators: 'Early prenatal care; No prenatal care', Published: true },
+    { ID: 'AI-011', ActionTeam: RSC, Item: 'Ensure partner free/reduced-cost resources are listed in the findhelp.org trusted network', Owner: 'L. Scott', DueDate: '2026-11-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Early prenatal care', Published: true },
+    { ID: 'AI-012', ActionTeam: RSC, Item: 'Raise teen pregnancy resources with high school guidance counselors; loop in Judy Centers', Owner: 'E. Grauer', DueDate: '2026-10-01', Status: 'Open', Created: now, Updated: now, Indicators: 'Early prenatal care; Low birth weight; Preterm birth', Published: true },
+    { ID: 'AI-013', ActionTeam: RSC, Item: 'Set standing monthly meeting time and send calendar invitations', Owner: 'L. Scott', DueDate: '2026-09-17', Status: 'Open', Created: now, Updated: now, Indicators: 'Cross-cutting', Published: true }
   ]);
 }
 
 function seedAnnouncements() {
   seedIfEmpty_(CONFIG.TABS.ANNOUNCEMENTS, [
-    { Date: '2026-09-03', Title: 'Welcome to the member site', Body: 'This site is the shared reference for the Maternal Care Task Force. Use the Barrier Log to record access problems families encounter (no identifying details), and suggest programs for the resource directory.', LinkURL: '', ExpiresOn: '2026-12-31', Published: true },
     { Date: '2026-09-03', Title: 'Hello Baby event — late September', Body: 'Cecil County Health Department will host a Hello Baby resource event for new and expecting families at the end of September. Flyer to follow.', LinkURL: '', ExpiresOn: '2026-10-01', Published: true }
   ]);
 }
